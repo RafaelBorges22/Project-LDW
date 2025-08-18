@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.40
     container_name: mysql-1
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: your_strong_password
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ldw-database
     volumes:
       - ./mysql-data:/var/lib/mysql
@@ -20,7 +20,7 @@ services:
       - mysql
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/ldw-database
-      - SPRING_DATASOURCE_USERNAME=squad
+      - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 

@@ -16,9 +16,10 @@ import lombok.Setter;
 public class ClientModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private String name;
     private String email;
     private String password;
-    private String adress;
+    private String address;
 }
