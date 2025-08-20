@@ -1,16 +1,10 @@
 package ldw.squad.project.Entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import ldw.squad.project.Entities.Enums.BodyPart;
+import ldw.squad.project.Entities.Enums.Size;
+import ldw.squad.project.Entities.Enums.State;
+import lombok.*;
 
 @Entity
 @Table(name = "quotes")
@@ -34,28 +28,6 @@ public class QuoteModel {
     @Enumerated(EnumType.STRING)
     private BodyPart bodyPart;
 
-    public enum Size {
-        SMALL,
-        MEDIUM,
-        LARGE
-    }
-
-    public enum BodyPart {
-        ARM,
-        BACK,
-        LEG,
-        CHEST,
-        RIB,
-        NECK,
-        HAND,
-        HEAD,
-        FOOT,
-        OTHER
-    }
-    
-    public enum State {
-        WAITING,
-        AWNSERED,
-        PAID
-    }
+    @Enumerated(EnumType.STRING)
+    private State state;
 }
