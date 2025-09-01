@@ -1,47 +1,41 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div id="app">
+    <Navbar />
+    <HeroSection />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
+    <AboutSection
+      title="SOBRE TATUAGENS"
+      text="lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+      imageUrl="../../../public/images/photos/AboutImgLast.png" />
 
-  <main>
-    <TheWelcome />
-  </main>
+    <AboutSection
+      title="SOBRE MIM"
+      text="lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+      imageUrl="../../../public/images/photos/AboutImgFirst.png" reverse
+    />
+    
+    <Footer />
+
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script>
+import Navbar from './components/global/Navbar.vue';
+import HeroSection from './components/home/HeroSection.vue';
+import AboutSection from './components/home/AboutSection.vue';
+import Footer from './components/global/Footer.vue';
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+export default {
+  name: 'App',
+  components: {
+    Navbar,
+    HeroSection,
+    AboutSection, 
+    Footer
   }
+};
+</script>
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
+<style>
+@import './assets/Global.css';
 </style>

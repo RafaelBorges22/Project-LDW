@@ -1,0 +1,78 @@
+/* Estilos para a seção principal/hero */
+.hero-section {
+  position: relative; /* Necessário para posicionar o conteúdo sobre a imagem */
+  width: 100%;
+  height: 600px; /* Altura da seção, ajuste conforme necessário */
+  background-image: url('../../../public/images/photos/BackgroundHome.png'); /* Substitua pelo caminho da sua imagem */
+  background-size: cover; /* Faz a imagem cobrir toda a área */
+  background-position: center; /* Centraliza a imagem */
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  display: flex;
+  justify-content: center; /* Centraliza o conteúdo horizontalmente */
+  align-items: center; /* Centraliza o conteúdo verticalmente */
+  flex-direction: column; /* Para empilhar o título e o botão */
+  text-align: center; /* Centraliza o texto */
+  overflow: hidden; /* Garante que a imagem não vaze */
+}
+
+/* Camada escura semi-transparente sobre a imagem de fundo */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* Cor preta com 40% de opacidade */
+  z-index: 1; /* Garante que a camada escura fique abaixo do conteúdo, mas acima da imagem */
+  backdrop-filter: blur(5px); /* Adiciona um leve desfoque à imagem de fundo */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2; /* Garante que o conteúdo fique acima da camada escura */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Ajusta a largura para o conteúdo interno */
+}
+
+.hero-title {
+  font-size: 4rem;
+  color: #ffffff;
+  text-shadow: 
+    4px 4px 0px #5C3A33; /* Cor diferente para o título "de baixo" */
+  margin-bottom: 30px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  position: relative;
+}
+
+.hero-button {
+  background-color: #5C3A33; /* Cor de fundo do botão (marrom escuro) */
+  color: #ffffff; /* Cor do texto do botão */
+  padding: 18px 40px; /* Espaçamento interno do botão */
+  border: none; /* Remove a borda padrão */
+  border-radius: 25px; /* Cantos arredondados */
+  font-size: 1.2rem; /* Tamanho da fonte do botão */
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Transição suave para o hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra para dar profundidade */
+}
+
+.hero-button:hover {
+  background-color: #7B4B42; /* Cor mais clara no hover */
+}
+
+/* Seção de cor clara abaixo da hero-section */
+.bottom-light-section {
+  width: 100%;
+  height: 150px; /* Altura da seção de cor clara */
+  background-color: #F8F5EE; /* Cor creme/clara */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Você pode adicionar conteúdo aqui se desejar */
+}
