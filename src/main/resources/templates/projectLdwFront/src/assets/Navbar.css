@@ -5,7 +5,9 @@
   background-color: #1a1a1a;
   color: #ffffff;
   padding: 10px 40px; 
+  border-bottom: #5C3A33 solid 18px;
 }
+
 
 .navbar-left {
   display: flex;
