@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,9 @@ public class ClientController {
 
     @Autowired
     private ClientRepository clientRepository;
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @GetMapping
     public List<ClientModel> getAllClients() {
         return clientRepository.findAll();
@@ -39,11 +42,12 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<ClientModel> createClient(@RequestBody ClientModel client) {
+        client.setPassword(passwordEncoder.encode(client.getPassword()));
         ClientModel newClient = clientRepository.save(client);
         return new ResponseEntity<>(newClient, HttpStatus.CREATED);
     }
 
-    // UPDATE
+
     @PutMapping("/{id}")
     public ResponseEntity<ClientModel> updateClient(@PathVariable Long id, @RequestBody ClientModel clientDetails) {
         Optional<ClientModel> optionalClient = clientRepository.findById(id);
@@ -59,7 +63,7 @@ public class ClientController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/admin")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
         if (clientRepository.existsById(id)) {
             clientRepository.deleteById(id);

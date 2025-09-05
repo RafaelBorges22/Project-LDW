@@ -67,7 +67,7 @@ public class QuoteController {
     }
     
     // DELETE: remove um quote do banco
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/admin")
     public ResponseEntity<Void> deleteQuote(@PathVariable Long id) {
         if (quoteRepository.existsById(id)) {
             quoteRepository.deleteById(id);
@@ -82,7 +82,7 @@ public class QuoteController {
 
     // POST: adiciona um valor adicional ao quote e recalcula o valor final
     // Pode receber valores negativos para reduzir o preço
-    @PostMapping("/{id}/additional")
+    @PostMapping("/{id}/additional/admin")
     public ResponseEntity<QuoteModel> addAdditionalCost(@PathVariable Long id, @RequestBody AdditionalCostRequest request) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
 
