@@ -14,5 +14,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/home/HeroSection.css'; 
+@import '../../assets/home/HeroSection.scss'; 
 </style>
