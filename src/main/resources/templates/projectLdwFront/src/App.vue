@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import Navbar from './components/global/Navbar.vue';
+import Navbar from './components/global/NavBar.vue';
 import HeroSection from './components/home/HeroSection.vue';
 import AboutSection from './components/home/AboutSection.vue';
 import Footer from './components/global/Footer.vue';
@@ -37,5 +37,5 @@ export default {
 </script>
 
 <style>
-@import './assets/Global.css';
+@import './assets/Global.scss';
 </style>

@@ -35,5 +35,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/home/AboutSection.css';
+@import '../../assets/home/AboutSection.scss';
 </style>

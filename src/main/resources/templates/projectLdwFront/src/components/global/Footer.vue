@@ -21,13 +21,13 @@
         <h3 class="footer-title">Contatos</h3>
         <ul class="footer-social">
           <li>
-            <a href="#">
+            <a href="#" class="social-link">
               <img src="../../../public/images/icons/whatsapp_icon.png" alt="WhatsApp" class="social-icon" />
               <span class="social-text">Whatsapp</span>
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="#" class="social-link">
               <img src="../../../public/images/icons/instagram_icon.png" alt="Instagram" class="social-icon" />
               <span class="social-text">Instagram</span>
             </a>
@@ -49,5 +49,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/Footer.css';
+@import '../../assets/Footer.scss';
 </style>

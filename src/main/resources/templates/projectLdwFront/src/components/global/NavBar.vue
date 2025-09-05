@@ -25,5 +25,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/Navbar.css';
+@import '../../assets/Navbar.scss';
 </style>
