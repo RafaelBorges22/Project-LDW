@@ -30,4 +30,8 @@ public class QuoteModel {
 
     @Enumerated(EnumType.STRING)
     private State state;
+
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private ClientModel client;
 }
