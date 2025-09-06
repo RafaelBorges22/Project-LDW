@@ -1,7 +1,10 @@
 package ldw.squad.project.Controller;
 
+import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Entities.QuoteModel;
+import ldw.squad.project.Repository.ClientRepository;
 import ldw.squad.project.Repository.QuoteRepository;
+import ldw.squad.project.Service.EmailService;
 import ldw.squad.project.Service.QuoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +22,13 @@ public class QuoteController {
     private QuoteRepository quoteRepository;
 
     @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
     private QuoteService quoteService;
+
+    @Autowired
+    private EmailService emailService;
 
     // GET: retorna todos os quotes no banco
     @GetMapping
@@ -32,17 +41,38 @@ public class QuoteController {
     public ResponseEntity<QuoteModel> getQuoteById(@PathVariable Long id) {
         Optional<QuoteModel> quote = quoteRepository.findById(id);
         return quote.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST: cria um quote e calcula automaticamente o preço final com base nos parâmetros
-    @PostMapping
-    public ResponseEntity<QuoteModel> createQuote(@RequestBody QuoteModel quote) {
-        double finalValue = quoteService.calculateBasePrice(quote); // preço calculado automaticamente
+    @PostMapping("/{clientId}")
+    public ResponseEntity<QuoteModel> createQuote(
+            @PathVariable Long clientId,
+            @RequestBody QuoteModel quote) {
+
+        // Busca o cliente pelo ID
+        Optional<ClientModel> clientOptional = clientRepository.findById(clientId);
+
+        //Se o cliente não for encontrado, retorna um erro 404 Not Found
+        if (clientOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        //Associa o cliente ao quote
+        ClientModel client = clientOptional.get();
+        quote.setClient(client);
+
+        // Calcula o valor final e salva o quote
+        double finalValue = quoteService.calculateBasePrice(quote);
         quote.setFinalValue(finalValue);
-        quote.setAdditionalCost(null); // ainda não há custo adicional
+        quote.setAdditionalCost(null);
 
         QuoteModel savedQuote = quoteRepository.save(quote);
+
+        emailService.enviarEmailText(client.getEmail(),
+                "Orçamento Enviado com sucesso!!",
+                "Obrigado por confiar em nosso serviço, o tatuador entrará em contato com mais informações. "
+        );
+
         return new ResponseEntity<>(savedQuote, HttpStatus.CREATED);
     }
 
@@ -65,7 +95,7 @@ public class QuoteController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
     // DELETE: remove um quote do banco
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuote(@PathVariable Long id) {
@@ -76,9 +106,8 @@ public class QuoteController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
     //A partir daqui, começam os endpoints especiais.
-    
 
     // POST: adiciona um valor adicional ao quote e recalcula o valor final
     // Pode receber valores negativos para reduzir o preço
