@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src/main/resources/templates/projectLdwFront', import.meta.url))
+      '@': fileURLToPath(new URL('./src/main/resources/templates/projectLdwFront/src', import.meta.url))
     },
   },
 })
