@@ -151,3 +151,14 @@ public class QuoteController {
         public void setAdditionalCost(Double additionalCost) { this.additionalCost = additionalCost; }
     }
 }
+
+//Link da Requisição caso consigam acessar:
+// https://web.postman.co/workspace/Personal-Workspace~80d41166-1b43-4b0e-a9e0-315da934247e/collection/38183942-edb2bde7-3a05-4084-9ffc-bc71084753ef?action=share&source=copy-link&creator=38183942
+
+
+
+
+
+
+
+
