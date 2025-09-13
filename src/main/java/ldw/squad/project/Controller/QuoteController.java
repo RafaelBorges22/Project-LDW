@@ -6,11 +6,16 @@ import ldw.squad.project.Repository.ClientRepository;
 import ldw.squad.project.Repository.QuoteRepository;
 import ldw.squad.project.Service.EmailService;
 import ldw.squad.project.Service.QuoteService;
+import ldw.squad.project.Service.UploadImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +35,9 @@ public class QuoteController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private UploadImageService imageService;
+
     // GET: retorna todos os quotes no banco
     @GetMapping
     public List<QuoteModel> getAllQuotes() {
@@ -44,10 +52,11 @@ public class QuoteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{clientId}")
+    @PostMapping(path = "/{clientId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<QuoteModel> createQuote(
             @PathVariable Long clientId,
-            @RequestBody QuoteModel quote) {
+            @RequestPart("quote") QuoteModel quote,
+            @RequestPart("image") MultipartFile image) throws IOException {
 
         // Busca o cliente pelo ID
         Optional<ClientModel> clientOptional = clientRepository.findById(clientId);
@@ -57,9 +66,18 @@ public class QuoteController {
             return ResponseEntity.notFound().build();
         }
 
-        //Associa o cliente ao quote
+        // Associa o cliente ao quote
         ClientModel client = clientOptional.get();
         quote.setClient(client);
+
+        // Salva a imagem e define a URL no quote
+        String filename = imageService.saveFile(image);
+        String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/upload/download/")
+                .path(filename)
+                .toUriString();
+        quote.setImageUrl(imageUrl);
+
 
         // Calcula o valor final e salva o quote
         double finalValue = quoteService.calculateBasePrice(quote);
@@ -133,3 +151,14 @@ public class QuoteController {
         public void setAdditionalCost(Double additionalCost) { this.additionalCost = additionalCost; }
     }
 }
+
+//Link da Requisição caso consigam acessar:
+// https://web.postman.co/workspace/Personal-Workspace~80d41166-1b43-4b0e-a9e0-315da934247e/collection/38183942-edb2bde7-3a05-4084-9ffc-bc71084753ef?action=share&source=copy-link&creator=38183942
+
+
+
+
+
+
+
+

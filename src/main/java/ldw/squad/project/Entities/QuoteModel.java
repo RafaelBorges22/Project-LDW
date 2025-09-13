@@ -21,6 +21,7 @@ public class QuoteModel {
     private String description;
     private Double additionalCost;
     private Double finalValue;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     private Size size;
