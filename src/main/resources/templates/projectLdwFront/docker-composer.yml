@@ -1,0 +1,10 @@
+frontend:
+  build:
+    context: ./src/main/resources/templates/projectLdwFront
+    dockerfile: Dockerfile
+  ports:
+    - "5173:5173"
+  volumes:
+    - ./src/main/resources/templates/projectLdwFront:/app
+    - /app/node_modules
+  command: npm run dev

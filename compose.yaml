@@ -3,27 +3,28 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0.40
-    container_name: mysql-1
+    container_name: mysql-ldw
     ports:
       - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ldw-database
     volumes:
-      - ./mysql-data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
 
-  app:
-    build: .
-    container_name: app-ldw
+  frontend:
+    build:
+      context: ./src/main/resources/templates/projectLdwFront
+      dockerfile: Dockerfile
+    container_name: frontend-ldw
     ports:
-      - "8080:8080"
+      - "5173:5173"
+    volumes:
+      - ./src/main/resources/templates/projectLdwFront:/app
+      - /app/node_modules
+    command: npm run dev
     depends_on:
       - mysql
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ldw-database
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
 volumes:
   mysql-data:
