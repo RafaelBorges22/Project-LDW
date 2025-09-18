@@ -1,3 +1,8 @@
+:root {
+  --brown-color: #5C3A33;
+  --background-color: #F8F5EE;
+  --text-color-black: #333;
+}
 
 body, html {
   margin: 0;
@@ -10,3 +15,23 @@ body, html {
 h1, h2, h3 {
   color: #333;
 }
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: #eeebeb;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+}
+
