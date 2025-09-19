@@ -72,13 +72,15 @@
       .upload-box {
         position: relative;
         width: 100%;
-        height: 200px;
+        height: 500px; /* Mantém a altura fixa */
         border: 2px solid #5C3A33;
         border-radius: 8px;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
+        overflow: hidden; /* Adicionado para cortar a imagem se ela exceder o limite */
+        background-color: #f0f0f0; /* Adicionado um fundo para o quadrado de pré-visualização */
 
         .upload-placeholder {
           display: flex;
@@ -88,15 +90,34 @@
           color: #5C3A33;
           font-weight: bold;
         }
+        
+        // Estilos para a imagem de pré-visualização
+        .image-preview {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
 
+          img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Redimensiona a imagem para caber no contêiner mantendo as proporções */
+          }
+        }
+        
         .file-input {
           position: absolute;
           width: 100%;
           height: 100%;
           opacity: 0;
           cursor: pointer;
+          z-index: 10; /* Garante que o input de arquivo esteja acima da imagem */
         }
-
+        
         .upload-icon {
           width: 50px;
           height: 50px;
