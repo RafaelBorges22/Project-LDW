@@ -14,7 +14,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -34,53 +33,42 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        // rotas publicas que nao demandam token
-        if (path.equals("/auth/login") || path.equals("/home") || path.startsWith("/css/") 
-            || path.startsWith("/js/") || path.equals("/clients")) {
+        if (path.equals("/auth/login") || path.equals("/home") || path.startsWith("/css/")
+                || path.startsWith("/js/") || path.equals("/clients")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            sendError(response, "Token ausente");
-            return;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            try {
+                String email = jwtUtil.extractUsername(jwt);
+                String role = jwtUtil.extractRole(jwt);
+
+                if (!jwtUtil.validateToken(jwt)) {
+                    sendError(response, "Token inválido ou Rota inexistente");
+                    return;
+                }
+
+                if (path.endsWith("/admin") && !"ADMIN".equals(role)) {
+                    sendForbidden(response, "Você não tem permissão para acessar esta rota");
+                    return;
+                }
+
+                clientRepository.findByEmail(email).ifPresent(client -> {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(client, null, null);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                });
+
+            } catch (Exception e) {
+                sendError(response, "Token inválido ou Rota inexistente");
+                return;
+            }
         }
-
-        String jwt = authHeader.substring(7);
-        String email;
-        String role;
-
-        try {
-            email = jwtUtil.extractUsername(jwt);
-            role = jwtUtil.extractRole(jwt);
-        } catch (Exception e) {
-            sendError(response, "Token inválido. A rota precisa de um token.");
-            return;
-        }
-
-        if (!jwtUtil.validateToken(jwt)) {
-            sendError(response, "Token inválido");
-            return;
-        }
-
-        if (path.endsWith("/admin") && !"ADMIN".equals(role)) {
-            sendForbidden(response, "Você não tem permissão para acessar esta rota");
-            return;
-        }
-
-        Optional<ClientModel> clientOpt = clientRepository.findByEmail(email);
-
-        if (clientOpt.isEmpty()) {
-            sendError(response, "Usuário não encontrado");
-            return;
-        }
-
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(clientOpt.get(), null, null);
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
     }
@@ -91,7 +79,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
-
 
     private void sendError(HttpServletResponse response, String message) throws IOException {
         response.setContentType("application/json");

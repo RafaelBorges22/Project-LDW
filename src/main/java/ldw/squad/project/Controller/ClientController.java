@@ -3,6 +3,7 @@ package ldw.squad.project.Controller;
 import java.util.List;
 import java.util.Optional;
 
+import ldw.squad.project.Service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +26,13 @@ public class ClientController {
 
     @Autowired
     private ClientRepository clientRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
+	@Autowired
+	private EmailService emailService;
+
     @GetMapping
     public List<ClientModel> getAllClients() {
         return clientRepository.findAll();
@@ -44,6 +49,11 @@ public class ClientController {
     public ResponseEntity<ClientModel> createClient(@RequestBody ClientModel client) {
         client.setPassword(passwordEncoder.encode(client.getPassword()));
         ClientModel newClient = clientRepository.save(client);
+        emailService.enviarEmailText(client.getEmail(),
+                "Bem Vindo a Familia Kazu Tatoo",
+                "Parabens voçê agora se cadastrou no nosso sistema, espero que goste da sua experiencia."
+        );
+
         return new ResponseEntity<>(newClient, HttpStatus.CREATED);
     }
 

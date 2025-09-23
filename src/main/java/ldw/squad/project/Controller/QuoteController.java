@@ -1,13 +1,21 @@
 package ldw.squad.project.Controller;
 
+import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Entities.QuoteModel;
+import ldw.squad.project.Repository.ClientRepository;
 import ldw.squad.project.Repository.QuoteRepository;
+import ldw.squad.project.Service.EmailService;
 import ldw.squad.project.Service.QuoteService;
+import ldw.squad.project.Service.UploadImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +27,16 @@ public class QuoteController {
     private QuoteRepository quoteRepository;
 
     @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
     private QuoteService quoteService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UploadImageService imageService;
 
     // GET: retorna todos os quotes no banco
     @GetMapping
@@ -32,17 +49,48 @@ public class QuoteController {
     public ResponseEntity<QuoteModel> getQuoteById(@PathVariable Long id) {
         Optional<QuoteModel> quote = quoteRepository.findById(id);
         return quote.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST: cria um quote e calcula automaticamente o preço final com base nos parâmetros
-    @PostMapping
-    public ResponseEntity<QuoteModel> createQuote(@RequestBody QuoteModel quote) {
-        double finalValue = quoteService.calculateBasePrice(quote); // preço calculado automaticamente
+    @PostMapping(path = "/{clientId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<QuoteModel> createQuote(
+            @PathVariable Long clientId,
+            @RequestPart("quote") QuoteModel quote,
+            @RequestPart("image") MultipartFile image) throws IOException {
+
+        // Busca o cliente pelo ID
+        Optional<ClientModel> clientOptional = clientRepository.findById(clientId);
+
+        //Se o cliente não for encontrado, retorna um erro 404 Not Found
+        if (clientOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Associa o cliente ao quote
+        ClientModel client = clientOptional.get();
+        quote.setClient(client);
+
+        // Salva a imagem e define a URL no quote
+        String filename = imageService.saveFile(image);
+        String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/upload/download/")
+                .path(filename)
+                .toUriString();
+        quote.setImageUrl(imageUrl);
+
+
+        // Calcula o valor final e salva o quote
+        double finalValue = quoteService.calculateBasePrice(quote);
         quote.setFinalValue(finalValue);
-        quote.setAdditionalCost(null); // ainda não há custo adicional
+        quote.setAdditionalCost(null);
 
         QuoteModel savedQuote = quoteRepository.save(quote);
+
+        emailService.enviarEmailText(client.getEmail(),
+                "Orçamento Enviado com sucesso!!",
+                "Obrigado por confiar em nosso serviço, o tatuador entrará em contato com mais informações. "
+        );
+
         return new ResponseEntity<>(savedQuote, HttpStatus.CREATED);
     }
 
@@ -65,7 +113,7 @@ public class QuoteController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
     // DELETE: remove um quote do banco
     @DeleteMapping("/{id}/admin")
     public ResponseEntity<Void> deleteQuote(@PathVariable Long id) {
@@ -76,9 +124,8 @@ public class QuoteController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
     //A partir daqui, começam os endpoints especiais.
-    
 
     // POST: adiciona um valor adicional ao quote e recalcula o valor final
     // Pode receber valores negativos para reduzir o preço
@@ -104,3 +151,14 @@ public class QuoteController {
         public void setAdditionalCost(Double additionalCost) { this.additionalCost = additionalCost; }
     }
 }
+
+//Link da Requisição caso consigam acessar:
+// https://web.postman.co/workspace/Personal-Workspace~80d41166-1b43-4b0e-a9e0-315da934247e/collection/38183942-edb2bde7-3a05-4084-9ffc-bc71084753ef?action=share&source=copy-link&creator=38183942
+
+
+
+
+
+
+
+

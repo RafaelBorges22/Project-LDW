@@ -6,13 +6,13 @@
     </div>
     <div class="navbar-right">
       <ul class="nav-links">
-        <li><a href="#"><img src="../../../public/images/icons/home_icon.png" alt="Home" class="nav-icon-img" /></a></li>
+        <li><a href="#"><i class="fi fi-sr-home"></i></a></li>
 
-        <li><a href="#"><img src="../../../public/images/icons/perfil_icon.png" alt="Perfil" class="nav-icon-img" /></a></li>
+        <li><a href="#"><i class="fi fi-sr-hand-holding-heart"></i></a></li>
 
-        <li><a href="#"><img src="../../../public/images/icons/budget_icon.png" alt="Documentos" class="nav-icon-img" /></a></li>
+        <li><a href="#"><i class="fi fi-ss-checklist-task-budget"></i></a></li>
 
-        <li><a href="#"><img src="../../../public/images/icons/chat_icon.png" alt="Chat" class="nav-icon-img" /></a></li>
+        <li><a href="#"><i class="fi fi-sr-messages"></i></a></li>
       </ul>
     </div>
   </nav>
@@ -25,5 +25,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/Navbar.css';
+@import '../../assets/Navbar.scss';
 </style>

@@ -21,6 +21,7 @@ public class QuoteModel {
     private String description;
     private Double additionalCost;
     private Double finalValue;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     private Size size;
@@ -30,4 +31,8 @@ public class QuoteModel {
 
     @Enumerated(EnumType.STRING)
     private State state;
+
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private ClientModel client;
 }
