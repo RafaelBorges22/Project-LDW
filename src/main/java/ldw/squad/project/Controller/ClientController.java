@@ -1,9 +1,13 @@
 package ldw.squad.project.Controller;
 
 import java.util.List;
-import java.util.Optional;
-
+import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Dto.CreateClientDto;
+import ldw.squad.project.Dto.UpdateClientDto;
+import ldw.squad.project.Mapper.ClientMapper;
 import ldw.squad.project.Service.EmailService;
+import ldw.squad.project.Service.ClientService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Repository.ClientRepository;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
@@ -33,53 +38,53 @@ public class ClientController {
 	@Autowired
 	private EmailService emailService;
 
+    @Autowired
+    private final ClientService clientService;
+
     @GetMapping
-    public List<ClientModel> getAllClients() {
-        return clientRepository.findAll();
+    public ResponseEntity<List<ClientDto>> getAllClients() {
+        List<ClientDto> clients = clientService.getAllClients()
+                .stream()
+                .map(ClientMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(clients);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClientModel> getClientById(@PathVariable Long id) {
-        Optional<ClientModel> client = clientRepository.findById(id);
-        return client.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ClientDto> getClientById(@PathVariable Long id) {
+        ClientModel client = clientService.getClientById(id);
+        return ResponseEntity.ok(ClientMapper.toDto(client));
     }
 
     @PostMapping
-    public ResponseEntity<ClientModel> createClient(@RequestBody ClientModel client) {
+    public ResponseEntity<ClientDto> createClient(@RequestBody CreateClientDto dto) {
+        ClientModel client = ClientMapper.toEntity(dto);
         client.setPassword(passwordEncoder.encode(client.getPassword()));
-        ClientModel newClient = clientRepository.save(client);
-        emailService.enviarEmailText(client.getEmail(),
-                "Bem Vindo a Familia Kazu Tatoo",
-                "Parabens voçê agora se cadastrou no nosso sistema, espero que goste da sua experiencia."
+
+        ClientModel newClient = clientService.save(client);
+
+        emailService.enviarEmailText(
+                newClient.getEmail(),
+                "Bem-vindo à Família Kazu Tattoo",
+                "Parabéns! Seu cadastro foi realizado com sucesso!"
         );
 
-        return new ResponseEntity<>(newClient, HttpStatus.CREATED);
+        return new ResponseEntity<>(ClientMapper.toDto(newClient), HttpStatus.CREATED);
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientModel> updateClient(@PathVariable Long id, @RequestBody ClientModel clientDetails) {
-        Optional<ClientModel> optionalClient = clientRepository.findById(id);
+    public ResponseEntity<ClientDto> updateClient(@PathVariable Long id, @RequestBody UpdateClientDto dto) {
+        ClientModel existingClient = clientService.getClientById(id);
+        ClientMapper.updateEntity(existingClient, dto);
 
-        if (optionalClient.isPresent()) {
-            ClientModel existingClient = optionalClient.get();
-            existingClient.setName(clientDetails.getName());
-            existingClient.setEmail(clientDetails.getEmail());
-            ClientModel updatedClient = clientRepository.save(existingClient);
-            return ResponseEntity.ok(updatedClient);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        ClientModel updatedClient = clientService.update(existingClient);
+        return ResponseEntity.ok(ClientMapper.toDto(updatedClient));
     }
 
     @DeleteMapping("/{id}/admin")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
-        if (clientRepository.existsById(id)) {
-            clientRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        clientService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

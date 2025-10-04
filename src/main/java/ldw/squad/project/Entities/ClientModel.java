@@ -26,5 +26,6 @@ public class ClientModel {
     private String email;
     private String password;
     private String address;
+    private String phone;
     private String role;
 }
