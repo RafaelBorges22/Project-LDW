@@ -1,7 +1,9 @@
 package ldw.squad.project.Dto;
 
+import java.util.UUID;
+
 public record ClientDto(
-        Long id,
+        UUID id,
         String name,
         String email,
         String address,

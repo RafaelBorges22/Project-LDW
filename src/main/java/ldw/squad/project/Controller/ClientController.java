@@ -1,6 +1,8 @@
 package ldw.squad.project.Controller;
 
 import java.util.List;
+import java.util.UUID;
+
 import ldw.squad.project.Dto.ClientDto;
 import ldw.squad.project.Dto.CreateClientDto;
 import ldw.squad.project.Dto.UpdateClientDto;
@@ -51,7 +53,7 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClientDto> getClientById(@PathVariable Long id) {
+    public ResponseEntity<ClientDto> getClientById(@PathVariable UUID id) {
         ClientModel client = clientService.getClientById(id);
         return ResponseEntity.ok(ClientMapper.toDto(client));
     }
@@ -74,7 +76,7 @@ public class ClientController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDto> updateClient(@PathVariable Long id, @RequestBody UpdateClientDto dto) {
+    public ResponseEntity<ClientDto> updateClient(@PathVariable UUID id, @RequestBody UpdateClientDto dto) {
         ClientModel existingClient = clientService.getClientById(id);
         ClientMapper.updateEntity(existingClient, dto);
 
@@ -83,7 +85,7 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}/admin")
-    public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable UUID  id) {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
     }

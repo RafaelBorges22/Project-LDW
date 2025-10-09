@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/quotes")
@@ -54,7 +55,7 @@ public class QuoteController {
 
     @PostMapping(path = "/{clientId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<QuoteModel> createQuote(
-            @PathVariable Long clientId,
+            @PathVariable UUID clientId,
             @RequestPart("quote") QuoteModel quote,
             @RequestPart("image") MultipartFile image) throws IOException {
 
