@@ -1,12 +1,12 @@
 package ldw.squad.project.Service;
 
-import ldw.squad.project.Entities.QuoteModel;
-import ldw.squad.project.Entities.Enums.BodyPart;
-import ldw.squad.project.Entities.Enums.Size;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import ldw.squad.project.Entities.QuoteModel;
+import ldw.squad.project.Entities.Enums.BodyPart;
+import ldw.squad.project.Entities.Enums.Size;
 
 @Service
 public class QuoteService {

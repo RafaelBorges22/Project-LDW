@@ -1,11 +1,12 @@
 package ldw.squad.project.Service;
 
-import ldw.squad.project.Entities.ClientModel;
-import ldw.squad.project.Repository.ClientRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import ldw.squad.project.Entities.ClientModel;
+import ldw.squad.project.Repository.ClientRepository;
 
 @Service
 public class ClientService {

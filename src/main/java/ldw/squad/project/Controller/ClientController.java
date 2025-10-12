@@ -3,13 +3,6 @@ package ldw.squad.project.Controller;
 import java.util.List;
 import java.util.UUID;
 
-import ldw.squad.project.Dto.ClientDto;
-import ldw.squad.project.Dto.CreateClientDto;
-import ldw.squad.project.Dto.UpdateClientDto;
-import ldw.squad.project.Mapper.ClientMapper;
-import ldw.squad.project.Service.EmailService;
-import ldw.squad.project.Service.ClientService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +16,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Dto.CreateClientDto;
+import ldw.squad.project.Dto.UpdateClientDto;
 import ldw.squad.project.Entities.ClientModel;
+import ldw.squad.project.Mapper.ClientMapper;
 import ldw.squad.project.Repository.ClientRepository;
+import ldw.squad.project.Service.ClientService;
+import ldw.squad.project.Service.EmailService;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController

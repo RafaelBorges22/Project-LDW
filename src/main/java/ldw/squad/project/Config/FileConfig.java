@@ -1,10 +1,11 @@
 package ldw.squad.project.Config;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Configuration
 @ConfigurationProperties(prefix = "file")

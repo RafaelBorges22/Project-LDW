@@ -1,16 +1,19 @@
 package ldw.squad.project.Controller;
 
-import ldw.squad.project.Config.JwtUtil;
-import ldw.squad.project.Entities.ClientModel;
-import ldw.squad.project.Repository.ClientRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletResponse;
+import ldw.squad.project.Config.JwtUtil;
+import ldw.squad.project.Entities.ClientModel;
+import ldw.squad.project.Repository.ClientRepository;
 
 @RestController
 @RequestMapping("/auth")
