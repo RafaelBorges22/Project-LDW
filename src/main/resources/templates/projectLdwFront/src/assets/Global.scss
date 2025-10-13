@@ -1,8 +1,10 @@
-:root {
-  --brown-color: #5C3A33;
-  --background-color: #F8F5EE;
-  --text-color-black: #333;
-}
+$brown-color: #5C3A33;
+$background-color: #F8F5EE;
+$text-color-black: #333;
+$text-color-white: #f8f8f8;
+$error-color: #b32323;
+$success-color: #2d8031;
+$transition: 0.3s ease-in-out;
 
 body, html {
   margin: 0;
@@ -10,6 +12,7 @@ body, html {
   width: 100%;
   overflow-x: hidden;
   font-family: sans-serif; 
+  color: var(--text-color-black);
 }
 
 h1, h2, h3 {
@@ -17,21 +20,20 @@ h1, h2, h3 {
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 a {
-    text-decoration: none;
-    color: #eeebeb;
+  text-decoration: none;
+  color: #eeebeb;
 }
 
 ul {
-    list-style: none;
+  list-style: none;
 }
 
 img {
-    max-width: 100%;
+  max-width: 100%;
 }
-

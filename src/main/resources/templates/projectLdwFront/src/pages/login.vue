@@ -1,78 +1,120 @@
 <template>
   <section class="login">
-	<div class="wrapper">
-      <div class="form-header">
+    <div class="wrapper">
+      <!-- Cabeçalho -->
+      <div class="form-header" :class="{'largura-aumentada': modoRecuperacao}">
         <div class="titles">
-          <div v-if="!modoCadastro && !modoRecuperacao">Login</div>
-          <div v-else-if="modoCadastro">Cadastro</div>
-          <div v-else>Recuperar Senha</div>
+          <div v-if="!modoCadastro && !modoRecuperacao" class="title-login">Login</div>
+          <div v-else-if="modoCadastro" class="title-cadastro">Cadastro</div>
+          <div v-else class="title-recuperacao">Recuperar Senha</div>
         </div>
       </div>
 
-      <form v-if="!modoCadastro && !modoRecuperacao" @submit.prevent="fazerLogin">
-        <div>
-          <label>Email</label>
-          <input type="email" v-model="login.email" required />
+      <!-- Login -->
+      <form v-if="!modoCadastro && !modoRecuperacao" class="form-container login-form" @submit.prevent="fazerLogin">
+        <div class="input-box" :class="{ filled: login.email }">
+          <input type="email" class="input-field" v-model="login.email" required />
+          <label class="label">Email</label>
+          <i class="fi fi-rr-envelope" id="icon-login"></i>
         </div>
-        <div>
-          <label>Senha</label>
-          <input :type="mostrarSenhaLogin ? 'text' : 'password'" v-model="login.password" required />
-          <input type="checkbox" v-model="mostrarSenhaLogin" /> Mostrar senha
+        <div class="input-box" :class="{ filled: login.password }">
+          <input :type="mostrarSenhaLogin ? 'text' : 'password'" class="input-field" v-model="login.password" required />
+          <label class="label">Senha</label>
+          <i class="fi fi-rr-lock" id="icon-login"></i>
         </div>
-        <button type="submit">Entrar</button>
-        <p v-if="erroLogin">{{ erroLogin }}</p>
-        <p>
-          <a href="#" @click.prevent="trocarFormulario('recuperacao')">Esqueceu a senha?</a> |
-          <a href="#" @click.prevent="trocarFormulario('cadastro')">Cadastrar</a>
-        </p>
+        <div class="form-cols">
+          <div class="col-1">
+            <input type="checkbox" id="mostrar-senha-login" v-model="mostrarSenhaLogin" />
+            <label for="mostrar-senha-login">{{ mostrarSenhaLogin ? 'Ocultar Senha' : 'Mostrar Senha' }}</label>
+          </div>
+          <div class="col-2">
+            <a href="#" @click.prevent="trocarFormulario('recuperacao')">Esqueceu a senha?</a>
+          </div>
+        </div>
+        <div class="input-box">
+          <button type="submit" class="btn-submit">Entrar <i class='bx bx-log-in'></i></button>
+        </div>
+        <p id="msg-erro" v-if="erroLogin">{{ erroLogin }}</p>
+        <div class="swith-form">
+          <span>Não tem uma conta? <a href="#" @click.prevent="trocarFormulario('cadastro')">Cadastre-se</a></span>
+        </div>
       </form>
 
-      <form v-else-if="modoCadastro" @submit.prevent="criarUsuario">
-        <div>
-          <label>Nome</label>
-          <input type="text" v-model="cadastro.nome" required />
+      <!-- Cadastro -->
+      <form v-else-if="modoCadastro" class="form-container cadastro-form" @submit.prevent="criarUsuario">
+        <div class="input-box" :class="{ filled: cadastro.nome }">
+          <input type="text" class="input-field" v-model="cadastro.nome" required />
+          <label class="label">Nome</label>
+          <i class="fi fi-rs-user" id="icon-login"></i>
         </div>
-        <div>
-          <label>Email</label>
-          <input type="email" v-model="cadastro.email" required />
+        <div class="input-box" :class="{ filled: cadastro.email }">
+          <input type="email" class="input-field" v-model="cadastro.email" required />
+          <label class="label">Email</label>
+          <i class="fi fi-rr-envelope" id="icon-login"></i>
         </div>
-        <div>
-          <label>Senha</label>
-          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" v-model="cadastro.senha" required />
+        <div class="input-box" :class="{ filled: cadastro.senha }">
+          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field" v-model="cadastro.senha" required />
+          <label class="label">Senha</label>
+          <i class="fi fi-rr-lock" id="icon-login"></i>
         </div>
-        <div>
-          <label>Confirmar senha</label>
-          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" v-model="cadastro.confirmarSenha" required />
-          <input type="checkbox" v-model="mostrarSenhaCadastro" /> Mostrar senhas
+        <div class="input-box" :class="{ filled: cadastro.confirmarSenha }">
+          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field" v-model="cadastro.confirmarSenha" required />
+          <label class="label" id="label-confirmar-senha">Confirmar Senha</label>
+          <i class="fi fi-rr-lock" id="icon-login"></i>
         </div>
-        <button type="submit">Cadastrar</button>
-        <p v-if="erroCadastro">{{ erroCadastro }}</p>
-        <p v-if="sucessoCriacao">{{ sucessoCriacao }}</p>
-        <p><a href="#" @click.prevent="trocarFormulario('login')">Voltar ao login</a></p>
+        <div class="form-cols">
+          <div class="col-1">
+            <input type="checkbox" id="mostrar-senha-cadastro" v-model="mostrarSenhaCadastro" />
+            <label for="mostrar-senha-cadastro">{{ mostrarSenhaCadastro ? 'Ocultar Senhas' : 'Mostrar Senhas' }}</label>
+          </div>
+        </div>
+        <div class="input-box">
+          <button type="submit" class="btn-submit">Cadastrar <i id="icon-cadastro" class="fi fi-ss-paw-claws"></i></button>
+        </div>
+        <p id="msg-erro" v-if="erroCadastro">{{ erroCadastro }}</p>
+        <p id="msg-sucesso" v-if="sucessoCriacao">{{ sucessoCriacao }}</p>
+        <div class="swith-form">
+          <span>Já tem uma conta? <a href="#" @click.prevent="trocarFormulario('login')">Faça o Login</a></span>
+        </div>
       </form>
 
-      <form v-else @submit.prevent="recuperarSenha">
-        <div>
-          <label>Email</label>
-          <input type="email" v-model="login.email" required />
+      <!-- Recuperação de senha -->
+      <form v-else class="form-container recuperacao-form" @submit.prevent="recuperarSenha">
+        <div class="input-box" :class="{ filled: login.email }">
+          <input type="email" class="input-field" v-model="login.email" required />
+          <label class="label">Email</label>
+          <i class="fi fi-rr-envelope" id="icon-login"></i>
         </div>
-        <div>
-          <label>Nova senha</label>
-          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" v-model="cadastro.senha" required />
+        <div class="input-box" :class="{ filled: cadastro.senha }">
+          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field" v-model="cadastro.senha" required />
+          <label class="label" id="label-nova-senha">Nova Senha</label>
+          <i class="fi fi-rr-lock" id="icon-login"></i>
         </div>
-        <div>
-          <label>Confirmar nova senha</label>
-          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" v-model="cadastro.confirmarSenha" required />
-          <input type="checkbox" v-model="mostrarSenhaCadastro" /> Mostrar senhas
+        <div class="input-box" :class="{ filled: cadastro.confirmarSenha }">
+          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field" v-model="cadastro.confirmarSenha" required />
+          <label class="label" id="label-confirmar-nova-senha">Confirmar Nova Senha</label>
+          <i class="fi fi-rr-lock" id="icon-login"></i>
         </div>
-        <button type="submit">Redefinir senha</button>
-        <p v-if="erroRecuperacao">{{ erroRecuperacao }}</p>
-        <p v-if="sucessoRecuperacao">{{ sucessoRecuperacao }}</p>
-        <p><a href="#" @click.prevent="trocarFormulario('login')">Voltar ao login</a></p>
+        <div class="form-cols">
+          <div class="col-1">
+            <input type="checkbox" id="mostrar-senha-recuperacao" v-model="mostrarSenhaCadastro" />
+            <label for="mostrar-senha-recuperacao">{{ mostrarSenhaCadastro ? 'Ocultar Senhas' : 'Mostrar Senhas' }}</label>
+          </div>
+        </div>
+        <div class="input-box">
+          <button type="submit" class="btn-submit">Redefinir Senha <i class='bx bx-reset'></i></button>
+        </div>
+        <p id="msg-erro" v-if="erroRecuperacao">{{ erroRecuperacao }}</p>
+        <p id="msg-sucesso" v-if="sucessoRecuperacao">{{ sucessoRecuperacao }}</p>
+        <div class="swith-form">
+          <span>Lembrou sua senha? <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a></span>
+        </div>
       </form>
     </div>
   </section>
 </template>
+
+
 
 <script>
 import axios from 'axios';

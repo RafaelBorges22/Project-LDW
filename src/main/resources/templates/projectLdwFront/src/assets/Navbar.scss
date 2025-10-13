@@ -1,3 +1,5 @@
+@import './Global.scss';
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -5,7 +7,8 @@
   background-color: #1a1a1a;
   color: #ffffff;
   padding: 10px 40px;
-  border-bottom: var(--brown-color) solid 18px;
+  border-bottom: $brown-color solid 18px;
+  position: relative;
 
   .navbar-left {
     display: flex;
@@ -36,13 +39,79 @@
     li {
       margin-left: 45px;
 
-      i{
+      i {
         font-size: 2rem;
         text-decoration: none;
         display: flex;
+        transition: opacity 0.2s ease-in-out;
 
         &:hover {
           opacity: 0.7;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+.logout-confirm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+
+  .confirm-box {
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 25px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    width: 320px;
+    max-width: 90%;
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: space-between;
+
+      button {
+        flex: 1;
+        margin: 0 6px;
+        padding: 8px 0;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+      }
+
+      button:first-child {
+        background-color: #c0392b;
+        color: #fff;
+
+        &:hover {
+          background-color: darken(#c0392b, 8%);
+        }
+      }
+
+      button:last-child {
+        background-color: #bdc3c7;
+        color: #1a1a1a;
+
+        &:hover {
+          background-color: darken(#bdc3c7, 8%);
         }
       }
     }
