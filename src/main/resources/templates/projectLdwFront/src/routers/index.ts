@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import BudgetPage from '../pages/BudgetPage.vue';
+import BudgetTable from '../components/budget/BudgetTable.vue';
 import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/login.vue';
 
@@ -9,6 +10,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Budget',
     component: BudgetPage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/budget-table',
+    name: 'BudgetTable',
+    component: BudgetTable,
+    meta: { requiresAuth: false }
   },
   {
     path: '/',

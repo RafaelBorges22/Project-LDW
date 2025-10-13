@@ -1,0 +1,127 @@
+// Colors taken from project's Navbar.scss and Footer.scss
+$bg: #1a1a1a;
+$accent: #5C3A33; // border/top color
+$hover: #7B4B42; // hover accent
+$text: #ffffff;
+$muted: rgba(255,255,255,0.6);
+
+.budget-table {
+  background: $bg;
+  color: $text;
+  padding: 18px;
+  border: 2px solid darken($bg, 5%);
+  border-top: 12px solid $accent;
+  border-radius: 8px;
+
+  .table-title {
+    margin: 0 0 12px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .table-placeholder,
+  .table-error,
+  .no-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 12px;
+    color: $muted;
+  }
+
+  .retry-btn {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid $accent;
+    color: $text;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover {
+      background: $hover;
+      border-color: $hover;
+    }
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.08);
+    border-top-color: $accent;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  table.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    color: $text;
+
+    thead th {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 2px solid rgba(255,255,255,0.06);
+      font-weight: 600;
+    }
+
+    tbody td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+      font-size: 0.95rem;
+    }
+
+    tbody tr {
+      transition: background 180ms ease, color 180ms ease;
+
+      &:hover {
+        background: rgba(123,75,66,0.06); // subtle hover using $hover
+      }
+    }
+  }
+
+  .muted {
+    color: $muted;
+  }
+
+  // responsive: turn into card list on small screens
+  @media (max-width: 720px) {
+    table.table {
+      display: block;
+
+      thead {
+        display: none;
+      }
+
+      tbody td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        position: relative;
+      }
+
+      tbody tr {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255,255,255,0.03);
+        border-radius: 8px;
+        padding: 8px;
+      }
+
+      tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: $muted;
+      }
+    }
+  }
+}
