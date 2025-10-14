@@ -144,5 +144,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/budget/BudgetForm.scss';
+@import '../../assets/Scss/pages/BudgetForm.scss';
 </style>

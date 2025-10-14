@@ -232,5 +232,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../assets/login/login.scss';
+@import '../assets/Scss/pages/login.scss';
 </style>

@@ -1,24 +1,31 @@
 <template>
   <nav class="navbar">
     <div class="navbar-left">
-      <img src="../../../public/images/Logo.png" alt="Kazu Tatoo Logo" class="logo-image" />
+      <router-link to="/"><img src="../../assets/base/Logo.png" alt="Kazu Tatoo Logo" class="logo-image" /></router-link>
       <span class="logo-text">Kazu Tatoo</span>
     </div>
 
     <div class="navbar-right">
       <ul class="nav-links">
-        <li><a href="#"><i class="fi fi-sr-home"></i></a></li>
-        <li><a href="#"><i class="fi fi-sr-hand-holding-heart"></i></a></li>
-        <li><a href="#"><i class="fi fi-ss-checklist-task-budget"></i></a></li>
-        <li><a href="#"><i class="fi fi-sr-messages"></i></a></li>
-        <li><a href="#" @click.prevent="showLogoutConfirm = true"><i class="fi fi-ss-user-logout"></i>
-          </a>
+        <li>
+          <router-link to="/"><i class="fi fi-sr-home"></i></router-link>
+        </li>
+        <li>
+          <router-link to="/"><i class="fi fi-sr-hand-holding-heart"></i></router-link>
+        </li>
+        <li>
+          <router-link to="/budget"><i class="fi fi-ss-checklist-task-budget"></i></router-link>
+        </li>
+        <li>
+          <router-link to="/"><i class="fi fi-sr-messages"></i></router-link>
+        </li>
+        <li>
+          <a href="#" @click.prevent="showLogoutConfirm = true"><i class="fi fi-ss-user-logout"></i></a>
         </li>
       </ul>
     </div>
 
-    <!-- Confirmação de logout -->
-    <div v-if="showLogoutConfirm" class="logout-confirm">
+    <div v-if="showLogoutConfirm" class="logout-confirm" @click="cancelLogout">
       <div class="confirm-box">
         <p>Deseja realmente sair?</p>
         <div class="confirm-actions">
@@ -56,5 +63,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/Navbar.scss';
+@import '../../assets/Scss/global/Navbar.scss';
 </style>

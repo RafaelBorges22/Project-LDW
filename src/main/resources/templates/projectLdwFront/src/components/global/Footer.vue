@@ -3,17 +3,25 @@
     <div class="footer-top">
       <div class="footer-column">
         <div class="footer-logo">
-          <img src="../../../public/images/LogoFooter.png" alt="Kazu Tattoo Logo" class="logo-image-footer" />
+          <img src="../../assets/base/LogoFooter.png" alt="Kazu Tattoo Logo" class="logo-image-footer" />
         </div>
       </div>
-      
+
       <div class="footer-column">
         <h3 class="footer-title">Links</h3>
         <ul class="footer-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Orçamento</a></li>
-          <li><a href="#">Pós-Tattoo</a></li>
-          <li><a href="#">Meu Trabalho</a></li>
+          <router-link to="/">
+            <li><p>Home</p></li>
+          </router-link>
+          <router-link to="/">
+            <li><p>Orçamento</p></li>
+          </router-link>
+          <router-link to="/">
+            <li><p>Pós-Tattoo</p></li>
+          </router-link>
+          <router-link to="/">
+            <li><p>Meu Trabalho</p></li>
+          </router-link>
         </ul>
       </div>
 
@@ -21,14 +29,16 @@
         <h3 class="footer-title">Contatos</h3>
         <ul class="footer-social">
           <li>
-            <a href="#" class="social-link">
-              <img src="../../../public/images/icons/whatsapp_icon.png" alt="WhatsApp" class="social-icon" />
+            <a href="https://wa.me/5511959895643?text=Ol%C3%A1,%20gostaria%20de%20fazer%20um%20or%C3%A7amento."
+              class="social-link" target="_blank">
+              <i class="fi fi-brands-whatsapp"></i>
               <span class="social-text">Whatsapp</span>
             </a>
           </li>
           <li>
-            <a href="#" class="social-link">
-              <img src="../../../public/images/icons/instagram_icon.png" alt="Instagram" class="social-icon" />
+            <a href="https://www.instagram.com/kazutattoo_/?igsh=eXQ4MHI5dXZ4amY%3D#" class="social-link"
+              target="_blank">
+              <i class="fi fi-brands-instagram"></i>
               <span class="social-text">Instagram</span>
             </a>
           </li>
@@ -49,5 +59,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/Footer.scss';
+@import '../../assets/Scss/global/Footer.scss';
 </style>

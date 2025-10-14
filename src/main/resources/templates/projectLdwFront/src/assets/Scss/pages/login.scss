@@ -1,9 +1,9 @@
-@import '../Global.scss';
+@import '../global/Global.scss';
 
 .login {
   display: flex;
   justify-content: center;
-  background: url('../../../public/images/img-background.png');
+  background: url('../../base/img-background.png');
   align-items: center;
   height: 100vh;
 }

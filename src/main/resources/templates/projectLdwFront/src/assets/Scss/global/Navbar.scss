@@ -4,8 +4,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #1a1a1a;
-  color: #ffffff;
+  background-color: $black-color;
+  color: $text-color-white;
   padding: 10px 40px;
   border-bottom: $brown-color solid 18px;
   position: relative;
@@ -25,6 +25,7 @@
     .logo-text {
       font-size: 1.5rem;
       font-weight: bold;
+      cursor: default;
     }
   }
 
@@ -67,8 +68,8 @@
   z-index: 9999;
 
   .confirm-box {
-    background: #ffffff;
-    color: #1a1a1a;
+    background: $text-color-white;
+    color: $black-color;
     padding: 25px 40px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -98,20 +99,20 @@
       }
 
       button:first-child {
-        background-color: #c0392b;
+        background-color: $error-color;
         color: #fff;
 
         &:hover {
-          background-color: darken(#c0392b, 8%);
+          background-color: darken($error-color, 8%);
         }
       }
 
       button:last-child {
-        background-color: #bdc3c7;
-        color: #1a1a1a;
+        background-color: $gray-color;
+        color: $black-color;
 
         &:hover {
-          background-color: darken(#bdc3c7, 8%);
+          background-color: darken($gray-color, 8%);
         }
       }
     }
