@@ -19,13 +19,26 @@
       <table v-if="hasData" class="table">
         <thead>
           <tr>
-            <th v-for="col in columns" :key="col">{{ col }}</th>
+            <th>Nome</th>
+            <th>Tamanho</th>
+            <th>Parte do Corpo</th>
+            <th>Custo Adicional</th>
+            <th>Contato</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(quote, i) in quotes" :key="i">
-            <td v-for="col in columns" :key="col + '-' + i">
-              <span v-html="formatCell(quote[col])"></span>
+          <tr v-for="(quote, i) in quotes" :key="i"
+          @click="goToQuoteDetails(quote.id)" class="clickable-row">
+            <td><strong>{{ quote.client.name || '—' }}</strong></td>
+            <td>{{ quote.size || '—' }}</td>
+            <td>{{ quote.bodyPart || '—' }}</td>
+            <td>{{ formatCurrency(quote.additionalCost) }}</td>
+            <td>
+              <div v-if="quote.client" class="client-info">
+                <p class="muted">{{ quote.client.email || '—' }}</p>
+                <p>{{ quote.client.phone || '—' }}</p>
+              </div>
+              <span v-else class="muted">Sem cliente</span>
             </td>
           </tr>
         </tbody>
@@ -38,8 +51,23 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from "vue-router";
+const router = useRouter();
 
-type Quote = Record<string, unknown>
+type Client = {
+  name?: string
+  email?: string
+  phone?: string
+}
+
+type Quote = {
+  id?: string | number
+  name?: string
+  size?: string
+  bodyPart?: string
+  additionalCost?: number
+  client?: Client
+}
 
 const API_URL = 'http://localhost:8081/quotes'
 
@@ -50,11 +78,9 @@ const error = ref<string | null>(null)
 async function fetchQuotes() {
   loading.value = true
   error.value = null
-
   try {
     const response = await fetch(API_URL)
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
-
     const data = await response.json()
     quotes.value = normalizeQuotes(data)
   } catch (err: any) {
@@ -66,79 +92,30 @@ async function fetchQuotes() {
 }
 
 function normalizeQuotes(data: any): Quote[] {
+  // tenta lidar com diferentes formatos de retorno da API
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.content)) return data.content as Quote[]
-  if (data && typeof data === 'object') {
-    const values = Object.values(data).filter(v => typeof v === 'object')
-    return values.length
-      ? values.map(v => ({ ...(v as object) } as Quote))
-      : [{ ...(data as object) } as Quote]
-  }
+  if (data && typeof data === 'object') return [data as Quote]
   return []
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
+function formatCurrency(value: any): string {
+  if (value == null || isNaN(value)) return '—'
+  return Number(value).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
 }
 
-function formatCell(value: unknown): string {
-  if (value == null) return '<span class="muted">—</span>'
-
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
-    return escapeHtml(new Date(value).toLocaleString())
-  }
-
-  if (typeof value === 'number') {
-    return escapeHtml(
-      value.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    )
-  }
-
-  if (typeof value === 'object') {
-    try {
-      return escapeHtml(JSON.stringify(value))
-    } catch {
-      return escapeHtml(String(value))
-    }
-  }
-
-  return escapeHtml(String(value))
+function goToQuoteDetails(id) {
+  router.push(`/quotes/${id}`);
 }
 
 const hasData = computed(() => quotes.value.length > 0)
-
-const columns = computed(() => {
-  if (!hasData.value) return []
-
-  const first = quotes.value[0]
-  const preferredOrder = [
-    'id', 'client', 'name', 'description',
-    'amount', 'price', 'total', 'status',
-    'date', 'createdAt', 'updatedAt',
-  ]
-
-  const keys = Object.keys(first)
-  return keys.sort((a, b) => {
-    const ai = preferredOrder.indexOf(a)
-    const bi = preferredOrder.indexOf(b)
-    if (ai === -1 && bi === -1) return 0
-    if (ai === -1) return 1
-    if (bi === -1) return -1
-    return ai - bi
-  })
-})
 
 onMounted(fetchQuotes)
 </script>
 
 <style scoped>
-@import '../../assets/budget/BudgetTable.scss'
+@import '../../assets/budget/BudgetTable.scss';
 </style>

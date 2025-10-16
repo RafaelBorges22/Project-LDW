@@ -3,6 +3,7 @@ import BudgetPage from '../pages/BudgetPage.vue';
 import BudgetTable from '../components/budget/BudgetTable.vue';
 import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/login.vue';
+import BudgetDetails from '../components/budget/BudgetDetails.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -16,6 +17,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'BudgetTable',
     component: BudgetTable,
     meta: { requiresAuth: false }
+  },
+  {
+  path: "/quotes/:id",
+  name: "quote-details",
+  component: BudgetDetails
   },
   {
     path: '/',

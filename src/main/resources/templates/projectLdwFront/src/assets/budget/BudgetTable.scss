@@ -1,9 +1,8 @@
-// Colors taken from project's Navbar.scss and Footer.scss
 $bg: #1a1a1a;
-$accent: #5C3A33; // border/top color
-$hover: #7B4B42; // hover accent
+$accent: #5C3A33;
+$hover: #7B4B42;
 $text: #ffffff;
-$muted: rgba(255,255,255,0.6);
+$muted: rgba(255, 255, 255, 0.6);
 
 .budget-table {
   background: $bg;
@@ -49,13 +48,25 @@ $muted: rgba(255,255,255,0.6);
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 4px solid rgba(255,255,255,0.08);
+    border: 4px solid rgba(255, 255, 255, 0.08);
     border-top-color: $accent;
     animation: spin 1s linear infinite;
     margin-bottom: 10px;
   }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .clickable-row {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.clickable-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
   table.table {
     width: 100%;
@@ -66,13 +77,14 @@ $muted: rgba(255,255,255,0.6);
     thead th {
       text-align: left;
       padding: 12px 10px;
-      border-bottom: 2px solid rgba(255,255,255,0.06);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.06);
       font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     tbody td {
       padding: 12px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       vertical-align: middle;
       font-size: 0.95rem;
     }
@@ -81,7 +93,7 @@ $muted: rgba(255,255,255,0.6);
       transition: background 180ms ease, color 180ms ease;
 
       &:hover {
-        background: rgba(123,75,66,0.06); // subtle hover using $hover
+        background: rgba(123, 75, 66, 0.12);
       }
     }
   }
@@ -90,7 +102,27 @@ $muted: rgba(255,255,255,0.6);
     color: $muted;
   }
 
-  // responsive: turn into card list on small screens
+  .client-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    p {
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    strong {
+      color: lighten($text, 10%);
+      font-weight: 600;
+    }
+
+    .muted {
+      font-size: 0.85rem;
+      color: $muted;
+    }
+  }
+
   @media (max-width: 720px) {
     table.table {
       display: block;
@@ -99,28 +131,25 @@ $muted: rgba(255,255,255,0.6);
         display: none;
       }
 
-      tbody td {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 10px 12px;
-        position: relative;
-      }
-
       tbody tr {
         display: block;
         margin-bottom: 12px;
-        border: 1px solid rgba(255,255,255,0.03);
+        border: 1px solid rgba(255, 255, 255, 0.03);
         border-radius: 8px;
-        padding: 8px;
+        padding: 10px;
       }
 
-      tbody td::before {
-        content: attr(data-label);
-        display: block;
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: $muted;
+      tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 4px;
+        border: none;
+
+        &::before {
+          content: attr(data-label);
+          font-weight: 600;
+          color: $muted;
+        }
       }
     }
   }
