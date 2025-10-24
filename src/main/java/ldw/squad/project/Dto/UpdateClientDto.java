@@ -5,6 +5,7 @@ public record UpdateClientDto(
         String email,
         String address,
         String phone,
+        String password,
         String role
 ) {}
 
