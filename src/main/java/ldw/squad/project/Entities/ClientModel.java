@@ -1,5 +1,6 @@
 package ldw.squad.project.Entities;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -32,4 +33,8 @@ public class ClientModel {
     private String address;
     private String phone;
     private String role;
+
+    //Esqueceu senha
+    private String resetPasswordToken;
+    private LocalDateTime resetPasswordTokenExpiry;
 }

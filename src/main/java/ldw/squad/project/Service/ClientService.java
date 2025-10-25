@@ -1,6 +1,8 @@
 package ldw.squad.project.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -36,6 +38,25 @@ public class ClientService {
 
     public void delete(UUID id) {
         clientRepository.deleteById(id);
+    }
+
+    //Serviço de esqueceu senha
+    public Optional<ClientModel> findByEmail(String email) {
+        return clientRepository.findByEmail(email);
+    }
+
+    public ClientModel findByResetToken(String token) {
+        return clientRepository.findByResetPasswordToken(token)
+                .filter(client -> client.getResetPasswordTokenExpiry() != null)
+                .filter(client -> client.getResetPasswordTokenExpiry().isAfter(LocalDateTime.now()))
+                .orElseThrow(() -> new RuntimeException("Token inválido ou expirado."));
+    }
+
+    // Novo: Salva o token de redefinição no cliente
+    public ClientModel createResetToken(ClientModel client, String token, LocalDateTime expiryDate) {
+        client.setResetPasswordToken(token);
+        client.setResetPasswordTokenExpiry(expiryDate);
+        return clientRepository.save(client);
     }
 }
 

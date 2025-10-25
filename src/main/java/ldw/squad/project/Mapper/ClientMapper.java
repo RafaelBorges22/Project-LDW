@@ -14,6 +14,7 @@ public class ClientMapper {
                 client.getEmail(),
                 client.getAddress(),
                 client.getPhone(),
+                client.getPassword(),
                 client.getRole()
         );
     }
@@ -34,6 +35,7 @@ public class ClientMapper {
         if (dto.email() != null) client.setEmail(dto.email());
         if (dto.address() != null) client.setAddress(dto.address());
         if (dto.phone() != null) client.setPhone(dto.phone());
+        if (dto.password()!= null) client.setPassword(dto.password());
         if (dto.role() != null) client.setRole(dto.role());
     }
 }

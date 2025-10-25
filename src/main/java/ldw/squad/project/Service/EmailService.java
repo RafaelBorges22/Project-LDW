@@ -25,8 +25,11 @@ public class EmailService {
             javaMailSender.send(simpleMailMessage);
 
             return "Email Funfando";
+
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Tentando enviar e-mail...");
+            System.out.println("E-mail enviado com sucesso!");
             return "Email não funfante" + e.getLocalizedMessage();
         }
     }

@@ -62,6 +62,23 @@ public class QuoteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    //Get Quote baseado no id do cliente (histórico de orçamentos)
+    @GetMapping(path = "/{clientId}/history")
+    public ResponseEntity<List<QuoteModel>> getQuotesByClient(@PathVariable UUID clientId) {
+        Optional<ClientModel> clientOpt = clientRepository.findById(clientId);
+
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<QuoteModel> quotes = quoteRepository.findByClient(clientOpt.get());
+
+        if (quotes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.ok(quotes);
+    }
     @PostMapping(path = "/{clientId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<QuoteModel> createQuote(
             @PathVariable UUID clientId,

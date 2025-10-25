@@ -8,5 +8,6 @@ public record ClientDto(
         String email,
         String address,
         String phone,
+        String password,
         String role
 ) {}
