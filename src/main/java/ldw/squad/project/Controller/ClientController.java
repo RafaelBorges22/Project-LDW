@@ -5,43 +5,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
 import ldw.squad.project.Dto.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Mapper.ClientMapper;
 import ldw.squad.project.Repository.ClientRepository;
 import ldw.squad.project.Service.ClientService;
 import ldw.squad.project.Service.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
 
-    @Autowired
-    private ClientRepository clientRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-	@Autowired
-	private EmailService emailService;
-
-    @Autowired
+    // usando lombok para injeção por construtor
+    private final ClientRepository clientRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
     private final ClientService clientService;
 
     @GetMapping
@@ -60,12 +44,22 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientDto> createClient(@RequestBody CreateClientDto dto) {
+    public ResponseEntity<?> createClient(@RequestBody CreateClientDto dto) {
+        // 1) valida se já existe esse e-mail
+        Optional<ClientModel> existing = clientService.findByEmail(dto.email());
+        if (existing.isPresent()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Já existe um usuário cadastrado com esse e-mail.");
+        }
+
+        // 2) cria normalmente
         ClientModel client = ClientMapper.toEntity(dto);
         client.setPassword(passwordEncoder.encode(client.getPassword()));
 
         ClientModel newClient = clientService.save(client);
 
+        // 3) envia e-mail
         emailService.enviarEmailText(
                 newClient.getEmail(),
                 "Bem-vindo à Família Kazu Tattoo",
@@ -74,7 +68,6 @@ public class ClientController {
 
         return new ResponseEntity<>(ClientMapper.toDto(newClient), HttpStatus.CREATED);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<ClientDto> updateClient(@PathVariable UUID id, @RequestBody UpdateClientDto dto) {
@@ -91,17 +84,17 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}/admin")
-    public ResponseEntity<Void> deleteClient(@PathVariable UUID  id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable UUID id) {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-
-    //Esqueceu senha
+    // Esqueceu senha
     @PostMapping("/request")
     public ResponseEntity<String> requestPasswordReset(@RequestBody AceptPasswordDto dto) {
         Optional<ClientModel> clientOpt = clientService.findByEmail(dto.email());
 
+        // mesmo se não achar, responde igual (boa prática de segurança)
         if (clientOpt.isEmpty()) {
             return ResponseEntity.ok("Se o e-mail estiver cadastrado, um link de redefinição será enviado.");
         }
@@ -113,18 +106,17 @@ public class ClientController {
         clientService.createResetToken(client, token, expiryDate);
 
         String resetUrl = "http://frontend/reset-password?token=" + token;
-        String emailBody = "Olá " + client.getName() + ", ... link: " + resetUrl
-                + "Você solicitou uma redefinição de senha. Use o link abaixo:\\n"
-                + resetUrl + "\\n\\n"
-                + "Este link expira em 1 hora.\\n"
-                + "Se você não solicitou isso, ignore este e-mail.";
+        String emailBody =
+                "Olá " + client.getName() + ",\n\n" +
+                "Você solicitou uma redefinição de senha. Use o link abaixo:\n" +
+                resetUrl + "\n\n" +
+                "Este link expira em 1 hora.\n" +
+                "Se você não solicitou isso, ignore este e-mail.";
 
-        System.out.println("DEBUG: Prestes a enviar e-mail para: " + client.getEmail());
         emailService.enviarEmailText(client.getEmail(), "Redefinição de Senha", emailBody);
 
         return ResponseEntity.ok("Se o e-mail estiver cadastrado, um link de redefinição será enviado.");
     }
-
 
     @PostMapping("/reset")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
@@ -147,4 +139,3 @@ public class ClientController {
         return ResponseEntity.ok("Senha redefinida com sucesso! Você já pode fazer login.");
     }
 }
-

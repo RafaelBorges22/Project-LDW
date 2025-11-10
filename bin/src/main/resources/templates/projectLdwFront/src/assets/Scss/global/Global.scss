@@ -1,0 +1,42 @@
+$brown-color: #5C3A33;
+$brown-color-white: #70473f;
+$black-color: #1a1a1a;
+$gray-color: #bdc3c7;
+$background-color: #F8F5EE;
+$text-color-black: #333;
+$text-color-white: #f8f8f8;
+$error-color: #b32323;
+$success-color: #2d8031;
+$transition: 0.3s ease-in-out;
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: sans-serif; 
+  color: var(--text-color-black);
+}
+
+h1, h2, h3 {
+  color: #333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: #eeebeb;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+}

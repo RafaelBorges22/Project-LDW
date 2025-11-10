@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import BudgetPage from '../pages/BudgetPage.vue';
 import BudgetTable from '../components/budget/BudgetTable.vue';
 import HomePage from '../pages/HomePage.vue';
-import Login from '../pages/login.vue';
+import Login from '../pages/LoginPage.vue';
 import BudgetDetails from '../components/budget/BudgetDetails.vue';
 
 const routes: Array<RouteRecordRaw> = [

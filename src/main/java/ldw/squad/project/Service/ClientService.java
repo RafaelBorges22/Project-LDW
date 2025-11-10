@@ -40,7 +40,11 @@ public class ClientService {
         clientRepository.deleteById(id);
     }
 
-    //Serviço de esqueceu senha
+    public boolean existsByEmail(String email) {
+        return clientRepository.existsByEmail(email);
+    }
+
+    // Serviço de esqueceu senha
     public Optional<ClientModel> findByEmail(String email) {
         return clientRepository.findByEmail(email);
     }
@@ -59,4 +63,3 @@ public class ClientService {
         return clientRepository.save(client);
     }
 }
-
