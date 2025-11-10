@@ -15,16 +15,22 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("API - Gestão de Clientes e Orçamentos (Kazu Tattoo)")
-                        .description("Documentação interativa dos endpoints da aplicação." +
-                                "Rafael Masca" +
-                                "")
+                        .description("""
+                                **Documentação interativa dos endpoints da aplicação.**
+
+                                **Integrantes da equipe:**
+                                - Rafael Mascarenhas Borges  
+                                - Kevyn Cavalcanti  
+                                - Lucas Retanero  
+                                - Vitor Tavares  
+
+                                **Repositório do projeto:**  
+                                [GitHub - Kazu Tattoo](https://github.com/RafaelBorges22/Project-LDW)
+                                """)
                         .version("1.0.0")
-                        .contact(new Contact()
-                                .name("Rafael Mascarenhas Borges")
-                                .name("Kevyn Cavalcante")
-                                .name("Lucas Retanero")
-                                .name("Vitor Tavares")
-                                )
-                        .license(new License().name("Apache 2.0").url("https://springdoc.org")));
+                        .license(new License()
+                                .name("Apache 2.0")
+                                .url("https://springdoc.org"))
+                );
     }
 }
