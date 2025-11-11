@@ -5,17 +5,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import ldw.squad.project.Dto.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import ldw.squad.project.Dto.AceptPasswordDto;
+import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Dto.CreateClientDto;
+import ldw.squad.project.Dto.ResetPasswordDto;
+import ldw.squad.project.Dto.UpdateClientDto;
 import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Mapper.ClientMapper;
 import ldw.squad.project.Repository.ClientRepository;
 import ldw.squad.project.Service.ClientService;
 import ldw.squad.project.Service.EmailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -38,9 +50,13 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClientDto> getClientById(@PathVariable UUID id) {
-        ClientModel client = clientService.getClientById(id);
-        return ResponseEntity.ok(ClientMapper.toDto(client));
+    public ResponseEntity<?> getClientById(@PathVariable UUID id) {
+        Optional<ClientModel> clientOpt = clientRepository.findById(id);
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cliente não encontrado");
+        }
+        return ResponseEntity.ok(ClientMapper.toDto(clientOpt.get()));
     }
 
     @PostMapping
@@ -53,41 +69,67 @@ public class ClientController {
                     .body("Já existe um usuário cadastrado com esse e-mail.");
         }
 
-        // 2) cria normalmente
-        ClientModel client = ClientMapper.toEntity(dto);
-        client.setPassword(passwordEncoder.encode(client.getPassword()));
+        try {
+            // 2) cria normalmente
+            ClientModel client = ClientMapper.toEntity(dto);
+            client.setPassword(passwordEncoder.encode(client.getPassword()));
 
-        ClientModel newClient = clientService.save(client);
+            ClientModel newClient = clientService.save(client);
 
-        // 3) envia e-mail
-        emailService.enviarEmailText(
-                newClient.getEmail(),
-                "Bem-vindo à Família Kazu Tattoo",
-                "Parabéns! Seu cadastro foi realizado com sucesso!"
-        );
+            // 3) envia e-mail
+            emailService.enviarEmailText(
+                    newClient.getEmail(),
+                    "Bem-vindo à Família Kazu Tattoo",
+                    "Parabéns! Seu cadastro foi realizado com sucesso!"
+            );
 
-        return new ResponseEntity<>(ClientMapper.toDto(newClient), HttpStatus.CREATED);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body("Usuário criado com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao criar usuário: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDto> updateClient(@PathVariable UUID id, @RequestBody UpdateClientDto dto) {
-        ClientModel existingClient = clientService.getClientById(id);
-        String newPassword = dto.password();
-        ClientMapper.updateEntity(existingClient, dto);
-
-        if (newPassword != null && !newPassword.isEmpty()) {
-            existingClient.setPassword(passwordEncoder.encode(newPassword));
+    public ResponseEntity<String> updateClient(@PathVariable UUID id, @RequestBody UpdateClientDto dto) {
+        Optional<ClientModel> clientOpt = clientRepository.findById(id);
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cliente não encontrado");
         }
 
-        ClientModel updatedClient = clientService.update(existingClient);
-        return ResponseEntity.ok(ClientMapper.toDto(updatedClient));
+        try {
+            ClientModel existingClient = clientOpt.get();
+            String newPassword = dto.password();
+            ClientMapper.updateEntity(existingClient, dto);
+
+            if (newPassword != null && !newPassword.isEmpty()) {
+                existingClient.setPassword(passwordEncoder.encode(newPassword));
+            }
+
+            clientService.update(existingClient);
+            return ResponseEntity.ok("Cliente atualizado com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao atualizar cliente: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}/admin")
-    public ResponseEntity<Void> deleteClient(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteClient(@PathVariable UUID id) {
+        boolean exists = clientRepository.existsById(id);
+        if (!exists) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cliente não encontrado. Nenhum registro foi excluído.");
+        }
+
         clientService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Usuário excluído com sucesso");
     }
+
 
     // Esqueceu senha
     @PostMapping("/request")
@@ -108,7 +150,7 @@ public class ClientController {
         String resetUrl = "http://frontend/reset-password?token=" + token;
         String emailBody =
                 "Olá " + client.getName() + ",\n\n" +
-                "Você solicitou uma redefinição de senha. Use o link abaixo:\n" +
+                "Você solicitou uma redefinição de senha. Use o link abaixo:\n\n" +
                 resetUrl + "\n\n" +
                 "Este link expira em 1 hora.\n" +
                 "Se você não solicitou isso, ignore este e-mail.";

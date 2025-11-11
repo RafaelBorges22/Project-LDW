@@ -50,142 +50,162 @@ public class QuoteController {
 
     // GET: retorna todos os quotes no banco
     @GetMapping
-    public List<QuoteModel> getAllQuotes() {
-        return quoteRepository.findAll();
+    public ResponseEntity<?> getAllQuotes() {
+        List<QuoteModel> quotes = quoteRepository.findAll();
+        if (quotes.isEmpty()) {
+            // 204 não permite corpo → usa 200 para exibir mensagem
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Nenhum orçamento encontrado.");
+        }
+        return ResponseEntity.ok(quotes);
     }
 
     // GET: retorna um quote específico pelo ID
     @GetMapping("/{id}")
-    public ResponseEntity<QuoteModel> getQuoteById(@PathVariable Long id) {
+    public ResponseEntity<?> getQuoteById(@PathVariable Long id) {
         Optional<QuoteModel> quote = quoteRepository.findById(id);
-        return quote.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        if (quote.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Orçamento não encontrado.");
+        }
+        return ResponseEntity.ok(quote.get());
     }
 
-    //Get Quote baseado no id do cliente (histórico de orçamentos)
-    @GetMapping(path = "/{clientId}/history")
-    public ResponseEntity<List<QuoteModel>> getQuotesByClient(@PathVariable UUID clientId) {
+    // GET: retorna histórico de orçamentos de um cliente
+    @GetMapping("/{clientId}/history")
+    public ResponseEntity<?> getQuotesByClient(@PathVariable UUID clientId) {
         Optional<ClientModel> clientOpt = clientRepository.findById(clientId);
-
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cliente não encontrado.");
         }
 
         List<QuoteModel> quotes = quoteRepository.findByClient(clientOpt.get());
-
         if (quotes.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            // 204 não mostra corpo → substituído por 200
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Nenhum orçamento encontrado para este cliente.");
         }
 
         return ResponseEntity.ok(quotes);
     }
+
+    // POST: cria um novo orçamento (com imagem)
     @PostMapping(path = "/{clientId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<QuoteModel> createQuote(
+    public ResponseEntity<String> createQuote(
             @PathVariable UUID clientId,
             @RequestPart("quote") QuoteModel quote,
-            @RequestPart("image") MultipartFile image) throws IOException {
+            @RequestPart("image") MultipartFile image) {
+        try {
+            Optional<ClientModel> clientOptional = clientRepository.findById(clientId);
+            if (clientOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Cliente não encontrado. Não foi possível criar o orçamento.");
+            }
 
-        // Busca o cliente pelo ID
-        Optional<ClientModel> clientOptional = clientRepository.findById(clientId);
+            ClientModel client = clientOptional.get();
+            quote.setClient(client);
 
-        //Se o cliente não for encontrado, retorna um erro 404 Not Found
-        if (clientOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            String filename = imageService.saveFile(image);
+            String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/upload/download/")
+                    .path(filename)
+                    .toUriString();
+            quote.setImageUrl(imageUrl);
+
+            double finalValue = quoteService.calculateBasePrice(quote);
+            quote.setFinalValue(finalValue);
+            quote.setAdditionalCost(null);
+
+            quoteRepository.save(quote);
+
+            emailService.enviarEmailText(
+                    client.getEmail(),
+                    "Orçamento Enviado com Sucesso!",
+                    "Obrigado por confiar em nosso serviço. O tatuador entrará em contato com mais informações."
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Orçamento criado com sucesso!");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao processar imagem: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao criar orçamento: " + e.getMessage());
         }
-
-        // Associa o cliente ao quote
-        ClientModel client = clientOptional.get();
-        quote.setClient(client);
-
-        // Salva a imagem e define a URL no quote
-        String filename = imageService.saveFile(image);
-        String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/upload/download/")
-                .path(filename)
-                .toUriString();
-        quote.setImageUrl(imageUrl);
-
-
-        // Calcula o valor final e salva o quote
-        double finalValue = quoteService.calculateBasePrice(quote);
-        quote.setFinalValue(finalValue);
-        quote.setAdditionalCost(null);
-
-        QuoteModel savedQuote = quoteRepository.save(quote);
-
-        emailService.enviarEmailText(client.getEmail(),
-                "Orçamento Enviado com sucesso!!",
-                "Obrigado por confiar em nosso serviço, o tatuador entrará em contato com mais informações. "
-        );
-
-        return new ResponseEntity<>(savedQuote, HttpStatus.CREATED);
     }
 
-    // PUT: atualiza apenas os dados da tatuagem, sem alterar preço ou adicional
+    // PUT: atualiza dados básicos do orçamento
     @PutMapping("/{id}")
-    public ResponseEntity<QuoteModel> updateQuote(@PathVariable Long id, @RequestBody QuoteModel quoteDetails) {
+    public ResponseEntity<String> updateQuote(@PathVariable Long id, @RequestBody QuoteModel quoteDetails) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
 
-        if (optionalQuote.isPresent()) {
-            QuoteModel quote = optionalQuote.get();
+        if (optionalQuote.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Orçamento não encontrado.");
+        }
 
+        try {
+            QuoteModel quote = optionalQuote.get();
             quote.setDescription(quoteDetails.getDescription());
             quote.setSize(quoteDetails.getSize());
             quote.setBodyPart(quoteDetails.getBodyPart());
             quote.setColored(quoteDetails.isColored());
 
-            QuoteModel updatedQuote = quoteRepository.save(quote);
-            return ResponseEntity.ok(updatedQuote);
-        } else {
-            return ResponseEntity.notFound().build();
+            quoteRepository.save(quote);
+            return ResponseEntity.ok("Orçamento atualizado com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao atualizar orçamento: " + e.getMessage());
         }
     }
 
-    // DELETE: remove um quote do banco
+    // DELETE: remove um orçamento (admin)
     @DeleteMapping("/{id}/admin")
-    public ResponseEntity<Void> deleteQuote(@PathVariable Long id) {
-        if (quoteRepository.existsById(id)) {
-            quoteRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<String> deleteQuote(@PathVariable Long id) {
+        if (!quoteRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Orçamento não encontrado. Nenhum registro foi excluído.");
         }
+
+        quoteRepository.deleteById(id);
+        return ResponseEntity.ok("Orçamento excluído com sucesso!");
     }
 
-    //A partir daqui, começam os endpoints especiais.
-
-    // POST: adiciona um valor adicional ao quote e recalcula o valor final
-    // Pode receber valores negativos para reduzir o preço
+    // POST: adiciona custo adicional e recalcula valor final (admin)
     @PostMapping("/{id}/additional/admin")
-    public ResponseEntity<QuoteModel> addAdditionalCost(@PathVariable Long id, @RequestBody AdditionalCostRequest request) {
+    public ResponseEntity<String> addAdditionalCost(
+            @PathVariable Long id,
+            @RequestBody AdditionalCostRequest request) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
 
-        if (optionalQuote.isPresent()) {
+        if (optionalQuote.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Orçamento não encontrado.");
+        }
+
+        try {
             QuoteModel quote = optionalQuote.get();
-            quoteService.addAdditionalCost(quote, request.getAdditionalCost()); // recalcula a partir do preço base
-            QuoteModel updatedQuote = quoteRepository.save(quote);
-            return ResponseEntity.ok(updatedQuote);
-        } else {
-            return ResponseEntity.notFound().build();
+            quoteService.addAdditionalCost(quote, request.getAdditionalCost());
+            quoteRepository.save(quote);
+            return ResponseEntity.ok("Custo adicional aplicado com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao adicionar custo adicional: " + e.getMessage());
         }
     }
 
-    // DTO para enviar apenas o valor adicional
+    // DTO interno para envio de custo adicional
     public static class AdditionalCostRequest {
         private Double additionalCost;
 
-        public Double getAdditionalCost() { return additionalCost; }
-        public void setAdditionalCost(Double additionalCost) { this.additionalCost = additionalCost; }
+        public Double getAdditionalCost() {
+            return additionalCost;
+        }
+
+        public void setAdditionalCost(Double additionalCost) {
+            this.additionalCost = additionalCost;
+        }
     }
 }
-
-//Link da Requisição caso consigam acessar:
-// https://web.postman.co/workspace/Personal-Workspace~80d41166-1b43-4b0e-a9e0-315da934247e/collection/38183942-edb2bde7-3a05-4084-9ffc-bc71084753ef?action=share&source=copy-link&creator=38183942
-
-
-
-
-
-
-
-
