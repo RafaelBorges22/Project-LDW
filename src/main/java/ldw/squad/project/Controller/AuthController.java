@@ -1,6 +1,7 @@
 package ldw.squad.project.Controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,9 +46,25 @@ public class AuthController {
             return;
         }
 
-        String token = jwtUtil.generateToken(clientOpt.get().getEmail(), clientOpt.get().getRole());
+        ClientModel client = clientOpt.get();
+
+        // mantém seu token atual
+        String token = jwtUtil.generateToken(client.getEmail(), client.getRole());
+
+        // agora devolve também o nome
+        Map<String, Object> body = new HashMap<>();
+        body.put("token", token);
+        body.put("name", client.getName());
 
         response.setContentType("application/json");
-        response.getWriter().write("{\"token\": \"" + token + "\"}");
+        response.getWriter().write(
+            "{\"token\":\"" + token + "\",\"name\":\"" + escapeJson(client.getName()) + "\"}"
+        );
+    }
+
+    // utilitário simples para evitar quebrar JSON em nomes com aspas
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

@@ -147,7 +147,7 @@ public class ClientController {
         LocalDateTime expiryDate = LocalDateTime.now().plusHours(1);
         clientService.createResetToken(client, token, expiryDate);
 
-        String resetUrl = "http://frontend/reset-password?token=" + token;
+        String resetUrl = "http://frontend/login?resetToken=" + token;
         String emailBody =
                 "Olá " + client.getName() + ",\n\n" +
                 "Você solicitou uma redefinição de senha. Use o link abaixo:\n\n" +

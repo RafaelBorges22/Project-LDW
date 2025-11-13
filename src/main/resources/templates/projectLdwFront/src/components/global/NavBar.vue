@@ -25,15 +25,41 @@
       </ul>
     </div>
 
-    <div v-if="showLogoutConfirm" class="logout-confirm" @click="cancelLogout">
-      <div class="confirm-box">
-        <p>Deseja realmente sair?</p>
-        <div class="confirm-actions">
-          <button @click="logoutNow">Sim</button>
-          <button @click="cancelLogout">Cancelar</button>
-        </div>
-      </div>
+<div
+  v-if="showLogoutConfirm"
+  class="logout-popup-overlay"
+  @click="cancelLogout"
+  aria-modal="true"
+  role="dialog"
+>
+  <div class="logout-popup-card info" @click.stop>
+    <div class="logout-popup-logo-container">
+      <span class="logout-popup-logo">
+        <i class="fi fi-ss-exit"></i>
+      </span>
     </div>
+
+    <h3 class="logout-popup-title">Deseja realmente sair?</h3>
+
+    <p class="logout-popup-description">
+      Você está prestes a sair. Deseja continuar?
+    </p>
+
+    <div class="logout-popup-actions">
+      <button type="button" class="logout-popup-btn" @click="logoutNow">
+        Sim, sair <i class="fi fi-ss-exit"></i>
+      </button>
+      <button
+        type="button"
+        class="logout-popup-btn outline"
+        @click="cancelLogout"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
   </nav>
 </template>
 
