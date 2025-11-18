@@ -4,8 +4,14 @@ import BudgetTable from '../components/budget/BudgetTable.vue';
 import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/LoginPage.vue';
 import BudgetDetails from '../components/budget/BudgetDetails.vue';
+import ChatTest from '../pages/ChatClientTest.vue';
 
 const routes: Array<RouteRecordRaw> = [
+  {
+    path:'/chat',
+    name:'Chat',
+    component: ChatTest
+  },
   {
     path: '/budget',
     name: 'Budget',
