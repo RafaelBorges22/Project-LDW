@@ -5,23 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import ldw.squad.project.Dto.AceptPasswordDto;
-import ldw.squad.project.Dto.ClientDto;
-import ldw.squad.project.Dto.CreateClientDto;
-import ldw.squad.project.Dto.ResetPasswordDto;
-import ldw.squad.project.Dto.UpdateClientDto;
+import ldw.squad.project.Dto.*;
 import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Mapper.ClientMapper;
 import ldw.squad.project.Repository.ClientRepository;
@@ -32,36 +25,46 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/clients")
+@Tag(name = "Clientes", description = "Gerenciamento de clientes e recuperação de senha")
 public class ClientController {
 
-    // usando lombok para injeção por construtor
     private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final ClientService clientService;
 
+    @Operation(summary = "Listar todos os clientes", description = "Retorna uma lista com todos os clientes cadastrados.")
+    @ApiResponse(responseCode = "200", description = "Clientes listados com sucesso.")
     @GetMapping
     public ResponseEntity<List<ClientDto>> getAllClients() {
         List<ClientDto> clients = clientService.getAllClients()
                 .stream()
                 .map(ClientMapper::toDto)
                 .toList();
+
         return ResponseEntity.ok(clients);
     }
 
+    @Operation(summary = "Buscar cliente por ID", description = "Retorna os dados de um cliente pelo seu UUID.")
+    @ApiResponse(responseCode = "200", description = "Cliente encontrado.")
+    @ApiResponse(responseCode = "404", description = "Cliente não encontrado.")
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable UUID id) {
         Optional<ClientModel> clientOpt = clientRepository.findById(id);
+
         if (clientOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Cliente não encontrado");
         }
+
         return ResponseEntity.ok(ClientMapper.toDto(clientOpt.get()));
     }
 
+    @Operation(summary = "Criar novo cliente", description = "Cria um novo cliente e envia e-mail de boas-vindas.")
+    @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso.")
     @PostMapping
     public ResponseEntity<?> createClient(@RequestBody CreateClientDto dto) {
-        // 1) valida se já existe esse e-mail
+
         Optional<ClientModel> existing = clientService.findByEmail(dto.email());
         if (existing.isPresent()) {
             return ResponseEntity
@@ -70,13 +73,11 @@ public class ClientController {
         }
 
         try {
-            // 2) cria normalmente
             ClientModel client = ClientMapper.toEntity(dto);
             client.setPassword(passwordEncoder.encode(client.getPassword()));
 
             ClientModel newClient = clientService.save(client);
 
-            // 3) envia e-mail
             emailService.enviarEmailText(
                     newClient.getEmail(),
                     "Bem-vindo à Família Kazu Tattoo",
@@ -87,15 +88,18 @@ public class ClientController {
                     .status(HttpStatus.CREATED)
                     .body("Usuário criado com sucesso!");
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao criar usuário: " + e.getMessage());
         }
     }
 
+    @Operation(summary = "Atualizar cliente", description = "Atualiza os dados de um cliente existente.")
+    @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso.")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateClient(@PathVariable UUID id, @RequestBody UpdateClientDto dto) {
+
         Optional<ClientModel> clientOpt = clientRepository.findById(id);
+
         if (clientOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Cliente não encontrado");
@@ -103,6 +107,7 @@ public class ClientController {
 
         try {
             ClientModel existingClient = clientOpt.get();
+
             String newPassword = dto.password();
             ClientMapper.updateEntity(existingClient, dto);
 
@@ -112,14 +117,18 @@ public class ClientController {
 
             clientService.update(existingClient);
             return ResponseEntity.ok("Cliente atualizado com sucesso!");
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao atualizar cliente: " + e.getMessage());
         }
     }
 
+    @Operation(summary = "Excluir cliente", description = "Remove um cliente pelo seu UUID.")
+    @ApiResponse(responseCode = "204", description = "Cliente removido com sucesso.")
     @DeleteMapping("/{id}/admin")
     public ResponseEntity<String> deleteClient(@PathVariable UUID id) {
+
         boolean exists = clientRepository.existsById(id);
         if (!exists) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -130,24 +139,24 @@ public class ClientController {
         return ResponseEntity.ok("Usuário excluído com sucesso");
     }
 
-
-    // Esqueceu senha
+    @Operation(summary = "Solicitar redefinição de senha", description = "Envia e-mail com link de redefinição caso o e-mail esteja cadastrado.")
     @PostMapping("/request")
     public ResponseEntity<String> requestPasswordReset(@RequestBody AceptPasswordDto dto) {
-        Optional<ClientModel> clientOpt = clientService.findByEmail(dto.email());
 
-        // mesmo se não achar, responde igual (boa prática de segurança)
+        Optional<ClientModel> clientOpt = clientService.findByEmail(dto.email());
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.ok("Se o e-mail estiver cadastrado, um link de redefinição será enviado.");
+            return ResponseEntity.ok("Se o e-mail estiver cadastrado, um link será enviado.");
         }
 
         ClientModel client = clientOpt.get();
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiryDate = LocalDateTime.now().plusHours(1);
+
         clientService.createResetToken(client, token, expiryDate);
 
         String resetUrl = "http://frontend/login?resetToken=" + token;
+
         String emailBody =
                 "Olá " + client.getName() + ",\n\n" +
                 "Você solicitou uma redefinição de senha. Use o link abaixo:\n\n" +
@@ -160,6 +169,7 @@ public class ClientController {
         return ResponseEntity.ok("Se o e-mail estiver cadastrado, um link de redefinição será enviado.");
     }
 
+    @Operation(summary = "Redefinir senha", description = "Redefine a senha do cliente com base no token recebido por e-mail.")
     @PostMapping("/reset")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
 
@@ -170,14 +180,12 @@ public class ClientController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
-        String newEncodedPassword = passwordEncoder.encode(dto.newPassword());
-        client.setPassword(newEncodedPassword);
-
+        client.setPassword(passwordEncoder.encode(dto.newPassword()));
         client.setResetPasswordToken(null);
         client.setResetPasswordTokenExpiry(null);
 
         clientService.save(client);
 
-        return ResponseEntity.ok("Senha redefinida com sucesso! Você já pode fazer login.");
+        return ResponseEntity.ok("Senha redefinida com sucesso!");
     }
 }
