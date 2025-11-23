@@ -142,8 +142,21 @@ public class QuoteController {
 }
 
 
+/* Curl para criação de Quote:
 
+curl -X POST "http://localhost:8081/quotes" \
+  -H "Accept: application/json" \
+  -F 'quote={
+    "clientId":"4703c6eb-a0de-4409-a2da-b3fcab59d556",
+    "colored": false,
+    "description": "Tatuagem realista",
+    "size": "MEDIUM",
+    "bodyPart": "ARM",
+    "state": "WAITING"
+  };type=application/json' \
+  -F "image=@\"/C:/Users/Rafael Borges/Pictures/Saved Pictures/1_34DCJ1mW9TL2ztHgORlCrA.jpeg\""
 
+ */
 
 
 
