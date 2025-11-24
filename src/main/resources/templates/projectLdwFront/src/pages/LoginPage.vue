@@ -119,6 +119,9 @@
 <script>
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL_LOG;
+const API_URL_CLI = import.meta.env.VITE_API_URL_CLI;
+
 export default {
   data() {
     return {
@@ -139,7 +142,7 @@ export default {
     async fazerLogin() {
       this.erroLogin = '';
       try {
-        const response = await axios.post('http://localhost:8081/auth/login', this.login);
+        const response = await axios.post(API_URL, this.login);
         const token = response.data.token;
 
         localStorage.setItem('jwtToken', token);
@@ -156,7 +159,7 @@ export default {
         return;
       }
 
-      axios.post('http://localhost:8081/clients', {
+      axios.post(API_URL_CLI, {
         name: this.cadastro.nome,
         email: this.cadastro.email,
         password: this.cadastro.senha,
@@ -183,7 +186,7 @@ export default {
         return;
       }
 
-      axios.post('http://localhost:8081/usuario/recuperar-senha', {
+      axios.post(API_URL_PASS, {
         email: this.login.email,
         novaSenha: this.cadastro.senha
       })

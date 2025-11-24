@@ -60,6 +60,18 @@ public class ClientController {
         return ResponseEntity.ok(ClientMapper.toDto(client));
     }
 
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ClientDto> getClientByEmail(@PathVariable String email) {
+        Optional<ClientModel> clientOpt = clientRepository.findByEmail(email);
+
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ClientMapper.toDto(clientOpt.get()));
+    }
+
     @Operation(summary = "Criar novo cliente", description = "Cria um novo cliente e envia e-mail de boas-vindas.")
     @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso.")
     @PostMapping

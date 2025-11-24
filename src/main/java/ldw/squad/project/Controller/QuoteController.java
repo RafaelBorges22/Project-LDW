@@ -3,6 +3,8 @@ package ldw.squad.project.Controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Mapper.ClientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
