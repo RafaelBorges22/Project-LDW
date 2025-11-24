@@ -1,0 +1,91 @@
+@import './Global.scss';
+
+.main-footer {
+  background-color: $black-color;
+  color: $text-color-white;
+  padding: 40px;
+  border-top: 18px solid $brown-color;
+}
+
+.main-footer .footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 40px;
+}
+
+.main-footer .footer-top .footer-column {
+  flex: 1;
+  padding: 0 20px;
+}
+
+.main-footer .footer-top .footer-column .footer-title {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: $text-color-white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.main-footer .footer-top .footer-column .footer-links,
+.main-footer .footer-top .footer-column .footer-social {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.main-footer .footer-top .footer-column .footer-links li,
+.main-footer .footer-top .footer-column .footer-social li {
+  margin-bottom: 10px;
+}
+
+.main-footer .footer-top .footer-column .footer-links li p,
+.main-footer .footer-top .footer-column .footer-social li p {
+  color: $text-color-white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.main-footer .footer-top .footer-column .footer-links li p:hover,
+.main-footer .footer-top .footer-column .footer-social li p:hover {
+  color: $brown-color-white;
+}
+
+.main-footer .footer-top .footer-column .footer-links li a.social-link,
+.main-footer .footer-top .footer-column .footer-social li a.social-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.main-footer .footer-top .footer-column .footer-social li a.social-link i {
+  font-size: 1.3rem;
+  margin-top: 3px;
+}
+
+.main-footer .footer-top .footer-column .footer-links li a.social-link .social-text,
+.main-footer .footer-top .footer-column .footer-social li a.social-link .social-text {
+  font-size: 1.1rem;
+}
+
+.main-footer .footer-top .footer-logo {
+  max-width: 200px;
+}
+
+.main-footer .footer-top .footer-logo .logo-image-footer {
+  width: 100%;
+  height: auto;
+}
+
+.main-footer .footer-bottom {
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+}
+
+.main-footer .footer-bottom .copyright-text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}

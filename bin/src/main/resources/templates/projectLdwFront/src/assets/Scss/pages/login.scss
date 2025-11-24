@@ -1,0 +1,263 @@
+@import '../global/Global.scss';
+
+.login {
+  display: flex;
+  justify-content: center;
+  background: url('../../base/img-background.png');
+  align-items: center;
+  height: 100vh;
+}
+
+.login a {
+  text-decoration: none;
+  color: $brown-color;
+  cursor: pointer;
+  &:hover {
+    color: darken($brown-color, 10%);
+  }
+}
+
+.wrapper {
+  position: relative;
+  width: 450px;
+  max-width: 100%;
+  background-color: $text-color-white;
+  border-radius: 8px;
+  border: 2px solid $brown-color;
+  box-shadow: 1px 6px 8px $brown-color;
+  padding: 50px 32px 35px;
+  backdrop-filter: blur(3px);
+}
+
+// Cabeçalho do formulário
+.form-header {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: $brown-color;
+  width: 13rem;
+  height: 3.5rem;
+  border-radius: 0 0 15px 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  div {
+    color: $text-color-white;
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 30px;
+    height: 30px;
+  }
+
+  &::before {
+    left: -30px;
+    border-top-right-radius: 50%;
+    box-shadow: 15px 0 0 $brown-color;
+  }
+
+  &::after {
+    right: -30px;
+    border-top-left-radius: 50%;
+    box-shadow: -15px 0 0 $brown-color;
+  }
+}
+
+// Formulários
+form {
+  margin-top: 70px;
+
+  .input-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+
+    .input-field {
+      width: 100%;
+      height: 55px;
+      padding: 0 45px 0 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #aaa;
+      outline: none;
+      background-color: #fff;
+      transition: $transition;
+
+      &:focus {
+        border-color: $brown-color;
+        box-shadow: 0 0 5px rgba(92,58,51,0.3);
+      }
+    }
+
+    .label {
+      position: absolute;
+      top: 36%;
+      left: 20px;
+      transform: translateY(-6%);
+      font-weight: 600;
+      color: $text-color-black;
+      pointer-events: none;
+      cursor: text;
+      transition: $transition;
+      background-color: #fff;
+      padding: 0 5px;
+      border-radius: 4px;
+    }
+
+    &.filled .label,
+    .input-field:focus ~ .label {
+      top: -5px;
+      font-size: 14px;
+      color: $text-color-white;
+      background-color: $brown-color;
+      padding: 0 10px;
+      border-radius: 4px;
+    }
+
+    #icon-login {
+      position: absolute;
+      top: 55%;
+      right: 20px;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: $text-color-black;
+      transition: $transition;
+    }
+  }
+
+  .form-cols {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 30px;
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .col-1{
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      input[type="checkbox"] {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid $text-color-black;
+        border-radius: 4px;
+        background-color: #fff;
+        cursor: pointer;
+        position: relative;
+        transition: background-color 0.2s, border-color 0.2s;
+
+        &:checked {
+          background-color: $brown-color;
+          border-color: $brown-color;
+
+          &::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 4px;
+            width: 4px;
+            height: 8px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Botões
+.btn-submit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-top: 3px;
+  width: 100%;
+  height: 55px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: $brown-color;
+  color: $text-color-white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: $transition;
+
+  &:hover {
+    gap: 15px;
+    background-color: darken($brown-color, 10%);
+  }
+
+  #icon-cadastro {
+    padding-left: 2px;
+    padding-top: 3px;
+  }
+
+  i {
+    font-size: 1.5rem;
+  }
+}
+
+// Mensagens de erro e sucesso
+#msg-erro {
+  display: flex;
+  justify-content: center;
+  font-size: 16px;
+  color: $error-color;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#msg-sucesso {
+  display: flex;
+  justify-content: center;
+  font-size: 16px;
+  color: $success-color;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+// Switch formulário
+.swith-form {
+  text-align: center;
+
+  a {
+    font-weight: bold;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Labels específicos
+#label-confirmar-senha { left: 21px; }
+#label-nova-senha { left: 20px; }
+#label-confirmar-nova-senha { left: 20px; }
+
+// Responsividade
+@media (max-width: 564px) {
+  .wrapper {
+    width: 90%;
+    margin: 20px;
+    padding: 40px 20px;
+  }
+}

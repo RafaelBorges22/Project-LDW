@@ -1,0 +1,193 @@
+// Container principal do formulário
+.form-container {
+  background-color: #F8F5EE;
+  padding: 50px 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+  .budget-form {
+    width: 100%;
+    max-width: 700px;
+    padding: 40px;
+    background-color: #F8F5EE;
+    border: 1px solid #D8D4CC;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+
+    .form-row {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 25px;
+
+      .form-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .form-label {
+          font-size: 1rem;
+          font-weight: bold;
+          color: #5C3A33;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+
+          .required {
+            color: #a70000;
+            font-size: 1.2rem;
+          }
+        }
+
+        .form-input,
+        .form-select {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #D8D4CC;
+          border-radius: 6px;
+          background-color: #ffffff;
+          font-size: 1rem;
+          color: #333;
+          box-sizing: border-box;
+
+          &::placeholder {
+            color: #bbb;
+          }
+        }
+
+        .form-select {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235C3A33' width='24' height='24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 10px center;
+          background-size: 16px;
+        }
+      }
+    }
+
+    // Seção de upload de imagem
+    .upload-section {
+      flex: none;
+
+      .upload-box {
+        position: relative;
+        width: 100%;
+        height: 500px; /* Mantém a altura fixa */
+        border: 2px solid #5C3A33;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        overflow: hidden; /* Adicionado para cortar a imagem se ela exceder o limite */
+        background-color: #f0f0f0; /* Adicionado um fundo para o quadrado de pré-visualização */
+
+        .upload-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          color: #5C3A33;
+          font-weight: bold;
+        }
+        
+        // Estilos para a imagem de pré-visualização
+        .image-preview {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Redimensiona a imagem para caber no contêiner mantendo as proporções */
+          }
+        }
+        
+        .file-input {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          cursor: pointer;
+          z-index: 10; /* Garante que o input de arquivo esteja acima da imagem */
+        }
+        
+        .upload-icon {
+          width: 50px;
+          height: 50px;
+        }
+      }
+    }
+
+    // Botão de envio
+    .submit-button {
+      display: block;
+      width: 100%;
+      max-width: 250px;
+      margin: 30px auto 10px auto;
+      padding: 18px 0;
+      background-color: #5C3A33;
+      color: #ffffff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #7B4B42;
+      }
+    }
+
+    .form-note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #5C3A33;
+    }
+  }
+}
+
+// Estilo do checkbox customizado
+.checkbox-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #5C3A33;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  .form-checkbox {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+
+    &:checked ~ .checkmark {
+      display: block;
+    }
+  }
+
+  .checkmark {
+    display: none;
+    width: 20px;
+    height: 20px;
+    background-color: #5C3A33;
+    border-radius: 50%;
+  }
+}
+
+
+

@@ -47,6 +47,7 @@ public class QuoteController {
     @Autowired
     private UploadImageService imageService;
 
+
     @Operation(summary = "Listar todos os orçamentos")
     @GetMapping
     public List<QuoteDto> getAllQuotes() {
@@ -65,6 +66,7 @@ public class QuoteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
     @Operation(summary = "Listar histórico de orçamentos de um cliente")
     @GetMapping("/{clientId}/history")
     public ResponseEntity<List<QuoteDto>> getQuotesByClient(@PathVariable UUID clientId) {
@@ -80,7 +82,8 @@ public class QuoteController {
         );
     }
 
-    @Operation(summary = "Criar novo orçamento ")
+
+    @Operation(summary = "Criar novo orçamento")
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<QuoteDto> createQuote(
             @RequestPart("quote") CreateQuoteDto dto,
@@ -92,9 +95,9 @@ public class QuoteController {
 
         ClientModel client = clientOpt.get();
         QuoteModel quote = QuoteMapper.toEntity(dto);
-
         quote.setClient(client);
 
+        // Upload de imagem
         String filename = imageService.saveFile(image);
         String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/upload/download/")
@@ -102,11 +105,13 @@ public class QuoteController {
                 .toUriString();
         quote.setImageUrl(imageUrl);
 
+        // Calcula valor
         double finalValue = quoteService.calculateBasePrice(quote);
         quote.setFinalValue(finalValue);
 
         QuoteModel savedQuote = quoteRepository.save(quote);
 
+        // Enviar email
         emailService.enviarEmailText(
                 client.getEmail(),
                 "Orçamento Enviado com Sucesso!",
@@ -116,21 +121,24 @@ public class QuoteController {
         return new ResponseEntity<>(QuoteMapper.toDto(savedQuote), HttpStatus.CREATED);
     }
 
+
     @Operation(summary = "Atualizar orçamento")
     @PutMapping("/{id}")
-    public ResponseEntity<QuoteDto> updateQuote(@PathVariable Long id, @RequestBody CreateQuoteDto dto) {
+    public ResponseEntity<QuoteDto> updateQuote(
+            @PathVariable Long id,
+            @RequestBody CreateQuoteDto dto
+    ) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
-
         if (optionalQuote.isEmpty()) return ResponseEntity.notFound().build();
 
         QuoteModel quote = optionalQuote.get();
-
         QuoteMapper.updateEntity(quote, dto);
 
         QuoteModel updatedQuote = quoteRepository.save(quote);
 
         return ResponseEntity.ok(QuoteMapper.toDto(updatedQuote));
     }
+
 
     @Operation(summary = "Excluir orçamento (admin)")
     @DeleteMapping("/{id}/admin")
