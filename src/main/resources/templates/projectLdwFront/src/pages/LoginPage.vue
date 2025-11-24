@@ -229,6 +229,9 @@
 <script>
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL_LOG;
+const API_URL_CLI = import.meta.env.VITE_API_URL_CLI;
+
 export default {
   data() {
     return {
@@ -272,8 +275,8 @@ export default {
     async fazerLogin() {
       this.erroLogin = '';
       try {
-        const { data } = await axios.post('http://localhost:8081/auth/login', this.login);
-        const token = data.token;
+        const response = await axios.post(API_URL, this.login);
+        const token = response.data.token;
 
         // salva token e e-mail
         localStorage.setItem('jwtToken', token);
@@ -312,42 +315,18 @@ export default {
         return;
       }
 
-      axios
-        .post('http://localhost:8081/clients', {
-          name: this.cadastro.nome,
-          email: this.cadastro.email,
-          password: this.cadastro.senha,
-          role: this.cadastro.permissao
-        })
-        .then(() => {
-          this.abrirPopup(
-            'Conta criada',
-            'Sua conta foi criada com sucesso! Faça login para continuar.',
-            'success'
-          );
-          this.erroCadastro = '';
-          this.resetCadastro();
-        })
-        .catch(error => {
-          if (
-            error.response?.status === 400 &&
-            typeof error.response.data === 'string' &&
-            error.response.data.includes('Já existe um usuário')
-          ) {
-            this.abrirPopup(
-              'E-mail já cadastrado',
-              'Este e-mail já está cadastrado. Faça login ou use outro e-mail.',
-              'error'
-            );
-          } else {
-            this.abrirPopup(
-              'Erro ao criar conta',
-              error.response?.data?.message ||
-                error.response?.data ||
-                'Não foi possível criar o usuário. Tente novamente.',
-              'error'
-            );
-          }
+      axios.post(API_URL_CLI, {
+        name: this.cadastro.nome,
+        email: this.cadastro.email,
+        password: this.cadastro.senha,
+		role: this.cadastro.permissao
+      })
+      .then(() => {
+        this.sucessoCriacao = 'Usuário criado com sucesso!';
+        this.erroCadastro = '';
+        this.resetCadastro();
+        setTimeout(() => {
+          this.modoCadastro = false;
           this.sucessoCriacao = '';
         });
     },
@@ -391,17 +370,12 @@ export default {
         return;
       }
 
-      try {
-        await axios.post('http://localhost:8081/clients/reset', {
-          token: this.reset.token,
-          newPassword: this.reset.novaSenha
-        });
-
-        this.abrirPopup(
-          'Senha redefinida',
-          'Sua senha foi redefinida com sucesso! Você já pode fazer login.',
-          'success'
-        );
+      axios.post(API_URL_PASS, {
+        email: this.login.email,
+        novaSenha: this.cadastro.senha
+      })
+      .then(() => {
+        this.sucessoRecuperacao = 'Senha redefinida com sucesso.';
         this.erroRecuperacao = '';
         this.resetRecuperacao();
         this.modoRecuperacao = false;

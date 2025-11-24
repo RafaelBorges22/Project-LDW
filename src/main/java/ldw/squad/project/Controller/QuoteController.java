@@ -3,6 +3,8 @@ package ldw.squad.project.Controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Mapper.ClientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -148,4 +150,23 @@ public class QuoteController {
         return ResponseEntity.noContent().build();
     }
 }
+
+
+/* Curl para criação de Quote:
+
+curl -X POST "http://localhost:8081/quotes" \
+  -H "Accept: application/json" \
+  -F 'quote={
+    "clientId":"4703c6eb-a0de-4409-a2da-b3fcab59d556",
+    "colored": false,
+    "description": "Tatuagem realista",
+    "size": "MEDIUM",
+    "bodyPart": "ARM",
+    "state": "WAITING"
+  };type=application/json' \
+  -F "image=@\"/C:/Users/Rafael Borges/Pictures/Saved Pictures/1_34DCJ1mW9TL2ztHgORlCrA.jpeg\""
+
+ */
+
+
 

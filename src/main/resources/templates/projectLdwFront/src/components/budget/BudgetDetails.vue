@@ -1,7 +1,7 @@
 <template>
   <section class="quote-details" v-if="quote">
     <header class="header">
-      <button class="back-btn" @click="$router.push('/quotes')">← Voltar</button>
+      <button class="back-btn" @click="$router.push('/budget-table')">← Voltar</button>
       <h2>Detalhes da Solicitação #{{ quote.id }}</h2>
     </header>
 
@@ -45,6 +45,8 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL_BUD;
+
 const route = useRoute();
 const quote = ref(null);
 
@@ -57,7 +59,7 @@ function formatMoney(value) {
 onMounted(async () => {
   const id = route.params.id;
   try {
-    const { data } = await axios.get(`http://localhost:8081/quotes/${id}`);
+    const { data } = await axios.get(`${API_URL}/${id}`);
     quote.value = data;
   } catch (err) {
     console.error("Erro ao carregar solicitação:", err);
