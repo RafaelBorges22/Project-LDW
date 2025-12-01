@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "quotes")
@@ -33,6 +34,7 @@ public class QuoteModel {
     private Double additionalCost;
     private Double finalValue;
     private String imageUrl;
+    private LocalDateTime scheduleDate;
 
     @Enumerated(EnumType.STRING)
     private Size size;

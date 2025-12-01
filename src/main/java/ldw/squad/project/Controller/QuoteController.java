@@ -3,7 +3,9 @@ package ldw.squad.project.Controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import io.swagger.v3.oas.models.info.Contact;
 import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Entities.Enums.State;
 import ldw.squad.project.Mapper.ClientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -17,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import ldw.squad.project.Dto.QuoteDto;
+import ldw.squad.project.Dto.UpdateQuoteDto;
 import ldw.squad.project.Dto.CreateQuoteDto;
 import ldw.squad.project.Entities.ClientModel;
 import ldw.squad.project.Entities.QuoteModel;
@@ -90,7 +93,7 @@ public class QuoteController {
             @RequestPart("image") MultipartFile image
     ) throws IOException {
 
-        Optional<ClientModel> clientOpt = clientRepository.findById(dto.getClientId());
+        Optional<ClientModel> clientOpt = clientRepository.findById(dto.clientId());
         if (clientOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         ClientModel client = clientOpt.get();
@@ -126,18 +129,42 @@ public class QuoteController {
     @PutMapping("/{id}")
     public ResponseEntity<QuoteDto> updateQuote(
             @PathVariable Long id,
-            @RequestBody CreateQuoteDto dto
+            @RequestBody UpdateQuoteDto dto
     ) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
         if (optionalQuote.isEmpty()) return ResponseEntity.notFound().build();
 
         QuoteModel quote = optionalQuote.get();
+
+        State oldState = quote.getState();
+        State newState = dto.state();
+
+        if (dto.clientId() != null) {
+            ClientModel newClient = clientRepository.findById(dto.clientId())
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
+            quote.setClient(newClient);
+        }
+
         QuoteMapper.updateEntity(quote, dto);
 
-        QuoteModel updatedQuote = quoteRepository.save(quote);
+        if (newState != null && newState != oldState) {
+            ClientModel client = quote.getClient();
 
-        return ResponseEntity.ok(QuoteMapper.toDto(updatedQuote));
+            if (newState == State.PAID) {
+                emailService.enviarEmailText(
+                        client.getEmail(),
+                        "Status atualizado",
+                        "Olá " + client.getName() +
+                                ", seu orçamento foi marcado como PAGO.\n" +
+                                "Data agendada: " + quote.getScheduleDate()
+                );
+            }
+        }
+
+        QuoteModel updated = quoteRepository.save(quote);
+        return ResponseEntity.ok(QuoteMapper.toDto(updated));
     }
+
 
 
     @Operation(summary = "Excluir orçamento (admin)")

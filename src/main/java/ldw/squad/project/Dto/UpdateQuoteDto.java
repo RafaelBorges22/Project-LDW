@@ -1,25 +1,20 @@
 package ldw.squad.project.Dto;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import ldw.squad.project.Entities.Enums.BodyPart;
 import ldw.squad.project.Entities.Enums.Size;
 import ldw.squad.project.Entities.Enums.State;
 
-public record QuoteDto(
-        Long id,
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+public record UpdateQuoteDto(
+        UUID clientId,
+        Boolean colored,
         String description,
-        String imageUrl,
         Size size,
         BodyPart bodyPart,
         State state,
-        Double finalValue,
-        boolean colored,
+        LocalDateTime scheduleDate,
         Double additionalCost,
-        UUID clientId,
-        String clientName,
-        String clientEmail,
-        LocalDateTime scheduleDate
-
-) {}
+        Double finalValue) {
+}
