@@ -16,23 +16,31 @@ const routes: Array<RouteRecordRaw> = [
     path: '/budget-table',
     name: 'BudgetTable',
     component: BudgetTable,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: true }
   },
   {
-  path: "/quotes/:id",
-  name: "quote-details",
-  component: BudgetDetails
+    path: '/quotes/:id',
+    name: 'quote-details',
+    component: BudgetDetails,
+    meta: { requiresAuth: true }
   },
   {
     path: '/',
     name: 'Home',
     component: HomePage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',
     name: 'login',
-    component: Login
+    component: Login,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/account',
+    name: 'Account',
+    component: () => import('../pages/AccountPage.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -41,16 +49,41 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('jwtToken');
+/**
+ * Helper seguro para pegar token "válido"
+ * - remove espaços
+ * - trata strings 'null'/'undefined' como vazias
+ */
+function getTokenSafe(): string | null {
+  const raw = localStorage.getItem('jwtToken');
+  if (!raw) return null;
+  const trimmed = String(raw).trim();
+  if (!trimmed) return null;
+  if (trimmed.toLowerCase() === 'null' || trimmed.toLowerCase() === 'undefined') return null;
+  return trimmed;
+}
 
-  if (to.meta.requiresAuth && !token) {
-    next('/login');
-  } else if (to.path === '/login' && token) {
-    next('/');
-  } else {
-    next(); 
+/**
+ * Guard robusto:
+ * - usa meta.requiresAuth
+ * - redireciona para Home (sua tela de login) caso esteja tentando acessar rota protegida sem token
+ * - logs para debug (remova em produção)
+ */
+router.beforeEach((to, from, next) => {
+  const token = getTokenSafe();
+
+  // DEBUG: inspecione no console para ver o que está acontecendo
+  // Remova / comente estes logs em produção
+  // eslint-disable-next-line no-console
+  console.log('[router.beforeEach] to:', to.fullPath, 'name:', to.name, 'requiresAuth:', Boolean(to.meta?.requiresAuth), 'tokenExists:', !!token);
+
+  if (to.meta?.requiresAuth && !token) {
+    // rota exige auth mas não há token -> manda para Home (login)
+    return next({ name: 'Home' });
   }
+
+  // caso contrário deixa navegar
+  return next();
 });
 
 export default router;

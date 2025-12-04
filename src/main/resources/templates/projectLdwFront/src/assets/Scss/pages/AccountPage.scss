@@ -1,0 +1,185 @@
+@import '../global/Global.scss';
+
+.account-card {
+  width: 420px;
+  background: $black-color;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.4);
+  color: $text-color-white;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 6px;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.info-group p {
+  margin: 8px 0;
+  font-size: 16px;
+  color: $gray-color;
+}
+
+.account-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  justify-content: space-between;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.btn.secondary {
+  background: transparent;
+  color: $text-color-white;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn.danger {
+  background: linear-gradient(180deg, $brown-color, $brown-color-white);
+  color: $text-color-white;
+}
+
+/* POPUP DE LOGOUT (transferido do NavBar.scss) */
+.logout-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba($black-color, 0.65);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 16px;
+  backdrop-filter: blur(3px);
+}
+
+.logout-popup-card {
+  width: min(460px, 90vw);
+  background: $black-color;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 34px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  color: $text-color-white;
+  animation: popupIn 180ms ease-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+
+  &.info {
+    border-color: rgba($brown-color, 0.35);
+  }
+
+  .logout-popup-logo-container {
+    width: 90px;
+    height: 90px;
+    padding-top: 8px;
+    padding-left: 4px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg,
+        rgba($brown-color, 0.25),
+        rgba($brown-color, 0.08));
+    border: 1px solid rgba($brown-color, 0.4);
+
+    .logout-popup-logo {
+      i {
+        font-size: 2.2rem;
+      }
+    }
+  }
+
+  .logout-popup-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: $text-color-white;
+    text-align: center;
+  }
+
+  .logout-popup-description {
+    width: 85%;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: $gray-color;
+    text-align: center;
+  }
+
+  .logout-popup-actions {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    padding-top: 8px;
+
+    .logout-popup-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 14px 16px 12px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      border: 1px solid $brown-color;
+      background: linear-gradient(180deg, $brown-color, $brown-color-white);
+      color: $text-color-white;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+      i {
+        font-size: 1rem;
+        margin-left: 6px;
+        padding-top: 4px;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba($brown-color, 0.35);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &.outline {
+        background: transparent;
+        color: $text-color-white;
+        border-color: rgba(255, 255, 255, 0.2);
+
+        &:hover {
+          box-shadow: 0 6px 18px rgba($text-color-white, 0.25);
+        }
+      }
+    }
+  }
+}
+
+/* Pequenas animações */
+@keyframes popupIn {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

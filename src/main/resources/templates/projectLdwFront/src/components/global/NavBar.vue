@@ -1,88 +1,92 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
     <div class="navbar-left">
-      <router-link to="/"><img src="../../assets/base/Logo.png" alt="Kazu Tatoo Logo" class="logo-image" /></router-link>
+      <router-link to="/" class="brand">
+        <img src="../../assets/base/Logo.png" alt="Kazu Tatoo Logo" class="logo-image" />
+      </router-link>
       <span class="logo-text">Kazu Tatoo</span>
     </div>
 
     <div class="navbar-right">
-      <ul class="nav-links">
-        <li>
-          <router-link to="/"><i class="fi fi-sr-home"></i></router-link>
+      <ul class="nav-links" role="menubar">
+
+        <li role="none">
+          <router-link to="/">
+            <i class="fi fi-sr-home" aria-hidden="true"></i>
+          </router-link>
         </li>
-        <li>
-          <router-link to="/"><i class="fi fi-sr-hand-holding-heart"></i></router-link>
+
+        <li v-if="isLoggedIn" role="none">
+          <router-link to="/budget">
+            <i class="fi fi-ss-checklist-task-budget" aria-hidden="true"></i>
+          </router-link>
         </li>
-        <li>
-          <router-link to="/budget"><i class="fi fi-ss-checklist-task-budget"></i></router-link>
+
+        <li role="none">
+          <router-link to="/">
+            <i class="fi fi-sr-messages" aria-hidden="true"></i>
+          </router-link>
         </li>
-        <li>
-          <router-link to="/"><i class="fi fi-sr-messages"></i></router-link>
+
+        <li v-if="!isLoggedIn" role="none">
+          <router-link to="/login">
+            <i class="fi fi-ss-user-add"></i>
+          </router-link>
         </li>
-        <li>
-          <a href="#" @click.prevent="showLogoutConfirm = true"><i class="fi fi-ss-user-logout"></i></a>
+
+        <li v-if="isLoggedIn" role="none">
+          <router-link to="/account">
+            <i class="fi fi-ss-user"></i>
+          </router-link>
         </li>
+        
       </ul>
     </div>
-
-<div
-  v-if="showLogoutConfirm"
-  class="logout-popup-overlay"
-  @click="cancelLogout"
-  aria-modal="true"
-  role="dialog"
->
-  <div class="logout-popup-card info" @click.stop>
-    <div class="logout-popup-logo-container">
-      <span class="logout-popup-logo">
-        <i class="fi fi-ss-exit"></i>
-      </span>
-    </div>
-
-    <h3 class="logout-popup-title">Deseja realmente sair?</h3>
-
-    <p class="logout-popup-description">
-      Você está prestes a sair. Deseja continuar?
-    </p>
-
-    <div class="logout-popup-actions">
-      <button type="button" class="logout-popup-btn" @click="logoutNow">
-        Sim, sair <i class="fi fi-ss-exit"></i>
-      </button>
-      <button
-        type="button"
-        class="logout-popup-btn outline"
-        @click="cancelLogout"
-      >
-        Cancelar
-      </button>
-    </div>
-  </div>
-</div>
-
   </nav>
 </template>
 
 <script>
 export default {
   name: 'Navbar',
+
   data() {
     return {
-      showLogoutConfirm: false
+      isLoggedIn: !!localStorage.getItem('jwtToken') // estado reativo inicial
     };
   },
+
+  created() {
+    // Atualiza quando a rota muda (útil após login/logout que navega para Home)
+    this.$watch(
+      () => this.$route.fullPath,
+      () => {
+        this.updateAuthState();
+      }
+    );
+
+    // Escuta mudanças de localStorage vindas de outras abas
+    window.addEventListener('storage', this.onStorage);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('storage', this.onStorage);
+  },
+
   methods: {
-    logoutNow() {
-      localStorage.removeItem("jwtToken");
-      localStorage.removeItem("usuarioEmail");
-      localStorage.removeItem("usuarioId");
-      localStorage.removeItem("usuarioNome");
-      localStorage.removeItem("permissao");
-      this.showLogoutConfirm = false;
-      this.$router.push('/login');
+    updateAuthState() {
+      // considera strings vazias/null/undefined como não logado
+      const raw = localStorage.getItem('jwtToken');
+      const token = raw && String(raw).trim() && raw.toLowerCase() !== 'null' && raw.toLowerCase() !== 'undefined'
+        ? raw
+        : null;
+      this.isLoggedIn = !!token;
     },
-    cancelLogout() {
-      this.showLogoutConfirm = false;
+
+    onStorage(event) {
+      if (event.key === 'jwtToken') {
+        // sincroniza estado entre abas
+        this.updateAuthState();
+      }
     }
   }
 };
@@ -90,4 +94,9 @@ export default {
 
 <style scoped>
 @import '../../assets/Scss/global/Navbar.scss';
+
+/* estilo local do botão removido (não mais usado aqui) mantido mínimo caso queira reativar algo */
+.logout-btn {
+  display: none;
+}
 </style>

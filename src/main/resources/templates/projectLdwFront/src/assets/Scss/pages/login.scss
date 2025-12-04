@@ -28,7 +28,9 @@
   padding: 50px 32px 35px;
 }
 
-// Cabeçalho do formulário
+/* ===========================
+   CABEÇALHO DO FORMULÁRIO
+   =========================== */
 .form-header {
   position: absolute;
   top: 0;
@@ -70,10 +72,11 @@
   }
 }
 
+/* Popup */
 .login-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0); // começa transparente
+  background: rgba(0, 0, 0, 0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,12 +85,8 @@
 }
 
 @keyframes overlayFade {
-  from {
-    background: rgba(0, 0, 0, 0);
-  }
-  to {
-    background: rgba(0, 0, 0, 0.6);
-  }
+  from { background: rgba(0, 0, 0, 0); }
+  to   { background: rgba(0, 0, 0, 0.6); }
 }
 
 .login-popup-card {
@@ -102,19 +101,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* card entra junto, mas com movimento */
   animation: popupIn 0.25s $transition both;
 }
 
 @keyframes popupIn {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .login-popup-icon-wrap {
@@ -167,25 +159,14 @@
   }
 }
 
-/* variação de erro */
-.login-popup-card.error .login-popup-icon-wrap {
-  background-color: lighten($error-color, 45%);
-}
-.login-popup-card.error .login-popup-icon {
-  color: $error-color;
-}
+/* POPUP VARIAÇÕES */
+.login-popup-card.error .login-popup-icon-wrap { background-color: lighten($error-color, 45%); }
+.login-popup-card.error .login-popup-icon { color: $error-color; }
 
-/* variação de sucesso */
-.login-popup-card.success .login-popup-icon-wrap {
-  background-color: lighten($success-color, 40%);
-}
-.login-popup-card.success .login-popup-icon {
-  color: $success-color;
-}
+.login-popup-card.success .login-popup-icon-wrap { background-color: lighten($success-color, 40%); }
+.login-popup-card.success .login-popup-icon { color: $success-color; }
 
-/* ===========================
-   FORMULÁRIOS
-   =========================== */
+/* ============= FORMULÁRIOS ============= */
 form {
   margin-top: 70px;
 
@@ -194,6 +175,18 @@ form {
     display: flex;
     flex-direction: column;
     margin-bottom: 30px;
+
+    &.campo-password {
+      margin-bottom: 10px;
+
+      .label {
+        top: 24%;
+      }
+
+      #icon-login {
+        top: 34%;
+      }
+    }
 
     .input-field {
       width: 100%;
@@ -206,16 +199,40 @@ form {
       outline: none;
       background-color: #fff;
       transition: $transition;
+      -webkit-appearance: none; /* evita estilos nativos incomuns */
+      appearance: none;
+
+      /* ← placeholder invisível até focar — não altera layout */
+      &::placeholder {
+        color: transparent;
+        transition: color 0.18s ease;
+      }
+
+      &:focus::placeholder {
+        color: #999; /* aparece somente no foco */
+      }
+
+      /* se o campo tiver conteúdo, mantemos placeholder escondido */
+      /* este seletor compila para: .input-box.filled .input-field::placeholder */
+      .input-box.filled &::placeholder {
+        color: transparent !important;
+      }
 
       &:focus {
         border-color: $brown-color;
         box-shadow: 0 0 5px rgba(92, 58, 51, 0.3);
       }
+
+      /* Proteções para que o verificador inline não empurre o input */
+      /* o verificador ficará posicionado abaixo do input, com layout controlado externamente */
+      & + .pwd-compact {
+        margin-top: 8px;
+      }
     }
 
     .label {
       position: absolute;
-      top: 38%;
+      top: 39%;
       left: 18px;
       transform: translateY(-6%);
       font-weight: 600;
@@ -249,6 +266,67 @@ form {
     }
   }
 
+  /* COMPACT PASSWORD VERIFIER (está dentro do form, mas afeta apenas o badge) */
+  .pwd-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: nowrap;
+    line-height: 1;
+  }
+
+  .pwd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #f1f1f1;
+    color: #6b6b6b;
+    min-width: 36px;
+    justify-content: center;
+    box-shadow: none;
+    transition: background .12s ease, color .12s ease, transform .08s ease;
+  }
+
+  .pwd-chip i {
+    font-size: 12px;
+  }
+
+  /* estado OK (verde) */
+  .pwd-chip.ok {
+    background: rgba(46, 204, 113, 0.12);
+    color: #2ecc71;
+    font-weight: 600;
+    transform: translateY(-1px);
+  }
+
+  /* rótulo de força */
+  .pwd-strength {
+    margin-left: 6px;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* força: fraca / média / forte */
+  .pwd-strength.weak {
+    background: rgba(255, 99, 71, 0.08);
+    color: #ff6347;
+  }
+  .pwd-strength.medium {
+    background: rgba(255, 193, 7, 0.08);
+    color: #ffc107;
+  }
+  .pwd-strength.strong {
+    background: rgba(46, 204, 113, 0.08);
+    color: #2ecc71;
+  }
+
   .form-cols {
     display: flex;
     justify-content: space-between;
@@ -256,9 +334,7 @@ form {
     font-weight: 400;
     margin-bottom: 30px;
 
-    a:hover {
-      text-decoration: underline;
-    }
+    a:hover { text-decoration: underline; }
 
     .col-1 {
       display: flex;
@@ -297,7 +373,7 @@ form {
   }
 }
 
-// Botões
+/* BOTÃO */
 .btn-submit {
   display: flex;
   justify-content: center;
@@ -330,28 +406,21 @@ form {
   }
 }
 
-// Mensagens de erro e sucesso
-#msg-erro {
-  display: flex;
-  justify-content: center;
-  font-size: 16px;
-  color: $error-color;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
+/* MENSAGENS */
+#msg-erro,
 #msg-sucesso {
   display: flex;
   justify-content: center;
   font-size: 16px;
-  color: $success-color;
   font-weight: 600;
   margin-bottom: 20px;
   text-align: center;
 }
 
-// Switch formulário
+#msg-erro { color: $error-color; }
+#msg-sucesso { color: $success-color; }
+
+/* SWITCH FORM */
 .swith-form {
   text-align: center;
 
@@ -364,19 +433,28 @@ form {
   }
 }
 
-// Labels específicos
-#label-nova-senha {
-  left: 20px;
-}
+/* LABELS ESPECÍFICAS */
+#label-nova-senha,
 #label-confirmar-nova-senha {
   left: 20px;
 }
 
-// Responsividade
+/* RESPONSIVIDADE */
 @media (max-width: 564px) {
   .wrapper {
     width: 90%;
     margin: 20px;
     padding: 40px 20px;
+  }
+
+  /* compacte ainda mais os chips em telas pequenas */
+  .pwd-chip {
+    padding: 3px 6px;
+    font-size: 11px;
+    min-width: 30px;
+  }
+  .pwd-strength {
+    font-size: 11px;
+    padding: 3px 6px;
   }
 }
