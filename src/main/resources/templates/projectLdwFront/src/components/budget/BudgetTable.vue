@@ -4,7 +4,7 @@
 
     <!-- Estado: carregando -->
     <div v-if="loading" class="table-placeholder">
-      <div class="spinner" />
+      <div class="spinner"></div>
       <p>Carregando orçamentos...</p>
     </div>
 
@@ -16,32 +16,36 @@
 
     <!-- Estado: sucesso -->
     <div v-else>
-      <table v-if="hasData" class="table">
+      <table v-if="hasData" class="styled-table">
         <thead>
           <tr>
             <th>Nome</th>
             <th>Tamanho</th>
             <th>Parte do Corpo</th>
-            <th>Custo Adicional</th>
+            <th>Valor Final</th>
             <th>Contato</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(quote, i) in quotes" :key="i"
-          @click="goToQuoteDetails(quote.id)" class="clickable-row">
-            <td><strong>{{ quote.client.name || '—' }}</strong></td>
-            <td>{{ quote.size || '—' }}</td>
-            <td>{{ quote.bodyPart || '—' }}</td>
-            <td>{{ formatCurrency(quote.additionalCost) }}</td>
-            <td>
-              <div v-if="quote.client" class="client-info">
-                <p class="muted">{{ quote.client.email || '—' }}</p>
-                <p>{{ quote.client.phone || '—' }}</p>
-              </div>
-              <span v-else class="muted">Sem cliente</span>
-            </td>
-          </tr>
-        </tbody>
+  <tr
+    v-for="(quote, i) in quotes"
+    :key="i"
+    @click="goToQuoteDetails(quote.id)"
+    class="clickable-row"
+  >
+    <td><strong>{{ quote.clientName || "—" }}</strong></td>
+    <td>{{ quote.size || "—" }}</td>
+    <td>{{ quote.bodyPart || "—" }}</td>
+    <td>{{ formatCurrency(quote.additionalCost + quote.finalValue)}}</td>
+
+    <td>
+      <div class="client-info">
+        <p class="muted">{{ quote.clientEmail || "—" }}</p>
+      </div>
+    </td>
+  </tr>
+</tbody>
+
       </table>
 
       <div v-else class="no-data">Nenhum orçamento encontrado.</div>
@@ -49,73 +53,60 @@
   </section>
 </template>
 
-<script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+<script lang="js" setup>
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+
 const router = useRouter();
 
-type Client = {
-  name?: string
-  email?: string
-  phone?: string
-}
+// ✔ Pegando a URL da API do .env
+const API_URL = import.meta.env.VITE_API_URL_BUD;
 
-type Quote = {
-  id?: string | number
-  name?: string
-  size?: string
-  bodyPart?: string
-  additionalCost?: number
-  client?: Client
-}
-
-const API_URL = 'http://localhost:8081/quotes'
-
-const quotes = ref<Quote[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
+const quotes = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
 async function fetchQuotes() {
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
+
   try {
-    const response = await fetch(API_URL)
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
-    const data = await response.json()
-    quotes.value = normalizeQuotes(data)
-  } catch (err: any) {
-    error.value = err?.message || 'Erro desconhecido'
-    quotes.value = []
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+
+    const data = await response.json();
+    quotes.value = normalizeQuotes(data);
+  } catch (err) {
+    error.value = err?.message || "Erro desconhecido";
+    quotes.value = [];
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-function normalizeQuotes(data: any): Quote[] {
-  // tenta lidar com diferentes formatos de retorno da API
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.content)) return data.content as Quote[]
-  if (data && typeof data === 'object') return [data as Quote]
-  return []
+function normalizeQuotes(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.content)) return data.content;
+  return [];
 }
 
-function formatCurrency(value: any): string {
-  if (value == null || isNaN(value)) return '—'
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  })
+function formatCurrency(value) {
+  if (!value) return "—";
+  return Number(value).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 }
 
 function goToQuoteDetails(id) {
   router.push(`/quotes/${id}`);
 }
 
-const hasData = computed(() => quotes.value.length > 0)
+const hasData = computed(() => quotes.value.length > 0);
 
-onMounted(fetchQuotes)
+onMounted(fetchQuotes);
 </script>
 
 <style scoped>
-@import '../../assets/budget/BudgetTable.scss';
+@import "../../assets/budget/BudgetTable.scss";
 </style>
