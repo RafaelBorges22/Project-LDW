@@ -1,57 +1,320 @@
 @import '../global/Global.scss';
 
-.account-card {
-  width: 420px;
-  background: $black-color;
-  padding: 28px;
-  border-radius: 14px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.4);
-  color: $text-color-white;
+.account-page-root {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Container centraliza conteúdo e limita largura */
+.account-container {
+  display: flex;
+  justify-content: center;
+  padding: 36px 20px;
+  flex: 1;
+}
+
+/* Card principal */
+.account-card {
+  width: 720px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba($black-color, 0.98), $black-color);
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  color: $text-color-white;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
   gap: 18px;
+  border: 1px solid rgba(255,255,255,0.03);
 }
 
-.title {
-  text-align: center;
-  margin-bottom: 6px;
-  font-size: 1.4rem;
-  font-weight: 700;
+/* header com avatar e título */
+.account-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
 }
 
-.info-group p {
-  margin: 8px 0;
-  font-size: 16px;
+.avatar {
+  width: 86px;
+  height: 86px;
+  padding-top: 6px;
+  border-radius: 50%;
+  background: rgba($text-color-white, 0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-icon i {
+  font-size: 42px;
+  color: $text-color-white;
+}
+
+
+.header-info .title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: $text-color-white;
+}
+
+.header-info .subtitle {
+  margin: 4px 0 0 0;
   color: $gray-color;
+  font-size: 0.95rem;
 }
 
+/* grid de informações - duas colunas em desktop, uma coluna em mobile */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+  align-items: start;
+}
+
+/* item individual */
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-item label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: rgba($text-color-white, 0.45);
+  letter-spacing: 1px;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: $text-color-white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  word-break: break-word;
+}
+
+/* ícone pequeno ao lado do telefone/endereço */
+.contact-icon {
+  font-size: 1.05rem;
+  color: $brown-color-white;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* botão de copiar */
+.copy-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: $text-color-white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.copy-btn:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+/* ações finais */
 .account-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 8px;
   justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
+/* agrupa ações à direita */
+.right-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* botões */
 .btn {
   padding: 10px 14px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
 }
 
+/* estilos variantes */
 .btn.secondary {
   background: transparent;
   color: $text-color-white;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.btn.outline {
+  background: transparent;
+  color: $text-color-white;
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 .btn.danger {
+  padding: 11px 14px 9px 14px;
   background: linear-gradient(180deg, $brown-color, $brown-color-white);
   color: $text-color-white;
+  border: 1px solid $brown-color;
 }
 
-/* POPUP DE LOGOUT (transferido do NavBar.scss) */
+/* ========= ALTERAÇÃO: uniformizar botões dentro de .right-actions =========
+   Manter cores diferentes (outline / danger), mas garantir mesma fonte,
+   mesmo padding e mesmo tamanho de ícone para ambos.
+*/
+.right-actions .btn {
+  font-size: 16px;       /* mesmo tamanho de fonte */
+  padding: 11px 16px 9px 16px;    /* mesmo padding (substitui padding diferente do .btn.danger) */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.right-actions .btn i {
+  font-size: 16px;       /* mesmo tamanho do ícone */
+}
+
+/* toast simples para "copiado" */
+.copy-toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  bottom: 18%;
+  background: rgba($black-color, 0.9);
+  color: $text-color-white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  opacity: 0;
+  transition: all 240ms ease;
+  z-index: 99999;
+}
+
+.copy-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+.message-toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  bottom: 6%;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+  max-width: 92%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba($black-color, 0.45);
+  color: $text-color-white;
+  z-index: 12000;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.message-toast.success {
+  background:$success-color;
+  border: 1px solid rgba($success-color, 0.15);
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.message-toast.error {
+  background: linear-gradient(180deg, rgba($error-color, 0.95), rgba($error-color, 0.85));
+  border: 1px solid rgba($error-color, 0.15);
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.message-toast .message-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  font-size: 1.05rem;
+}
+
+.message-toast.success .message-icon {
+  background: rgba(255,255,255,0.06);
+}
+
+.message-toast.error .message-icon {
+  background: rgba(255,255,255,0.06);
+}
+
+.message-toast .message-text {
+  font-size: 0.98rem;
+  line-height: 1.2;
+  color: $text-color-white;
+  text-align: left;
+}
+
+@media (max-width: 880px) {
+  .account-card {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .avatar-icon i {
+    font-size: 36px;
+  }
+
+  .header-info .title {
+    font-size: 1.35rem;
+  }
+
+  .account-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .right-actions {
+    justify-content: flex-end;
+  }
+
+  .copy-btn {
+    padding: 6px 8px;
+  }
+
+  .right-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .logout-popup-overlay {
   position: fixed;
   inset: 0;
@@ -171,7 +434,6 @@
   }
 }
 
-/* Pequenas animações */
 @keyframes popupIn {
   from {
     transform: translateY(8px);
@@ -182,4 +444,38 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* edit grid */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+}
+
+.edit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-item label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 1px;
+}
+
+.edit-item input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* small screen for edit grid */
+@media (max-width: 520px) {
+  .edit-grid { grid-template-columns: 1fr; }
 }

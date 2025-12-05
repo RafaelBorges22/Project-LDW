@@ -131,7 +131,7 @@
 
     <!-- ========== GALERIA (com otimizações) ========== -->
     <div class="gallery-section">
-      <h2 class="section-title">Galeria de Trabalhos</h2>
+      <h2 id="title-galeria" class="section-title">Galeria de Trabalhos</h2>
 
       <div class="gallery-container" ref="galleryContainer" @mouseenter="pauseAutoplay" @mouseleave="resumeAutoplay"
         @touchstart.passive="onTouchStart" @touchmove.passive="onTouchMove" @touchend="onTouchEnd">
@@ -238,6 +238,12 @@ export default {
     this.stopAutoplay();
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
   },
+  computed: {
+    isLoggedIn() {
+      const raw = localStorage.getItem('jwtToken');
+      return !!(raw && String(raw).trim() && raw.toLowerCase() !== 'null' && raw.toLowerCase() !== 'undefined');
+    }
+  },
   methods: {
     // navegação do carrossel (respeita isTransitioning)
     next() {
@@ -315,12 +321,19 @@ export default {
       this.resumeAutoplay();
     },
 
-    // navegação (exemplo)
+    // navegação (com verificação de login)
     goToBudget() {
+      if (!this.isLoggedIn) {
+        // guarda destino desejado para pós-login (opcional)
+        try { localStorage.setItem('postLoginRedirect', '/budget'); } catch (e) {}
+        this.$router.push('/login');
+        return;
+      }
       this.$router.push('/budget');
     },
     irParaAgendamento() {
       this.showWelcome = false;
+      // reaproveita a mesma lógica de verificação
       this.goToBudget();
     },
     fecharWelcome() {
@@ -371,6 +384,5 @@ export default {
 </script>
 
 <style>
-@import '../assets/Scss/global/Global.scss';
 @import '../assets/Scss/pages/home.scss';
 </style>

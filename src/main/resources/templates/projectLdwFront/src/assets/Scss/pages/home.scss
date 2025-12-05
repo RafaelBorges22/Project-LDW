@@ -1,15 +1,10 @@
 @import '../global/Global.scss';
 
-/* =========================================
-   MIXINS & UTILITÁRIOS
-   ========================================= */
-// Mixin para centralizar conteúdo com limite de largura (Melhor UX em telas grandes)
 @mixin container-limit {
   width: 100%;
   padding: 0 100px;
 }
 
-// Mixin para títulos de seção padronizados
 @mixin section-title-style {
   font-size: 2.2rem;
   font-weight: 800;
@@ -20,7 +15,6 @@
   position: relative;
   display: inline-block;
 
-  // Detalhe decorativo sutil abaixo do título
   &::after {
     content: '';
     display: block;
@@ -267,7 +261,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba($black-color, 0.35), rgba($black-color, 0.7));
+    background: linear-gradient(to bottom, rgba(#000, 0.5), rgba(#000, 0.8));
     z-index: 1;
   }
 
@@ -567,6 +561,10 @@
     .aftercare-item {
       max-width: 100%;
       padding: 20px;
+      /* ALTERAÇÃO: largura máxima uniforme e centralizada em mobile */
+      max-width: 420px !important;
+      width: 100% !important;
+      margin: 0 auto !important;
     }
   }
 }
@@ -590,6 +588,9 @@
     &::after {
       margin: 8px auto 0;
     }
+
+    /* ALTERAÇÃO: garantir mesmo tamanho dos titles (mesmo do mixin) */
+    font-size: 2.2rem !important;
   }
 
   .gallery-container {
@@ -709,4 +710,236 @@
       opacity: 1;
     }
   }
+}
+
+/* =========================
+   Ajustes mobile (apenas overrides)
+   ========================= */
+@media (max-width: 768px) {
+  /* Geral: reduzir paddings globais das seções */
+  .about-section,
+  .aftercare-section,
+  .gallery-section,
+  .hero-section {
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+  }
+
+  /* HERO: altura menor e espaçamento reduzido */
+  .hero-section {
+    height: 60vh;
+    min-height: 360px;
+
+    .hero-content {
+      padding: 0 12px;
+
+      .hero-title {
+        font-size: clamp(1.8rem, 6vw, 3.2rem); /* menor que desktop */
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+      }
+
+      .hero-button {
+        padding: 12px 28px;
+        font-size: 0.98rem;
+      }
+    }
+  }
+
+  /* POP-UP: tamanho e padding menores para caber em telas pequenas */
+  .welcome-popup-card {
+    width: min(520px, 94vw);
+    padding: 20px;
+    border-radius: 14px;
+    gap: 12px;
+
+    .welcome-popup-logo-container {
+      width: 86px;
+      height: 86px;
+
+      img {
+        width: 78%;
+        height: 78%;
+      }
+    }
+
+    .welcome-popup-title {
+      font-size: 1.15rem;
+    }
+
+    .welcome-popup-description {
+      font-size: 0.95rem;
+    }
+
+    .welcome-popup-features {
+      padding: 14px;
+    }
+
+    .welcome-popup-features li {
+      font-size: 0.92rem;
+      padding-left: 16px;
+    }
+
+    .welcome-popup-buttons {
+      gap: 10px;
+
+      .welcome-popup-btn {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        min-height: 40px;
+      }
+    }
+  }
+
+  /* ABOUT: reduzir gap, imagens menores */
+  .about-section {
+    gap: 24px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+
+    .about-image-container {
+      max-width: 320px;
+      aspect-ratio: 4 / 3;
+      .about-image {
+        box-shadow: 0 8px 20px rgba($black-color, 0.18);
+      }
+    }
+
+    .about-content {
+      .about-title {
+        font-size: 1.25rem;
+      }
+
+      .about-text {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  /* AFTERCARE: adaptações para grid e tamanhos dos cards */
+  .aftercare-section {
+    padding: 40px 16px;
+
+    .aftercare-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .aftercare-item {
+      padding: 16px;
+      max-width: 100%;
+      .aftercare-icon {
+        width: 72px;
+        height: 72px;
+        font-size: 28px;
+        i { font-size: 30px; }
+      }
+
+      .aftercare-text {
+        font-size: 0.92rem;
+      }
+    }
+  }
+
+  /* GALLERY: altura reduzida e controles menores */
+  .gallery-section {
+    padding: 36px 12px;
+
+    #title-galeria {
+      font-size: 1.25rem !important;
+      margin-bottom: 36px;
+    }
+
+    .gallery-container {
+      height: 320px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .gallery-nav {
+      width: 44px;
+      height: 44px;
+      font-size: 1.1rem;
+    }
+
+    .gallery-dots {
+      margin-top: 18px;
+      .dot { width: 9px; height: 9px; }
+    }
+  }
+
+  /* Ajustes gerais de tipografia para legibilidade no mobile */
+  .section-title,
+  .about-title,
+  .hero-title {
+    line-height: 1.12;
+  }
+
+  /* Remove sombras muito pesadas para telas pequenas (economiza render) */
+  .welcome-popup-card,
+  .gallery-container,
+  .about-image {
+    box-shadow: 0 8px 24px rgba($black-color, 0.18);
+  }
+
+  /* Pequenos ajustes de espaçamento nos botões e elementos interativos */
+  button,
+  .welcome-popup-btn,
+  .hero-button,
+  .gallery-nav {
+    touch-action: manipulation;
+  }
+}
+
+/* Extra small screens — ajustes finais */
+@media (max-width: 480px) {
+  .hero-section {
+    height: 55vh;
+    min-height: 300px;
+
+    .hero-content {
+      .hero-title {
+        font-size: clamp(1.6rem, 7vw, 2.6rem);
+      }
+
+      .hero-button {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  .welcome-popup-card {
+    width: calc(94vw);
+    padding: 16px;
+
+    .welcome-popup-logo-container {
+      width: 72px;
+      height: 72px;
+    }
+
+    .welcome-popup-title { font-size: 1.05rem; }
+    .welcome-popup-description { font-size: 0.92rem; }
+    .welcome-popup-features li { font-size: 0.9rem; }
+    .welcome-popup-buttons .welcome-popup-btn { font-size: 0.92rem; padding: 8px 10px; }
+  }
+
+  .about-section {
+    .about-image-container { max-width: 260px; }
+    .about-content .about-text { font-size: 0.98rem; }
+  }
+
+  /* ALTERAÇÃO: garantir itens aftercare com largura máxima e centralizados em telas muito pequenas */
+  .aftercare-section .aftercare-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .aftercare-section .aftercare-item {
+    max-width: 420px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .gallery-section .gallery-container { height: 260px; }
 }

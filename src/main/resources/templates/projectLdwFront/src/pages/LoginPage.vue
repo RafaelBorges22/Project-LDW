@@ -296,15 +296,12 @@ export default {
       };
     },
 
-    // conta quantos critérios são verdadeiros (0..5)
     senhaScore() {
       const c = this.senhaCriteria;
       return Object.values(c).filter(Boolean).length;
     },
 
     senhaIsStrong() {
-      // exigência atual: TODOS os critérios satisfeitos
-      // se preferir, troque por: return this.senhaScore >= 4;
       return this.senhaScore === 5;
     },
 
@@ -325,28 +322,47 @@ export default {
     async fazerLogin() {
       this.erroLogin = '';
       try {
+        // 1) Login principal
         const { data } = await axios.post('http://localhost:8081/auth/login', this.login);
         const token = data.token;
 
-        // salva token e e-mail
+        // 2) Salva token e email
         localStorage.setItem('jwtToken', token);
         localStorage.setItem('usuarioEmail', this.login.email);
 
-        // tenta obter o nome real: 1) body {name}, 2) claims do JWT
-        let nome =
-          typeof data.name === 'string' && data.name.trim() ? data.name.trim() : '';
-
+        // 3) nome (resposta ou JWT)
+        let nome = typeof data.name === 'string' && data.name.trim() ? data.name.trim() : '';
         if (!nome) {
           const fromJwt = this.extractNameFromJwt(token);
           if (fromJwt) nome = fromJwt;
         }
+        if (nome) localStorage.setItem('usuarioNome', nome);
 
-        if (nome) {
-          localStorage.setItem('usuarioNome', nome);
-        } else {
-          localStorage.removeItem('usuarioNome');
+        // 4) se o login retornou id, salva
+        if (data.id) {
+          localStorage.setItem('usuarioId', String(data.id));
         }
 
+        // 5) Busca dados completos do usuário (id, phone, address) e garante salvar usuarioId
+        try {
+          const resUser = await axios.get(
+            `http://localhost:8081/clients/email/${encodeURIComponent(this.login.email)}`
+          );
+          const user = resUser.data;
+          if (user) {
+            if (user.id) localStorage.setItem('usuarioId', String(user.id));
+            if (user.name && !nome) localStorage.setItem('usuarioNome', user.name);
+            localStorage.setItem('usuarioTelefone', user.phone || '');
+            localStorage.setItem('usuarioEndereco', user.address || '');
+          }
+        } catch (err) {
+          console.warn('Não foi possível obter telefone/endereço do usuário:', err);
+          // garantir chaves existentes (evita undefined)
+          if (!localStorage.getItem('usuarioTelefone')) localStorage.setItem('usuarioTelefone', '');
+          if (!localStorage.getItem('usuarioEndereco')) localStorage.setItem('usuarioEndereco', '');
+        }
+
+        // 6) Redireciona
         this.$router.push('/');
       } catch (error) {
         this.abrirPopup(
@@ -360,7 +376,7 @@ export default {
     },
 
     formatarTelefone() {
-      let digits = (this.cadastro.telefone || '').replace(/\D/g, '').slice(0, 11); // até 11 dígitos
+      let digits = (this.cadastro.telefone || '').replace(/\D/g, '').slice(0, 11);
       if (digits.length === 0) {
         this.cadastro.telefone = '';
         return;
@@ -374,11 +390,9 @@ export default {
         return;
       }
       if (digits.length <= 10) {
-        // sem dígito 9
         this.cadastro.telefone = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
         return;
       }
-      // 11 dígitos (9xxxx-xxxx)
       this.cadastro.telefone = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
     },
 
@@ -409,7 +423,6 @@ export default {
         email: this.cadastro.email,
         password: this.cadastro.senha,
         address: this.cadastro.endereco || '',
-
         phone: (this.cadastro.telefone || '').replace(/\D/g, ''),
         role: this.cadastro.permissao
       };
@@ -449,13 +462,10 @@ export default {
         });
     },
 
-    // ETAPA 1 - envia o pedido de reset (/clients/request)
     async solicitarResetSenha() {
       this.erroRecuperacao = '';
       try {
-        await axios.post('http://localhost:8081/clients/request', {
-          email: this.reset.email
-        });
+        await axios.post('http://localhost:8081/clients/request', { email: this.reset.email });
 
         this.abrirPopup(
           'Verifique seu e-mail',
@@ -463,7 +473,6 @@ export default {
           'info'
         );
 
-        // avança para o segundo formulário (token + nova senha)
         this.etapaRecuperacao = 2;
       } catch (error) {
         this.abrirPopup(
@@ -476,7 +485,6 @@ export default {
       }
     },
 
-    // ETAPA 2 - redefine a senha (/clients/reset)
     async redefinirSenha() {
       if (this.reset.novaSenha !== this.reset.confirmarNovaSenha) {
         this.abrirPopup(
@@ -569,8 +577,6 @@ export default {
       this.etapaRecuperacao = 1;
       this.resetRecuperacao();
     },
-
-    // --------- Helpers JWT ---------
 
     extractNameFromJwt(token) {
       if (!token || token.split('.').length < 2) return null;

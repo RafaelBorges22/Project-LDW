@@ -1,4 +1,4 @@
-@import './Global.scss';
+@import '../global/Global.scss';
 
 .navbar {
   display: flex;
@@ -9,6 +9,7 @@
   padding: 10px 40px;
   border-bottom: $brown-color solid 18px;
   position: relative;
+  z-index: 1000;
 
   .navbar-left {
     display: flex;
@@ -29,149 +30,257 @@
     }
   }
 
-  .nav-links {
-    display: flex;
+  /* HAMBURGER */
+  .hamburger {
+    display: none;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    gap: 6px;
+    width: 40px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
 
-    li {
-      margin-left: 45px;
-
-      i {
-        font-size: 2rem;
-        text-decoration: none;
-        display: flex;
-        transition: opacity 0.2s ease-in-out;
-
-        &:hover {
-          opacity: 0.7;
-          cursor: pointer;
-        }
-      }
+    span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: $text-color-white;
+      border-radius: 3px;
+      transition: transform 0.25s ease, opacity 0.2s ease;
     }
-  }
-}
 
-.logout-popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba($black-color, 0.65);
-  display: grid;
-  place-items: center;
-  z-index: 9999;
-  padding: 16px;
-  backdrop-filter: blur(3px);
-}
-
-.logout-popup-card {
-  width: min(460px, 90vw);
-  background: $black-color;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 34px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
-  color: $text-color-white;
-  animation: popupIn 180ms ease-out;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 22px;
-
-  &.info {
-    border-color: rgba($brown-color, 0.35);
-  }
-
-  .logout-popup-logo-container {
-    width: 90px;
-    height: 90px;
-    padding-top: 8px;
-    padding-left: 4px;
-    border-radius: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(
-      180deg,
-      rgba($brown-color, 0.25),
-      rgba($brown-color, 0.08)
-    );
-    border: 1px solid rgba($brown-color, 0.4);
-
-    .logout-popup-logo {
-      i {
-        font-size: 2.2rem;
-      }
+    &:focus {
+      outline: 2px solid rgba($brown-color, 0.25);
+      outline-offset: 3px;
     }
   }
 
-  .logout-popup-title {
-    font-size: 1.3rem;
-    font-weight: 800;
-    letter-spacing: 0.2px;
-    color: $text-color-white;
-    text-align: center;
-  }
-
-  .logout-popup-description {
-    width: 85%;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: $gray-color;
-    text-align: center;
-  }
-
-  .logout-popup-actions {
+  .navbar-right {
     display: flex;
-    justify-content: center;
-    gap: 24px;
-    width: 100%;
-    padding-top: 8px;
+    align-items: center;
 
-    .logout-popup-btn {
-      flex: 1;
+    .nav-links {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 40px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 15px;
-      border: 1px solid $brown-color;
-      background: linear-gradient(180deg, $brown-color, $brown-color-white);
-      color: $text-color-white;
-      cursor: pointer;
-      transition: transform 0.05s ease, box-shadow $transition;
+      list-style: none;
+      margin: 0;
+      padding: 0;
 
-      &:hover {
-        box-shadow: 0 6px 20px rgba($brown-color, 0.35);
-        transform: translateY(-1px);
+      li {
+        margin-left: 45px;
+
+        a {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: $text-color-white;
+          text-decoration: none;
+        }
+
+        i {
+          font-size: 2rem;
+          transition: opacity 0.2s ease-in-out, transform 0.12s;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+            cursor: pointer;
+          }
+        }
+
+        .link-label {
+          display: none; /* desktop: esconder label */
+          font-size: 0.95rem;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 18px;
+
+    .logo-image {
+      width: 56px;
+      height: 56px;
+    }
+
+    /* === Mantive todo o restante igual, só removi o `display: none` e deixei o título visível === */
+    .logo-text {
+      /* Mantive o estilo original, apenas ajuste de tamanho para caber no mobile */
+      display: block;
+      font-size: 1.1rem;
+    }
+
+    .hamburger {
+      display: flex;
+    }
+
+    /* backdrop que escurece o conteúdo do site - fica atrás do painel */
+    .mobile-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(3px);
+      z-index: 998;
+    }
+
+    /* painel lateral direito - estilo mais profissional */
+    .navbar-right {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 76%;
+      max-width: 360px;
+      height: 100vh;
+      background: linear-gradient(180deg, rgba($black-color, 1), rgba($black-color, 0.98));
+      border-left: 3px solid $brown-color;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      transition: right 0.32s cubic-bezier(.2,.9,.3,1);
+      z-index: 999;
+      padding: 18px;
+      box-shadow: -8px 0 30px rgba(0,0,0,0.45);
+
+      &.open {
+        right: 0;
       }
 
-      &:active {
-        transform: translateY(0);
+      /* header do painel com logo e botão fechar */
+      &::before {
+        content: '';
+        display: block;
+        height: 8px;
+        width: 100%;
       }
 
-      i {
+      .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 8px;
         padding-top: 6px;
-        font-size: 1rem;
-        margin-left: 6px;
+        overflow-y: auto;
       }
 
-      &.outline {
-        background: transparent;
-        color: $text-color-white;
-        border-color: rgba(255, 255, 255, 0.2);
+      .nav-links li {
+        margin-left: 0;
+        border-radius: 10px;
+        transition: background 0.12s ease;
+        list-style: none;
+
+        /* === LINHA MARROM FINA ENTRE OS ITENS (solicitação) === */
+        border-bottom: 1px solid rgba($brown-color, 0.18);
+        width: 100%;
+
+        a {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          color: $text-color-white;
+          text-decoration: none;
+          width: 100%;
+        }
 
         &:hover {
-          border-color: $brown-color;
-          box-shadow: 0 6px 18px rgba($brown-color, 0.25);
+          background: rgba(255,255,255,0.02);
         }
+
+        i {
+          font-size: 1.45rem;
+          flex: 0 0 34px;
+          text-align: center;
+          padding: 6px;
+          background: rgba(255,255,255,0.02);
+          border-radius: 8px;
+        }
+
+        .link-label {
+          display: inline-block;
+          font-size: 0.98rem;
+          font-weight: 700;
+          color: $text-color-white;
+        }
+
+        /* mini descrição/legendinha (opcional) */
+        .link-sub {
+          display: block;
+          font-size: 0.78rem;
+          color: $gray-color;
+          margin-top: 4px;
+          line-height: 1.1;
+        }
+      }
+
+      /* remove a linha do último item para ficar mais limpo */
+      .nav-links li:last-child {
+        border-bottom: none;
+      }
+
+      /* se quiser adicionar um header visível dentro do painel */
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        margin-bottom: 12px;
+
+        .mobile-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          text-decoration: none;
+          color: $text-color-white;
+
+          .mobile-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+
+          .mobile-logo-text {
+            font-weight: 800;
+          }
+        }
+
+        .close-btn {
+          background: transparent;
+          border: none;
+          font-size: 26px;
+          color: $text-color-white;
+          cursor: pointer;
+          padding: 8px;
+        }
+      }
+    }
+  }
+}
+
+/* tablet intermediate tweaks */
+@media (max-width: 992px) and (min-width: 769px) {
+  .navbar {
+    padding: 10px 24px;
+
+    .nav-links li {
+      margin-left: 28px;
+
+      i {
+        font-size: 1.8rem;
       }
     }
   }

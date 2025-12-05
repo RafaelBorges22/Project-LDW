@@ -1,5 +1,5 @@
 $brown-color: #5C3A33;
-$brown-color-white: #70473f;
+$brown-color-white: #664039;
 $black-color: #1a1a1a;
 $gray-color: #bdc3c7;
 $background-color: #F8F5EE;
@@ -16,6 +16,27 @@ body, html {
   overflow-x: hidden;
   font-family: sans-serif; 
   color: var(--text-color-black);
+}
+
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: lighten($background-color, 4%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: $brown-color;
+  border-radius: 10px;
+  border: 2px solid lighten($background-color, 5%);
+  transition: background $transition;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: $brown-color-white;
 }
 
 h1, h2, h3 {
@@ -44,4 +65,15 @@ img {
 #app {
   background-color: $background-color;
   height: 100vh;
+}
+
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;    
+  }
 }

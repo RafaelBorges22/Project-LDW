@@ -8,7 +8,7 @@
       </div>
 
       <div class="footer-column">
-        <h3 class="footer-title">Links</h3>
+        <h3 id="titulo-links" class="footer-title">Links</h3>
         <ul class="footer-links">
           <router-link to="/">
             <li><p>Home</p></li>

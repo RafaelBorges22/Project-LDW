@@ -49,11 +49,6 @@ const router = createRouter({
   routes
 });
 
-/**
- * Helper seguro para pegar token "válido"
- * - remove espaços
- * - trata strings 'null'/'undefined' como vazias
- */
 function getTokenSafe(): string | null {
   const raw = localStorage.getItem('jwtToken');
   if (!raw) return null;
@@ -63,26 +58,15 @@ function getTokenSafe(): string | null {
   return trimmed;
 }
 
-/**
- * Guard robusto:
- * - usa meta.requiresAuth
- * - redireciona para Home (sua tela de login) caso esteja tentando acessar rota protegida sem token
- * - logs para debug (remova em produção)
- */
 router.beforeEach((to, from, next) => {
   const token = getTokenSafe();
 
-  // DEBUG: inspecione no console para ver o que está acontecendo
-  // Remova / comente estes logs em produção
-  // eslint-disable-next-line no-console
   console.log('[router.beforeEach] to:', to.fullPath, 'name:', to.name, 'requiresAuth:', Boolean(to.meta?.requiresAuth), 'tokenExists:', !!token);
 
   if (to.meta?.requiresAuth && !token) {
-    // rota exige auth mas não há token -> manda para Home (login)
     return next({ name: 'Home' });
   }
 
-  // caso contrário deixa navegar
   return next();
 });
 

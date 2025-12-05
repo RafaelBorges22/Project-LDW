@@ -89,3 +89,101 @@
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.6);
 }
+
+/* ===== Responsividade (ajustes solicitados) =====
+   - Na versão mobile: remover links, deixar contatos ao lado da imagem e reduzir o tamanho da imagem.
+   - Mantive o restante da estética exatamente igual.
+*/
+@media (max-width: 768px) {
+  .main-footer {
+    padding: 28px 20px;
+  }
+
+  #titulo-links {
+    display: none;
+  }
+
+  /* Ao invés de empilhar, mantemos logo + contatos lado a lado */
+  .main-footer .footer-top {
+    /* garantir que quando a coluna de Links estiver oculta, logo e contatos fiquem alinhados em linha e centralizados */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 24px;
+  }
+
+  /* reduz o padding lateral nas colunas para mobile */
+  .main-footer .footer-top .footer-column {
+    flex: 0 0 auto;
+    padding: 0 8px;
+    text-align: left; /* para o bloco de contatos ficar alinhado naturalmente ao lado do logo */
+  }
+
+  /* === Esconder os links no mobile conforme solicitado === */
+  .main-footer .footer-top .footer-column .footer-links {
+    display: none !important;
+  }
+
+  /* ajustar logo: menor, como pediu */
+  .main-footer .footer-top .footer-logo {
+    max-width: 120px; /* imagem menor */
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
+  .main-footer .footer-top .footer-logo .logo-image-footer {
+    width: 120px;
+    height: auto;
+    display: block;
+  }
+
+  /* contatos ficam ao lado da imagem e centralizados verticalmente */
+  .main-footer .footer-top .footer-column:last-child {
+    /* assume que a última coluna é a dos contatos; ficará à direita do logo */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* melhorar aparência dos itens de contato em linha com a logo */
+  .main-footer .footer-top .footer-column .footer-social {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .main-footer .footer-top .footer-column .footer-social li {
+    margin: 0;
+  }
+
+  .main-footer .footer-top .footer-column .footer-social li a.social-link {
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* diminuir um pouco os tamanhos de fonte no mobile para balancear */
+  .main-footer .footer-top .footer-column .footer-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+
+  .main-footer .footer-top .footer-column .footer-links li p,
+  .main-footer .footer-top .footer-column .footer-social li p {
+    font-size: 1rem;
+  }
+
+  .main-footer .footer-bottom {
+    padding-top: 16px;
+  }
+
+  .main-footer .footer-bottom .copyright-text {
+    font-size: 0.85rem;
+  }
+}
