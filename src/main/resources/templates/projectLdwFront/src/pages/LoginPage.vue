@@ -238,6 +238,11 @@
 <script>
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL_AUTH;
+const API_URL_CLI = import.meta.env.VITE_API_URL_CLI;
+const API_URL_REQ = import.meta.env.VITE_API_URL_REQ;
+const API_URL_RES = import.meta.env.VITE_API_URL_RES;
+
 export default {
   data() {
     return {
@@ -323,7 +328,7 @@ export default {
       this.erroLogin = '';
       try {
         // 1) Login principal
-        const { data } = await axios.post('http://localhost:8081/auth/login', this.login);
+        const { data } = await axios.post(API_URL, this.login);
         const token = data.token;
 
         // 2) Salva token e email
@@ -346,7 +351,7 @@ export default {
         // 5) Busca dados completos do usuário (id, phone, address) e garante salvar usuarioId
         try {
           const resUser = await axios.get(
-            `http://localhost:8081/clients/email/${encodeURIComponent(this.login.email)}`
+            `${API_URL_CLI}` + `/${encodeURIComponent(this.login.email)}`
           );
           const user = resUser.data;
           if (user) {
@@ -428,7 +433,7 @@ export default {
       };
 
       axios
-        .post('http://localhost:8081/clients', payload)
+        .post(API_URL_CLI, payload)
         .then(() => {
           this.abrirPopup(
             'Conta criada',
@@ -465,7 +470,7 @@ export default {
     async solicitarResetSenha() {
       this.erroRecuperacao = '';
       try {
-        await axios.post('http://localhost:8081/clients/request', { email: this.reset.email });
+        await axios.post(API_URL_REQ, { email: this.reset.email });
 
         this.abrirPopup(
           'Verifique seu e-mail',
@@ -497,7 +502,7 @@ export default {
       }
 
       try {
-        await axios.post('http://localhost:8081/clients/reset', {
+        await axios.post(API_URL_RES, {
           token: this.reset.token,
           newPassword: this.reset.novaSenha
         });
