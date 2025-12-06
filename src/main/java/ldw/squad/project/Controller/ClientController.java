@@ -167,17 +167,22 @@ public class ClientController {
 
         clientService.createResetToken(client, token, expiryDate);
 
-        String resetUrl = "http://frontend/login?resetToken=" + token;
+        String resetUrl = token;
+        String pageReset = "http://localhost:5173/reset-password";
 
         String emailBody =
                 "Olá " + client.getName() + ",\n\n" +
-                "Você solicitou uma redefinição de senha. Use o link abaixo:\n\n" +
-                resetUrl + "\n\n" +
-                "Este link expira em 1 hora.\n" +
-                "Se você não solicitou isso, ignore este e-mail.";
+                        "Você solicitou a redefinição de senha para sua conta.\n\n" +
+                        "Para concluir a redefinição, utilize o código abaixo na página de redefinição:\n\n" +
+                        "====================================\n" +
+                        "CODIGO DE REDEFINIÇÃO: " + token + "\n" + // <-- Destaque para o Token
+                        "====================================\n\n" +
+                        "Cole o código na barra de token desta pagina" + pageReset +
+                        "Este código de segurança é válido por apenas 1 hora.\n\n" +
+                        "Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail. Sua senha atual permanecerá inalterada.\n\n" +
+                        "Atenciosamente,\nA Equipe KAZU TATOO";
 
         emailService.enviarEmailText(client.getEmail(), "Redefinição de Senha", emailBody);
-
         return ResponseEntity.ok("Se o e-mail estiver cadastrado, um link de redefinição será enviado.");
     }
 

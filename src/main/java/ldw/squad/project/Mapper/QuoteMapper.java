@@ -2,6 +2,7 @@ package ldw.squad.project.Mapper;
 
 import ldw.squad.project.Dto.CreateQuoteDto;
 import ldw.squad.project.Dto.QuoteDto;
+import ldw.squad.project.Dto.UpdateQuoteDto;
 import ldw.squad.project.Entities.QuoteModel;
 
 public class QuoteMapper {
@@ -33,11 +34,10 @@ public class QuoteMapper {
         return quote;
     }
 
-    public static void updateEntity(QuoteModel quote, CreateQuoteDto dto) {
-        if (dto.getDescription() != null) quote.setDescription(dto.getDescription());
-        if (dto.getSize() != null) quote.setSize(dto.getSize());
-        if (dto.getBodyPart() != null) quote.setBodyPart(dto.getBodyPart());
-        quote.setColored(dto.isColored());
-        if (dto.getState() != null) quote.setState(dto.getState());
+    public static void updateEntity(QuoteModel entity, UpdateQuoteDto dto) {
+        if (dto.getFinalValue() != null) entity.setFinalValue(dto.getFinalValue());
+        if (dto.getAdditionalCost() != null) entity.setAdditionalCost(dto.getAdditionalCost());
+        if (dto.getState() != null) entity.setState(dto.getState());
     }
+
 }

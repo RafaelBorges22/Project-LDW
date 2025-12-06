@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import ldw.squad.project.Dto.ClientDto;
+import ldw.squad.project.Dto.UpdateQuoteDto;
 import ldw.squad.project.Mapper.ClientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -126,19 +127,27 @@ public class QuoteController {
     @PutMapping("/{id}")
     public ResponseEntity<QuoteDto> updateQuote(
             @PathVariable Long id,
-            @RequestBody CreateQuoteDto dto
+            @RequestBody UpdateQuoteDto dto
     ) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
         if (optionalQuote.isEmpty()) return ResponseEntity.notFound().build();
-
         QuoteModel quote = optionalQuote.get();
-        QuoteMapper.updateEntity(quote, dto);
 
+        if (dto.getFinalValue() != null) {
+            quote.setFinalValue(dto.getFinalValue());
+        }
+
+        if (dto.getAdditionalCost() != null) {
+            quote.setAdditionalCost(dto.getAdditionalCost());
+        }
+
+        if (dto.getState() != null) {
+            quote.setState(dto.getState());
+        }
         QuoteModel updatedQuote = quoteRepository.save(quote);
 
         return ResponseEntity.ok(QuoteMapper.toDto(updatedQuote));
     }
-
 
     @Operation(summary = "Excluir orçamento (admin)")
     @DeleteMapping("/{id}/admin")
