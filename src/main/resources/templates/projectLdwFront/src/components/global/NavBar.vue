@@ -38,7 +38,7 @@
         </li>
 
         <li role="none">
-          <router-link to="/" @click="closeMenu" role="menuitem">
+          <router-link to="/chat" @click="closeMenu" role="menuitem">
             <i class="fi fi-sr-messages" aria-hidden="true"></i>
             <span class="link-label">Mensagens</span>
           </router-link>

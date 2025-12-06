@@ -5,6 +5,7 @@ import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/LoginPage.vue';
 import BudgetDetails from '../components/budget/BudgetDetails.vue';
 import BudgetFromCL from '../pages/BudgetFromCL.vue';
+import ChatPage from '../pages/ChatPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -42,6 +43,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'login',
     component: Login,
     meta: { requiresAuth: false }
+  },
+  {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('../pages/ChatPage.vue'),
+      meta: { requiresAuth: true }
   },
   {
     path: '/account',
