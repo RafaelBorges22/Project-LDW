@@ -105,7 +105,7 @@
 
             <span class="pwd-chip" :class="{ ok: senhaCriteria.number }" title="Possui número">
               <i :class="senhaCriteria.number ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>0-9</small>
+              <small>123</small>
             </span>
 
             <span class="pwd-chip" :class="{ ok: senhaCriteria.special }" title="Possui caractere especial">

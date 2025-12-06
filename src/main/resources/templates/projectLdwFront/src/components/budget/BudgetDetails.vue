@@ -146,7 +146,7 @@ async function updateQuote() {
 </script>
 
 <style scoped>
-@import "../../assets/budget/BudgetDetails.scss";
+@import "../../assets/Scss/budget/BudgetDetails.scss";
 
 /* Inputs */
 .edit-input {
