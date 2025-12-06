@@ -4,6 +4,7 @@ import BudgetTable from '../components/budget/BudgetTable.vue';
 import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/LoginPage.vue';
 import BudgetDetails from '../components/budget/BudgetDetails.vue';
+import BudgetFromCL from '../pages/BudgetFromCL.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -16,6 +17,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/budget-table',
     name: 'BudgetTable',
     component: BudgetTable,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/budget-table-cl',
+    name: 'BudgetFromCL',
+    component: BudgetFromCL,
     meta: { requiresAuth: true }
   },
   {

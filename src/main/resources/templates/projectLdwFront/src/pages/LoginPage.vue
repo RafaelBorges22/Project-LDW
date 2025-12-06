@@ -351,8 +351,9 @@ export default {
         // 5) Busca dados completos do usuário (id, phone, address) e garante salvar usuarioId
         try {
           const resUser = await axios.get(
-            `${API_URL_CLI}` + `/${encodeURIComponent(this.login.email)}`
+            `${API_URL_CLI}/email/${encodeURIComponent(this.login.email)}`
           );
+
           const user = resUser.data;
           if (user) {
             if (user.id) localStorage.setItem('usuarioId', String(user.id));
