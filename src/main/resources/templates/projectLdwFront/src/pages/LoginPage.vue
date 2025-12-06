@@ -147,19 +147,20 @@
 
       <!-- Recuperação de senha - ETAPA 1: solicitar e-mail -->
       <form v-else-if="modoRecuperacao && etapaRecuperacao === 1" class="form-container recuperacao-form"
-        @submit.prevent="solicitarResetSenha">
+        @submit.prevent="solicitarResetSenha" autocomplete="on" novalidate>
         <div class="input-box" :class="{ filled: reset.email }">
-          <input type="email" class="input-field" v-model="reset.email" required />
-          <label class="label">Email cadastrado</label>
-          <i class="fi fi-rr-envelope" id="icon-login"></i>
+          <input id="reset-email" name="email" type="email" class="input-field" v-model="reset.email" required
+            autocomplete="email" autocorrect="off" autocapitalize="off" spellcheck="false"
+            @keyup.enter.prevent="solicitarResetSenha" />
+          <label class="label email-recuperacao">Email cadastrado</label>
+          <i class="fi fi-rr-envelope" id="icon-recuperacao"></i>
         </div>
-
+        <input type="submit" style="position:absolute; left:-9999px; width:1px; height:1px;" aria-hidden="true" />
         <div class="input-box">
           <button type="submit" class="btn-submit">
-            Enviar link de redefinição <i class="bx bx-mail-send"></i>
+            Enviar código de redefinição <i class="bx bx-mail-send"></i>
           </button>
         </div>
-
         <div class="swith-form">
           <span>Lembrou sua senha?
             <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a>
@@ -168,23 +169,57 @@
       </form>
 
       <!-- Recuperação de senha - ETAPA 2: informar token + nova senha -->
-      <form v-else class="form-container recuperacao-form" @submit.prevent="redefinirSenha">
+      <form v-else class="form-container recuperacao-form" @submit.prevent="redefinirSenha" autocomplete="on"
+        novalidate>
+
         <div class="input-box" :class="{ filled: reset.token }">
-          <input type="text" class="input-field" v-model="reset.token" required />
+          <input id="reset-token" name="one-time-code" type="text" class="input-field" v-model="reset.token" required
+            autocomplete="one-time-code" @keyup.enter.prevent="redefinirSenha" />
           <label class="label">Token recebido por e-mail</label>
           <i class="fi fi-rr-key" id="icon-login"></i>
         </div>
 
-        <div class="input-box" :class="{ filled: reset.novaSenha }">
-          <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" class="input-field" v-model="reset.novaSenha"
-            required />
+        <div class="input-box campo-password" :class="{ filled: reset.novaSenha }">
+          <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" id="reset-nova-senha" name="new-password"
+            class="input-field" v-model="reset.novaSenha" required autocomplete="new-password"
+            placeholder="Min. 8 caracteres" @keyup.enter.prevent="redefinirSenha" />
           <label class="label" id="label-nova-senha">Nova Senha</label>
           <i class="fi fi-rr-lock" id="icon-login"></i>
+
+          <div class="pwd-compact" aria-hidden="false">
+            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.minLength }" title="Mínimo 8 caracteres">
+              <i :class="resetSenhaCriteria.minLength ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+              <small>8+</small>
+            </span>
+
+            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.lower }" title="Possui letra minúscula">
+              <i :class="resetSenhaCriteria.lower ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+              <small>a</small>
+            </span>
+
+            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.upper }" title="Possui letra maiúscula">
+              <i :class="resetSenhaCriteria.upper ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+              <small>A</small>
+            </span>
+
+            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.number }" title="Possui número">
+              <i :class="resetSenhaCriteria.number ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+              <small>123</small>
+            </span>
+
+            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.special }" title="Possui caractere especial">
+              <i :class="resetSenhaCriteria.special ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+              <small>#</small>
+            </span>
+
+            <span class="pwd-strength" :class="resetStrengthClass">{{ resetStrengthLabel }}</span>
+          </div>
         </div>
 
         <div class="input-box" :class="{ filled: reset.confirmarNovaSenha }">
-          <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" class="input-field"
-            v-model="reset.confirmarNovaSenha" required />
+          <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" id="reset-confirmar-nova-senha"
+            name="confirm-new-password" class="input-field" v-model="reset.confirmarNovaSenha" required
+            autocomplete="new-password" placeholder="Confirme a nova senha" @keyup.enter.prevent="redefinirSenha" />
           <label class="label" id="label-confirmar-nova-senha">Confirmar Nova Senha</label>
           <i class="fi fi-rr-lock" id="icon-login"></i>
         </div>
@@ -198,6 +233,8 @@
           </div>
         </div>
 
+        <input type="submit" style="position:absolute; left:-9999px; width:1px; height:1px;" aria-hidden="true" />
+
         <div class="input-box">
           <button type="submit" class="btn-submit">
             Redefinir Senha <i class="bx bx-reset"></i>
@@ -209,28 +246,39 @@
             <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a>
           </span>
         </div>
+
       </form>
+
     </div>
 
     <div v-if="showPopup" class="login-popup-overlay" @click="showPopup = false">
       <div class="login-popup-card" :class="popupType" @click.stop>
+
         <div class="login-popup-icon-wrap">
-          <span class="login-popup-icon" v-if="popupType === 'error'">!</span>
-          <span class="login-popup-icon" v-else>✅</span>
+          <span class="login-popup-icon error" v-if="popupType === 'error'">!</span>
+          <span class="login-popup-icon success" v-else>✅</span>
         </div>
+
         <h3 class="login-popup-title">
           {{ popupTitle }}
         </h3>
+
         <p class="login-popup-text">
           {{ popupMessage }}
         </p>
+
+        <!-- Botão quando for sucesso -->
         <button v-if="popupType === 'success'" type="button" class="login-popup-button" @click="irParaLogin">
           Ir para o Login
         </button>
+
+        <!-- Botão quando for erro -->
         <button v-else type="button" class="login-popup-button" @click="showPopup = false">
-          Tentar novamente
+          fechar
         </button>
+
       </div>
+
     </div>
   </section>
 </template>
@@ -290,6 +338,7 @@ export default {
   },
 
   computed: {
+    /* ---------------- cadastro senha (original) ---------------- */
     senhaCriteria() {
       const s = this.cadastro.senha || '';
       return {
@@ -319,6 +368,39 @@ export default {
     strengthClass() {
       if (this.senhaScore <= 2) return 'weak';
       if (this.senhaScore === 3 || this.senhaScore === 4) return 'medium';
+      return 'strong';
+    },
+
+    /* ---------------- reset senha (nova) - mesma lógica separada ---------------- */
+    resetSenhaCriteria() {
+      const s = this.reset.novaSenha || '';
+      return {
+        minLength: s.length >= 8,
+        lower: /[a-z]/.test(s),
+        upper: /[A-Z]/.test(s),
+        number: /[0-9]/.test(s),
+        special: /[!@#\$%\^&\*\(\)\-_\+=\[\]{};:'",.<>\/\\\?|`~]/.test(s)
+      };
+    },
+
+    resetSenhaScore() {
+      const c = this.resetSenhaCriteria;
+      return Object.values(c).filter(Boolean).length;
+    },
+
+    resetSenhaIsStrong() {
+      return this.resetSenhaScore === 5;
+    },
+
+    resetStrengthLabel() {
+      if (this.resetSenhaScore <= 2) return 'Fraca';
+      if (this.resetSenhaScore === 3 || this.resetSenhaScore === 4) return 'Média';
+      return 'Forte';
+    },
+
+    resetStrengthClass() {
+      if (this.resetSenhaScore <= 2) return 'weak';
+      if (this.resetSenhaScore === 3 || this.resetSenhaScore === 4) return 'medium';
       return 'strong';
     }
   },
@@ -475,7 +557,7 @@ export default {
 
         this.abrirPopup(
           'Verifique seu e-mail',
-          'Se o e-mail informado estiver cadastrado, você receberá um link para redefinir sua senha.',
+          'Se o e-mail informado estiver cadastrado, você receberá um código para redefinição de senha.',
           'info'
         );
 
@@ -492,6 +574,7 @@ export default {
     },
 
     async redefinirSenha() {
+      // checa se as senhas coincidem
       if (this.reset.novaSenha !== this.reset.confirmarNovaSenha) {
         this.abrirPopup(
           'Senhas diferentes',
@@ -499,6 +582,23 @@ export default {
           'error'
         );
         this.sucessoRecuperacao = '';
+        return;
+      }
+
+      // checa força da senha (mesma validação do cadastro)
+      if (!this.resetSenhaIsStrong) {
+        const faltam = [];
+        const crit = this.resetSenhaCriteria;
+        if (!crit.minLength) faltam.push('mínimo 8 caracteres');
+        if (!crit.lower) faltam.push('uma letra minúscula');
+        if (!crit.upper) faltam.push('uma letra maiúscula');
+        if (!crit.number) faltam.push('um número');
+        if (!crit.special) faltam.push('um caractere especial');
+        this.abrirPopup(
+          'Senha fraca',
+          `Sua senha precisa conter: ${faltam.join(', ')}.`,
+          'error'
+        );
         return;
       }
 
