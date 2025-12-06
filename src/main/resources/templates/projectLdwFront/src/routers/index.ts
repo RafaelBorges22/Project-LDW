@@ -5,7 +5,8 @@ import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/LoginPage.vue';
 import BudgetDetails from '../components/budget/BudgetDetails.vue';
 import BudgetFromCL from '../pages/BudgetFromCL.vue';
-import ChatPage from '../pages/ChatPage.vue'
+import ForbiddenErrorPage from '../pages/err/403.vue';
+import NotFoundErrorPage from '../pages/err/404.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,7 +19,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/budget-table',
     name: 'BudgetTable',
     component: BudgetTable,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, role: 'ADMIN' }
   },
   {
     path: '/budget-table-cl',
@@ -30,32 +31,40 @@ const routes: Array<RouteRecordRaw> = [
     path: '/quotes/:id',
     name: 'quote-details',
     component: BudgetDetails,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, role: 'ADMIN' }
   },
   {
     path: '/',
     name: 'Home',
-    component: HomePage,
-    meta: { requiresAuth: false }
+    component: HomePage
   },
   {
     path: '/login',
     name: 'login',
-    component: Login,
-    meta: { requiresAuth: false }
-  },
-  {
-      path: '/chat',
-      name: 'chat',
-      component: () => import('../pages/ChatPage.vue'),
-      meta: { requiresAuth: true }
+    component: Login
   },
   {
     path: '/account',
     name: 'Account',
     component: () => import('../pages/AccountPage.vue'),
     meta: { requiresAuth: true }
-  }
+  },
+  {
+  path: '/403',
+  name: 'Forbidden',
+  component:ForbiddenErrorPage,
+  meta: { requiresAuth: false }
+  },
+  {
+  path: '/404',
+  name: 'NotFound',
+  component: NotFoundErrorPage,
+},
+{
+  path: '/:pathMatch(.*)*',
+  redirect: '/404'
+}
+
 ];
 
 const router = createRouter({
@@ -72,13 +81,39 @@ function getTokenSafe(): string | null {
   return trimmed;
 }
 
+// decodifica JWT manualmente (sem lib)
+function decodeJwt(token: string): any | null {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decoded);
+  } catch (e) {
+    console.warn('Erro ao decodificar token:', e);
+    return null;
+  }
+}
+
 router.beforeEach((to, from, next) => {
   const token = getTokenSafe();
+  const requiresAuth = Boolean(to.meta?.requiresAuth);
 
-  console.log('[router.beforeEach] to:', to.fullPath, 'name:', to.name, 'requiresAuth:', Boolean(to.meta?.requiresAuth), 'tokenExists:', !!token);
+  console.log('[router.beforeEach] to:', to.fullPath, 'requiresAuth:', requiresAuth, 'tokenExists:', !!token);
 
-  if (to.meta?.requiresAuth && !token) {
+  if (requiresAuth && !token) {
     return next({ name: 'Home' });
+  }
+
+  // Verifica role se a rota exigir
+  if (to.meta?.role) {
+    const decoded = token ? decodeJwt(token) : null;
+
+    const userRole = decoded?.role || decoded?.authorities || decoded?.roles;
+
+    console.log('Role do usuário:', userRole, '| role necessária:', to.meta.role);
+
+    if (!userRole || !String(userRole).includes(String(to.meta.role))) {
+      return next({ name: 'Forbidden' });
+    }
   }
 
   return next();
