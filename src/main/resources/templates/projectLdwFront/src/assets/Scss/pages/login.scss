@@ -200,8 +200,6 @@
   line-height: 1;
 }
 
-
-
 .login-popup-title {
   font-size: 1.25rem;
   font-weight: 600;
@@ -383,7 +381,6 @@ form {
     font-size: 12px;
   }
 
-  /* estado OK (verde) */
   .pwd-chip.ok {
     background: rgba(46, 204, 113, 0.12);
     color: #2ecc71;
@@ -391,7 +388,6 @@ form {
     transform: translateY(-1px);
   }
 
-  /* rótulo de força */
   .pwd-strength {
     margin-left: 6px;
     font-size: 12px;
@@ -401,7 +397,6 @@ form {
     font-weight: 700;
   }
 
-  /* força: fraca / média / forte */
   .pwd-strength.weak {
     background: rgba(255, 99, 71, 0.08);
     color: #ff6347;
@@ -461,7 +456,6 @@ form {
   }
 }
 
-/* BOTÃO */
 .btn-submit {
   display: flex;
   justify-content: center;
@@ -494,7 +488,6 @@ form {
   }
 }
 
-/* MENSAGENS */
 #msg-erro,
 #msg-sucesso {
   display: flex;
@@ -508,7 +501,6 @@ form {
 #msg-erro { color: $error-color; }
 #msg-sucesso { color: $success-color; }
 
-/* SWITCH FORM */
 .swith-form {
   text-align: center;
 
@@ -521,13 +513,11 @@ form {
   }
 }
 
-/* LABELS ESPECÍFICAS */
 #label-nova-senha,
 #label-confirmar-nova-senha {
   left: 20px;
 }
 
-/* RESPONSIVIDADE */
 @media (max-width: 564px) {
   .wrapper {
     width: 90%;
@@ -535,7 +525,6 @@ form {
     padding: 40px 20px;
   }
 
-  /* compacte ainda mais os chips em telas pequenas */
   .pwd-chip {
     padding: 3px 6px;
     font-size: 11px;
@@ -545,4 +534,58 @@ form {
     font-size: 11px;
     padding: 3px 6px;
   }
+}
+
+/* ========== LOADING / OVERLAYS PADRONIZADOS ========== */
+
+.global-loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.32);
+  z-index: 12000;
+  pointer-events: auto;
+}
+
+.global-loading-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  font-weight: 600;
+  color: $text-color-black;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.global-loading-box .spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,0,0,0.08);
+  border-top-color: rgba(0,0,0,0.45);
+  animation: _login-spin 0.9s linear infinite;
+}
+
+.global-loading-box .loading-text {
+  font-size: 0.95rem;
+  color: $text-color-black;
+  opacity: 0.95;
+}
+
+@keyframes _login-spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-submit[disabled],
+.btn-submit.disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+  pointer-events: none;
+  transform: none;
 }

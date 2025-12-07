@@ -209,11 +209,21 @@ export default {
     };
   },
   mounted() {
-    // nome / welcome logic (mantido)
-    const email = (localStorage.getItem('usuarioEmail') || '').trim();
-    const key = `welcomeShown:${email || 'anon'}`;
-    const nomeBruto = (localStorage.getItem('usuarioNome') || '').trim();
+    // inicia autoplay do carrossel
+    this.startAutoplay();
 
+    // pausa autoplay quando aba estiver oculta
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
+
+    // ===== lógica de nome / welcome popup =====
+    const token = localStorage.getItem('jwtToken');
+    if (!token) return; // usuário não logado, não mostra o pop-up
+
+    const email = (localStorage.getItem('usuarioEmail') || '').trim();
+    const nomeBruto = (localStorage.getItem('usuarioNome') || '').trim();
+    const key = `welcomeShown:${email || 'anon'}`;
+
+    // define firstName
     if (nomeBruto) {
       this.firstName = this.pickFirstAndSecond(nomeBruto);
     } else if (email.includes('@')) {
@@ -222,17 +232,12 @@ export default {
       this.firstName = 'ao estúdio';
     }
 
+    // mostra pop-up apenas se ainda não viu
     const jaViu = localStorage.getItem(key);
     if (!jaViu) {
       this.showWelcome = true;
       localStorage.setItem(key, 'true');
     }
-
-    // inicia autoplay do carrossel
-    this.startAutoplay();
-
-    // pausar autoplay quando aba estiver oculta
-    document.addEventListener('visibilitychange', this.onVisibilityChange);
   },
   beforeUnmount() {
     this.stopAutoplay();
@@ -294,7 +299,6 @@ export default {
     // transition end handler: libera a navegação
     onTransitionEnd(e) {
       if (e.target === this.$refs.galleryTrack) {
-        // margem de segurança para garantir repaint completo
         setTimeout(() => {
           this.isTransitioning = false;
         }, 0);
@@ -324,7 +328,6 @@ export default {
     // navegação (com verificação de login)
     goToBudget() {
       if (!this.isLoggedIn) {
-        // guarda destino desejado para pós-login (opcional)
         try { localStorage.setItem('postLoginRedirect', '/budget'); } catch (e) {}
         this.$router.push('/login');
         return;
@@ -333,14 +336,13 @@ export default {
     },
     irParaAgendamento() {
       this.showWelcome = false;
-      // reaproveita a mesma lógica de verificação
       this.goToBudget();
     },
     fecharWelcome() {
       this.showWelcome = false;
     },
 
-    /* helpers de nome (mantidos) */
+    /* helpers de nome */
     pickFirstAndSecond(full) {
       const tokens = String(full).replace(/\s+/g, ' ').trim().split(' ');
       if (!tokens.length) return '';
@@ -382,7 +384,6 @@ export default {
   }
 };
 </script>
-
 <style>
 @import '../assets/Scss/pages/home.scss';
 </style>

@@ -1,53 +1,114 @@
-$bg: #0f0f10;
-$card: #141414;
-$accent: #5C3A33;
-$hover: #7B4B42;
-$text: #fff;
-$muted: rgba(255,255,255,0.66);
+@import '../global/Global.scss';
 
+/* ----------------- Paleta Global (Variáveis ajustadas) ----------------- */
+$accent: $brown-color;           // Marrom principal
+$accent-dark: $brown-color-white; // Marrom mais claro/hover
+// ... (outras variáveis mantidas)
+$bg-page: $black-color;
+$card-bg: $black-color;
+$text: $text-color-white;
+$text-muted: rgba(255,255,255,0.66);
+$error: $error-color;
+$success: $success-color;
+$info: #4682b4;
+$warning: $brown-color-white;
+$highlight: lighten($brown-color, 15%);
+$radius-lg: 12px;
+$radius-sm: 8px;
+$gap: 16px;
+$transition-fast: $transition;
+
+/* ----------------- Container principal ----------------- */
 .budget-table {
-  background: linear-gradient(180deg, rgba(20,20,20,0.96), $card);
+  // Usando black-color como base escura
+  background: linear-gradient(180deg, rgba($black-color,0.98), darken($black-color, 2%));
   color: $text;
-  padding: 22px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.03);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.6);
-  max-width: 1100px;
-  margin: 0 auto;
+  padding: 30px;
+  border-radius: $radius-lg;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+  max-width: 1200px;
+  margin: 30px auto;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-/* header com titulo e ação */
-.header-row {
+/* Header e Ações - Mais organizado */
+.header-section {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  align-items: flex-start;
+  gap: $gap;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
+.title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
 .table-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: $highlight; // Destaque na cor mais clara do marrom
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: $text;
+}
+.table-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.7);
 }
 
-.header-actions .btn.primary {
-  background: linear-gradient(180deg, $accent, darken($accent, 6%));
-  border: 1px solid $accent;
-  color: $text;
-  padding: 10px 14px;
+.actions-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.new-quote-btn {
+  background-color: $brown-color !important;
+  color: $text-color-white;
+  padding: 12px 18px;
   border-radius: 10px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
+  transition: all $transition-fast;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.new-quote-btn:hover {
+    background: $accent-dark;
+    transform: translateY(-1px);
+    box-shadow: none; 
 }
 
-.header-actions .btn.primary:hover {
-  background: $hover;
-  border-color: $hover;
+.filters-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-/* placeholders / erros */
+.search-input, .state-filter {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.03);
+  color: $text;
+  font-size: 0.95rem;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+}
+.search-input:focus, .state-filter:focus {
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.3);
+}
+
+/* placeholders */
 .table-placeholder,
 .table-error,
 .no-data {
@@ -56,10 +117,11 @@ $muted: rgba(255,255,255,0.66);
   align-items: center;
   justify-content: center;
   padding: 36px 10px;
-  color: $muted;
-  border-radius: 8px;
+  color: $text-muted;
+  border-radius: $radius-sm;
   gap: 10px;
 }
+.table-error .error-message { color: $error; }
 
 /* spinner */
 .spinner {
@@ -71,104 +133,226 @@ $muted: rgba(255,255,255,0.66);
   animation: spin 1s linear infinite;
   margin-bottom: 6px;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* tabela desktop */
+/* ========== Stats Cards (Mais Visuais) ========== */
+.stats-row {
+  display: flex;
+  gap: $gap;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  background: rgba(255,255,255,0.02);
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 150px;
+  flex-grow: 1;
+  border: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+.stat-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2.5rem;
+  opacity: 0.08;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: $highlight; // Destaque na cor principal
+}
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Cores específicas para stats */
+.pending-stat .stat-value { color: $warning; }
+.paid-stat .stat-value { color: $success; }
+.total-stat .stat-value { color: $accent; }
+
+/* ----------------- Table (desktop) ----------------- */
+.table-container {
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
 .styled-table {
+  min-width: 900px;
   width: 100%;
   border-collapse: collapse;
-  background: transparent;
+  background: rgba(0,0,0,0.2);
   color: $text;
-  overflow: hidden;
-  border-radius: 10px;
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.02);
 }
 
 .styled-table thead th {
   text-align: left;
-  padding: 12px 14px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: lighten($text, 6%);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  background: rgba(255,255,255,0.02);
-}
-
-.styled-table tbody td {
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  vertical-align: middle;
-  font-size: 0.95rem;
-}
-
-.clickable-row {
-  cursor: pointer;
-  transition: background 200ms ease;
-}
-
-.clickable-row:hover {
+  padding: 14px 18px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.8);
+  border-bottom: 2px solid rgba(255,255,255,0.05);
   background: rgba(255,255,255,0.03);
 }
 
-/* client column */
-.client-info .muted {
-  color: $muted;
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-.client-info p { margin: 0; }
-
-/* empty card */
-.empty-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255,255,255,0.02);
-  padding: 24px;
-  border-radius: 10px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.empty-icon {
-  width: 48px;
-  height: 48px;
-  color: $accent;
-  opacity: 0.95;
-}
-
-.empty-card h4 {
-  margin: 0;
+.styled-table tbody td {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  vertical-align: center;
+  font-size: 0.95rem;
   color: $text;
-  font-weight: 800;
 }
 
-.empty-card .muted {
-  color: $muted;
-  text-align: center;
+/* clickable row */
+.clickable-row {
+  cursor: pointer;
+  transition: background 200ms ease, box-shadow 200ms ease;
+}
+.clickable-row:hover {
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* botões */
-.btn {
+/* Descrição e meta */
+.quote-title { font-size: 1rem; font-weight: 800; color: $text; display: block; margin-bottom: 4px; }
+.small-meta {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ----------------- Status badges (Ajustado à Paleta) ----------------- */
+.status {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
-  border-radius: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
   font-weight: 700;
-  cursor: pointer;
-  border: none;
-  color: $text;
-  background: transparent;
+  font-size: 0.82rem;
+  letter-spacing: 0.2px;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  background: linear-gradient(180deg, rgba($info,0.08), rgba($info,0.04));
+  color: $info;
+  border-color: rgba($info,0.2);
 }
 
-.btn.outline {
-  border: 1px solid rgba(255,255,255,0.06);
+/* icons via pseudo */
+.status::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: $info; box-shadow: 0 0 10px rgba($info,0.15);
 }
 
+/* Pending / WAITING (Usando $warning) */
+.status-pending {
+  background: linear-gradient(180deg, rgba($warning,0.08), rgba($warning,0.04));
+  color: $warning;
+  border-color: rgba($warning,0.2);
+}
+.status-pending::before { background: $warning; box-shadow: 0 0 10px rgba($warning,0.18); }
+
+/* Respondido / AWNSERED (AGORA USANDO $info PARA AZUL) */
+.status-responded {
+  background: linear-gradient(180deg, rgba($info,0.08), rgba($info,0.04));
+  color: $info;
+  border-color: rgba($info,0.2);
+}
+.status-responded::before { background: $info; box-shadow: 0 0 10px rgba($info,0.15); }
+
+/* Pago / PAID (Usando $success - Verde) */
+.status-paid {
+  background: linear-gradient(180deg, rgba($success,0.08), rgba($success,0.04));
+  color: $success;
+  border-color: rgba($success,0.2);
+}
+.status-paid::before { background: $success; box-shadow: 0 0 10px rgba($success,0.15); }
+
+/* Rejeitado (Usando $error) */
+.status-rejected {
+  background: linear-gradient(180deg, rgba($error,0.08), rgba($error,0.04));
+  color: $error;
+  border-color: rgba($error,0.2);
+}
+.status-rejected::before { background: $error; box-shadow: 0 0 10px rgba($error,0.18); }
+
+/* In progress / Andamento / Aprovado (Usando $info) */
+.status-inprogress,
+.status-approved {
+  background: linear-gradient(180deg, rgba($info,0.08), rgba($info,0.04));
+  color: $info;
+  border-color: rgba($info,0.2);
+}
+.status-inprogress::before,
+.status-approved::before { background: $info; box-shadow: 0 0 10px rgba($info,0.18); }
+
+/* ----------------- Adjustment styles (Ajustado à Paleta) ----------------- */
+.adjustment {
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.adjustment-await { color: $text-muted; font-style: italic; font-size: 0.85rem; }
+
+/* Aumento de custo (Vermelho de $error) */
+.adjust-up {
+  color: $error;
+  background: rgba($error,0.1);
+  border: 1px solid rgba($error,0.1);
+}
+/* Redução de custo (Verde de $success) */
+.adjust-down {
+  color: $success;
+  background: rgba($success,0.1);
+  border: 1px solid rgba($success,0.1);
+}
+.adjust-none { color: $text-muted; background: transparent; }
+
+/* Valor Final Destaque */
+.highlight-final {
+  color: $highlight; // Cor clara do marrom para destaque
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+.final-value-await { color: rgba(255,255,255,0.4); font-style: italic; font-size: 0.85rem; }
+
+/* ========== Empty card ========== */
+.no-data { padding: 40px 10px; }
+.empty-card {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 30px;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+.empty-icon { font-size: 3rem; color: $accent; opacity: 0.95; }
+.empty-card h4 { margin: 0; color: $text; font-weight: 800; }
+.empty-card .muted { color: $text-muted; text-align: center; }
+
+/* ========== Buttons ========== */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; color: $text; background: transparent; }
+.btn.outline { border: 1px solid rgba(255,255,255,0.12); }
 .retry-btn {
   background: transparent;
   border: 1px solid $accent;
@@ -177,21 +361,153 @@ $muted: rgba(255,255,255,0.66);
   border-radius: 8px;
   cursor: pointer;
 }
+.retry-btn:hover { background: $accent-dark; border-color: $accent-dark; }
 
-.retry-btn:hover {
-  background: $hover;
-  border-color: $hover;
+.explain-note {
+  margin-top: 24px;
+  padding: 16px;
+  border-left: 4px solid $accent;
+  background: rgba(255,255,255,0.03);
+  color: $text-muted;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 10px;
+}
+.explain-note strong { color: $accent; }
+
+/* ========== Acessibilidade / foco ========== */
+button:focus, .btn:focus, .save-btn:focus, .back-btn:focus, .edit-input:focus {
+  outline: 3px solid rgba($accent,0.5);
+  outline-offset: 2px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 
-/* responsive: transforma em cards */
-@media (max-width: 760px) {
+/* utilitários */
+.text-right { text-align: right; justify-items: center !important; }
+
+/* Colunas específicas para melhor controle */
+.col-desc { width: 30%;}
+.col-state { width: 12%; text-align: center !important; justify-content: center !important;}
+.col-initial, .col-adjust, .col-final { width: 15%; text-align: center !important;}
+.col-actions { width: 13%; text-align: center !important; }
+
+
+/* ----------------- Responsivo: cards mobile (Melhorado) ----------------- */
+@media (max-width: 900px) {
+  .budget-table { margin: 15px; padding: 20px; }
+  .header-section { flex-direction: column; align-items: stretch; }
+  .actions-block { align-items: stretch; }
+  .filters-row { flex-direction: column; align-items: stretch; }
+  .search-input, .state-filter { width: 100%; box-sizing: border-box; }
+  .new-quote-btn { width: 100%; justify-content: center; }
+
+  .stats-row { justify-content: center; }
+  .stat-card { min-width: 45%; max-width: 45%; padding: 12px; }
+}
+
+@media (max-width: 600px) {
+  .stat-card { min-width: 100%; max-width: 100%; }
+
+  /* Tabela vira cards */
   .styled-table thead { display: none; }
   .styled-table, .styled-table tbody, .styled-table tr, .styled-table td { display: block; width: 100%; }
-  .styled-table tr { margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 10px; }
-  .styled-table td { padding: 8px 10px; border: none; display: flex; justify-content: space-between; align-items: center; }
-  .styled-table td::before { content: attr(data-label); color: $muted; font-weight: 700; margin-right: 12px; }
+  .styled-table tr {
+    margin-bottom: 15px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+  .styled-table td {
+    padding: 8px 0;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .styled-table td::before {
+    content: attr(data-label);
+    color: rgba(255,255,255,0.5);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  /* Ajustes específicos para mobile */
+  .col-desc { display: block; margin-bottom: 10px; }
+  .col-desc::before { display: none; }
+  .desc { flex-direction: column; align-items: flex-start; }
+  .quote-title { font-size: 1rem; }
+  .small-meta { margin-top: 5px; }
+  .col-actions { justify-content: flex-start; }
+  .col-actions::before { content: ""; width: 0; }
+  .details-btn { width: 100%; justify-content: center; }
 }
 
-/* pequenos ajustes */
-.error-actions { display: flex; gap: 8px; margin-top: 8px; }
-.header-actions { display: flex; gap: 8px; align-items: center; }
+/* Regras de CSS adicionais (detalhes do tatuador - não faz parte da tabela, mas estava no original) */
+.quote-details {
+  padding: 2rem;
+  color: $text;
+  background-color: $card-bg;
+  border-radius: 16px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  max-width: 1000px;
+  margin: 2rem auto;
+}
+.quote-details .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.back-btn { background: rgba(255,255,255,0.06); border: none; color: $text; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: background $transition-fast; }
+.back-btn:hover { background: rgba(255,255,255,0.12); }
+.info-box, .client-box { background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 12px; min-height: 160px; }
+.info-box h3, .client-box h3 { margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; }
+.info-box strong, .client-box strong { color: $accent; }
+.save-btn {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, $accent, darken($accent, 6%));
+  color: $text;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform $transition-fast, background $transition-fast;
+}
+.save-btn:hover { transform: translateY(-1px); background: $accent-dark; }
+
+/* =================== Dropdown filtro =================== */
+.state-filter {
+  background-color: rgba(255, 255, 255, 0.08); // fundo escuro translúcido
+  color: $text; // texto branco
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  appearance: none; // remove estilo nativo
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &:focus {
+    border-color: $accent;
+    box-shadow: 0 0 0 2px rgba($accent, 0.3);
+    outline: none;
+  }
+}
+
+/* seta customizada */
+.state-filter {
+  background-image: url("data:image/svg+xml,%3Csvg fill='%23FFFFFF' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px; // espaço para seta
+}
+
+/* Opcional: melhora contraste das opções quando abertas (nem todos browsers aceitam) */
+.state-filter option {
+  background-color: $card-bg;
+  color: $text;
+}
+
+.client-filter {
+  margin-left: 8px;
+}

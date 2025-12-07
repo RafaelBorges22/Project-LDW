@@ -1,254 +1,243 @@
 <template>
   <section class="login">
-    <div class="wrapper">
-      <!-- Cabeçalho -->
-      <div class="form-header" :class="{ 'largura-aumentada': modoRecuperacao }">
-        <div class="titles">
-          <div v-if="!modoCadastro && !modoRecuperacao" class="title-login">Login</div>
-          <div v-else-if="modoCadastro" class="title-cadastro">Cadastro</div>
-          <div v-else class="title-recuperacao">Recuperar Senha</div>
+
+    <div class="login-container">
+      <div class="wrapper">
+        <div class="form-header" :class="{ 'largura-aumentada': modoRecuperacao }">
+          <div class="titles">
+            <div v-if="!modoCadastro && !modoRecuperacao" class="title-login">Login</div>
+            <div v-else-if="modoCadastro" class="title-cadastro">Cadastro</div>
+            <div v-else class="title-recuperacao">Recuperar Senha</div>
+          </div>
         </div>
+
+        <form v-if="!modoCadastro && !modoRecuperacao" class="form-container login-form" @submit.prevent="fazerLogin">
+          <div class="input-box" :class="{ filled: login.email }">
+            <input id="login-email" name="username" type="email" class="input-field" v-model="login.email" required
+              autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false" /> <label class="label">Email</label>
+            <i class="fi fi-rr-envelope" id="icon-login"></i>
+          </div>
+
+          <div class="input-box" :class="{ filled: login.password }">
+            <input id="login-password" name="current-password" :type="mostrarSenhaLogin ? 'text' : 'password'"
+              class="input-field" v-model="login.password" required autocomplete="current-password"
+              ref="passwordField" /> <label class="label">Senha</label>
+            <i class="fi fi-rr-lock" id="icon-login"></i>
+          </div>
+
+          <div class="form-cols">
+            <div class="col-1">
+              <input type="checkbox" id="mostrar-senha-login" v-model="mostrarSenhaLogin" />
+              <label for="mostrar-senha-login">
+                {{ mostrarSenhaLogin ? 'Ocultar Senha' : 'Mostrar Senha' }}
+              </label>
+            </div>
+
+            <div class="col-2">
+              <a href="#" @click.prevent="trocarFormulario('recuperacao')">Esqueceu a senha?</a>
+            </div>
+          </div>
+
+          <div class="input-box">
+            <button type="submit" class="btn-submit" :disabled="isLoading" :aria-disabled="isLoading">
+              Entrar<i class="bx bx-log-in"></i>
+            </button>
+          </div>
+
+          <div class="swith-form">
+            <span>Não tem uma conta?
+              <a href="#" @click.prevent="trocarFormulario('cadastro')">Cadastre-se</a>
+            </span>
+          </div>
+        </form>
+
+        <form v-else-if="modoCadastro" class="form-container cadastro-form" @submit.prevent="criarUsuario">
+          <div class="input-box" :class="{ filled: cadastro.nome }">
+            <input type="text" class="input-field" placeholder="Nome Completo" v-model="cadastro.nome" required />
+            <label class="label">Nome</label>
+            <i class="fi fi-rs-user" id="icon-login"></i>
+          </div>
+
+          <div class="input-box" :class="{ filled: cadastro.telefone }">
+            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" class="input-field"
+              v-model="cadastro.telefone" @input="formatarTelefone" maxlength="15" required
+              placeholder="(11) 91234-5678" pattern="^\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}$"
+              title="Telefone no formato (11) 91234-5678" /> <label class="label tel">Telefone</label>
+            <i class="fi fi-rr-phone-call" id="icon-login"></i>
+          </div>
+
+          <div class="input-box" :class="{ filled: cadastro.endereco }">
+            <input type="text" class="input-field" v-model="cadastro.endereco" required
+              placeholder="Rua, Número, Bairro, Cidade, Estado"
+              title="Endereço (Rua, Número, Bairro, Cidade, Estado)" /> <label class="label">Endereço</label>
+            <i class="fi fi-rr-map-pin" id="icon-login"></i>
+          </div>
+
+          <div class="input-box" :class="{ filled: cadastro.email }">
+            <input id="email" name="email" type="email" class="input-field" placeholder="email@exemplo.com"
+              v-model="cadastro.email" autocomplete="email" required /> <label class="label">Email</label>
+            <i class="fi fi-rr-envelope" id="icon-login"></i>
+          </div>
+
+          <div class="input-box campo-password" :class="{ filled: cadastro.senha }">
+            <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field"
+              placeholder="Min. 8 caracteres" v-model="cadastro.senha" required /> <label class="label">Senha</label>
+            <i class="fi fi-rr-lock" id="icon-login"></i>
+
+            <div class="pwd-compact" aria-hidden="false">
+              <span class="pwd-chip" :class="{ ok: senhaCriteria.minLength }" title="Mínimo 8 caracteres">
+                <i :class="senhaCriteria.minLength ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>8+</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: senhaCriteria.lower }" title="Possui letra minúscula">
+                <i :class="senhaCriteria.lower ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>a</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: senhaCriteria.upper }" title="Possui letra maiúscula">
+                <i :class="senhaCriteria.upper ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>A</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: senhaCriteria.number }" title="Possui número">
+                <i :class="senhaCriteria.number ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>123</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: senhaCriteria.special }" title="Possui caractere especial">
+                <i :class="senhaCriteria.special ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>#</small>
+              </span>
+
+              <span class="pwd-strength" :class="strengthClass">{{ strengthLabel }}</span>
+            </div>
+          </div>
+
+          <div class="input-box" :class="{ filled: cadastro.confirmarSenha }">
+            <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field"
+              placeholder="Confirme sua senha" v-model="cadastro.confirmarSenha" required />
+            <label class="label" id="label-confirmar-senha">Confirmar Senha</label>
+            <i class="fi fi-rr-lock" id="icon-login"></i>
+          </div>
+
+          <div class="form-cols">
+            <div class="col-1">
+              <input type="checkbox" id="mostrar-senha-cadastro" v-model="mostrarSenhaCadastro" />
+              <label for="mostrar-senha-cadastro">
+                {{ mostrarSenhaCadastro ? 'Ocultar Senhas' : 'Mostrar Senhas' }}
+              </label>
+            </div>
+          </div>
+
+          <div class="input-box">
+            <button type="submit" class="btn-submit" :disabled="isLoading" :aria-disabled="isLoading">
+              Cadastrar<i id="icon-cadastro" class="fi fi-ss-paw-claws"></i>
+            </button>
+          </div>
+          <div class="swith-form">
+            <span>Já tem uma conta?
+              <a href="#" @click.prevent="trocarFormulario('login')">Faça o Login</a>
+            </span>
+          </div>
+        </form>
+
+        <form v-else-if="modoRecuperacao && etapaRecuperacao === 1" class="form-container recuperacao-form"
+          @submit.prevent="solicitarResetSenha" autocomplete="on">
+          <div class="input-box" :class="{ filled: reset.email }">
+            <input id="reset-email" name="email" type="email" class="input-field" v-model="reset.email" required
+              autocomplete="email" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <label class="label email-recuperacao">Email cadastrado</label>
+            <i class="fi fi-rr-envelope" id="icon-recuperacao"></i>
+          </div>
+          <div class="input-box">
+            <button type="submit" class="btn-submit" :disabled="isLoading" :aria-disabled="isLoading">
+              Enviar código de redefinição <i class="bx bx-mail-send"></i>
+            </button>
+          </div>
+          <div class="swith-form">
+            <span>Lembrou sua senha?
+              <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a>
+            </span>
+          </div>
+        </form>
+
+        <form v-else class="form-container recuperacao-form" @submit.prevent="redefinirSenha" autocomplete="on">
+
+          <div class="input-box" :class="{ filled: reset.token }">
+            <input id="reset-token" name="one-time-code" type="text" class="input-field" v-model="reset.token" required
+              autocomplete="one-time-code" /> <label class="label">Token recebido por e-mail</label>
+            <i class="fi fi-rr-key" id="icon-login"></i>
+          </div>
+
+          <div class="input-box campo-password" :class="{ filled: reset.novaSenha }">
+            <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" id="reset-nova-senha" name="new-password"
+              class="input-field" v-model="reset.novaSenha" required autocomplete="new-password"
+              placeholder="Min. 8 caracteres" /> <label class="label" id="label-nova-senha">Nova Senha</label>
+            <i class="fi fi-rr-lock" id="icon-login"></i>
+
+            <div class="pwd-compact" aria-hidden="false">
+              <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.minLength }" title="Mínimo 8 caracteres">
+                <i :class="resetSenhaCriteria.minLength ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>8+</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.lower }" title="Possui letra minúscula">
+                <i :class="resetSenhaCriteria.lower ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>a</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.upper }" title="Possui letra maiúscula">
+                <i :class="resetSenhaCriteria.upper ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>A</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.number }" title="Possui número">
+                <i :class="resetSenhaCriteria.number ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>123</small>
+              </span>
+
+              <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.special }" title="Possui caractere especial">
+                <i :class="resetSenhaCriteria.special ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
+                <small>#</small>
+              </span>
+
+              <span class="pwd-strength" :class="resetStrengthClass">{{ resetStrengthLabel }}</span>
+            </div>
+          </div>
+
+          <div class="input-box" :class="{ filled: reset.confirmarNovaSenha }">
+            <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" id="reset-confirmar-nova-senha"
+              name="confirm-new-password" class="input-field" v-model="reset.confirmarNovaSenha" required
+              autocomplete="new-password" placeholder="Confirme a nova senha" />
+            <label class="label" id="label-confirmar-nova-senha">Confirmar Nova Senha</label>
+            <i class="fi fi-rr-lock" id="icon-login"></i>
+          </div>
+
+          <div class="form-cols">
+            <div class="col-1">
+              <input type="checkbox" id="mostrar-senha-recuperacao" v-model="mostrarSenhaRecuperacao" />
+              <label for="mostrar-senha-recuperacao">
+                {{ mostrarSenhaRecuperacao ? 'Ocultar Senhas' : 'Mostrar Senhas' }}
+              </label>
+            </div>
+          </div>
+
+          <div class="input-box">
+            <button type="submit" class="btn-submit" :disabled="isLoading" :aria-disabled="isLoading">
+              Redefinir Senha <i class="bx bx-reset"> </i>
+            </button>
+          </div>
+
+          <div class="swith-form">
+            <span>Lembrou sua senha?
+              <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a>
+            </span>
+          </div>
+
+        </form>
+
       </div>
-
-      <form v-if="!modoCadastro && !modoRecuperacao" class="form-container login-form" @submit.prevent="fazerLogin"
-        autocomplete="on" novalidate>
-        <div class="input-box" :class="{ filled: login.email }">
-          <input id="login-email" name="username" type="email" class="input-field" v-model="login.email" required
-            autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false" />
-          <label class="label">Email</label>
-          <i class="fi fi-rr-envelope" id="icon-login"></i>
-        </div>
-
-        <div class="input-box" :class="{ filled: login.password }">
-          <input id="login-password" name="current-password" :type="mostrarSenhaLogin ? 'text' : 'password'"
-            class="input-field" v-model="login.password" required autocomplete="current-password" />
-          <label class="label">Senha</label>
-          <i class="fi fi-rr-lock" id="icon-login"></i>
-        </div>
-
-        <div class="form-cols">
-          <div class="col-1">
-            <input type="checkbox" id="mostrar-senha-login" v-model="mostrarSenhaLogin" />
-            <label for="mostrar-senha-login">
-              {{ mostrarSenhaLogin ? 'Ocultar Senha' : 'Mostrar Senha' }}
-            </label>
-          </div>
-
-          <div class="col-2">
-            <a href="#" @click.prevent="trocarFormulario('recuperacao')">Esqueceu a senha?</a>
-          </div>
-        </div>
-
-        <div class="input-box">
-          <button type="submit" class="btn-submit">
-            Entrar <i class="bx bx-log-in"></i>
-          </button>
-        </div>
-
-        <div class="swith-form">
-          <span>Não tem uma conta?
-            <a href="#" @click.prevent="trocarFormulario('cadastro')">Cadastre-se</a>
-          </span>
-        </div>
-      </form>
-
-      <form v-else-if="modoCadastro" class="form-container cadastro-form" @submit.prevent="criarUsuario">
-        <div class="input-box" :class="{ filled: cadastro.nome }">
-          <input type="text" class="input-field" placeholder="Nome Completo" v-model="cadastro.nome" required />
-          <label class="label">Nome</label>
-          <i class="fi fi-rs-user" id="icon-login"></i>
-        </div>
-
-        <div class="input-box" :class="{ filled: cadastro.telefone }">
-          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" class="input-field"
-            v-model="cadastro.telefone" @input="formatarTelefone" maxlength="15" required placeholder="(11) 91234-5678"
-            pattern="^\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}$" title="Telefone no formato (11) 91234-5678" />
-          <label class="label tel">Telefone</label>
-          <i class="fi fi-rr-phone-call" id="icon-login"></i>
-        </div>
-
-        <div class="input-box" :class="{ filled: cadastro.endereco }">
-          <input type="text" class="input-field" v-model="cadastro.endereco" required
-            placeholder="Rua, Número, Bairro, Cidade, Estado" title="Endereço (Rua, Número, Bairro, Cidade, Estado)" />
-          <label class="label">Endereço</label>
-          <i class="fi fi-rr-map-pin" id="icon-login"></i>
-        </div>
-
-        <div class="input-box" :class="{ filled: cadastro.email }">
-          <input id="email" name="email" type="email" class="input-field" placeholder="email@exemplo.com"
-            v-model="cadastro.email" autocomplete="email" required />
-          <label class="label">Email</label>
-          <i class="fi fi-rr-envelope" id="icon-login"></i>
-        </div>
-
-        <div class="input-box campo-password" :class="{ filled: cadastro.senha }">
-          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field" placeholder="Min. 8 caracteres"
-            v-model="cadastro.senha" required />
-          <label class="label">Senha</label>
-          <i class="fi fi-rr-lock" id="icon-login"></i>
-
-          <div class="pwd-compact" aria-hidden="false">
-            <span class="pwd-chip" :class="{ ok: senhaCriteria.minLength }" title="Mínimo 8 caracteres">
-              <i :class="senhaCriteria.minLength ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>8+</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: senhaCriteria.lower }" title="Possui letra minúscula">
-              <i :class="senhaCriteria.lower ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>a</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: senhaCriteria.upper }" title="Possui letra maiúscula">
-              <i :class="senhaCriteria.upper ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>A</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: senhaCriteria.number }" title="Possui número">
-              <i :class="senhaCriteria.number ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>123</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: senhaCriteria.special }" title="Possui caractere especial">
-              <i :class="senhaCriteria.special ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>#</small>
-            </span>
-
-            <span class="pwd-strength" :class="strengthClass">{{ strengthLabel }}</span>
-          </div>
-        </div>
-
-        <div class="input-box" :class="{ filled: cadastro.confirmarSenha }">
-          <input :type="mostrarSenhaCadastro ? 'text' : 'password'" class="input-field" placeholder="Confirme sua senha"
-            v-model="cadastro.confirmarSenha" required />
-          <label class="label" id="label-confirmar-senha">Confirmar Senha</label>
-          <i class="fi fi-rr-lock" id="icon-login"></i>
-        </div>
-
-        <div class="form-cols">
-          <div class="col-1">
-            <input type="checkbox" id="mostrar-senha-cadastro" v-model="mostrarSenhaCadastro" />
-            <label for="mostrar-senha-cadastro">
-              {{ mostrarSenhaCadastro ? 'Ocultar Senhas' : 'Mostrar Senhas' }}
-            </label>
-          </div>
-        </div>
-
-        <div class="input-box">
-          <button type="submit" class="btn-submit">
-            Cadastrar <i id="icon-cadastro" class="fi fi-ss-paw-claws"></i>
-          </button>
-        </div>
-        <div class="swith-form">
-          <span>Já tem uma conta?
-            <a href="#" @click.prevent="trocarFormulario('login')">Faça o Login</a>
-          </span>
-        </div>
-      </form>
-
-      <!-- Recuperação de senha - ETAPA 1: solicitar e-mail -->
-      <form v-else-if="modoRecuperacao && etapaRecuperacao === 1" class="form-container recuperacao-form"
-        @submit.prevent="solicitarResetSenha" autocomplete="on" novalidate>
-        <div class="input-box" :class="{ filled: reset.email }">
-          <input id="reset-email" name="email" type="email" class="input-field" v-model="reset.email" required
-            autocomplete="email" autocorrect="off" autocapitalize="off" spellcheck="false"
-            @keyup.enter.prevent="solicitarResetSenha" />
-          <label class="label email-recuperacao">Email cadastrado</label>
-          <i class="fi fi-rr-envelope" id="icon-recuperacao"></i>
-        </div>
-        <input type="submit" style="position:absolute; left:-9999px; width:1px; height:1px;" aria-hidden="true" />
-        <div class="input-box">
-          <button type="submit" class="btn-submit">
-            Enviar código de redefinição <i class="bx bx-mail-send"></i>
-          </button>
-        </div>
-        <div class="swith-form">
-          <span>Lembrou sua senha?
-            <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a>
-          </span>
-        </div>
-      </form>
-
-      <!-- Recuperação de senha - ETAPA 2: informar token + nova senha -->
-      <form v-else class="form-container recuperacao-form" @submit.prevent="redefinirSenha" autocomplete="on"
-        novalidate>
-
-        <div class="input-box" :class="{ filled: reset.token }">
-          <input id="reset-token" name="one-time-code" type="text" class="input-field" v-model="reset.token" required
-            autocomplete="one-time-code" @keyup.enter.prevent="redefinirSenha" />
-          <label class="label">Token recebido por e-mail</label>
-          <i class="fi fi-rr-key" id="icon-login"></i>
-        </div>
-
-        <div class="input-box campo-password" :class="{ filled: reset.novaSenha }">
-          <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" id="reset-nova-senha" name="new-password"
-            class="input-field" v-model="reset.novaSenha" required autocomplete="new-password"
-            placeholder="Min. 8 caracteres" @keyup.enter.prevent="redefinirSenha" />
-          <label class="label" id="label-nova-senha">Nova Senha</label>
-          <i class="fi fi-rr-lock" id="icon-login"></i>
-
-          <div class="pwd-compact" aria-hidden="false">
-            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.minLength }" title="Mínimo 8 caracteres">
-              <i :class="resetSenhaCriteria.minLength ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>8+</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.lower }" title="Possui letra minúscula">
-              <i :class="resetSenhaCriteria.lower ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>a</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.upper }" title="Possui letra maiúscula">
-              <i :class="resetSenhaCriteria.upper ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>A</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.number }" title="Possui número">
-              <i :class="resetSenhaCriteria.number ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>123</small>
-            </span>
-
-            <span class="pwd-chip" :class="{ ok: resetSenhaCriteria.special }" title="Possui caractere especial">
-              <i :class="resetSenhaCriteria.special ? 'fi fi-rr-check' : 'fi fi-rr-circle'"></i>
-              <small>#</small>
-            </span>
-
-            <span class="pwd-strength" :class="resetStrengthClass">{{ resetStrengthLabel }}</span>
-          </div>
-        </div>
-
-        <div class="input-box" :class="{ filled: reset.confirmarNovaSenha }">
-          <input :type="mostrarSenhaRecuperacao ? 'text' : 'password'" id="reset-confirmar-nova-senha"
-            name="confirm-new-password" class="input-field" v-model="reset.confirmarNovaSenha" required
-            autocomplete="new-password" placeholder="Confirme a nova senha" @keyup.enter.prevent="redefinirSenha" />
-          <label class="label" id="label-confirmar-nova-senha">Confirmar Nova Senha</label>
-          <i class="fi fi-rr-lock" id="icon-login"></i>
-        </div>
-
-        <div class="form-cols">
-          <div class="col-1">
-            <input type="checkbox" id="mostrar-senha-recuperacao" v-model="mostrarSenhaRecuperacao" />
-            <label for="mostrar-senha-recuperacao">
-              {{ mostrarSenhaRecuperacao ? 'Ocultar Senhas' : 'Mostrar Senhas' }}
-            </label>
-          </div>
-        </div>
-
-        <input type="submit" style="position:absolute; left:-9999px; width:1px; height:1px;" aria-hidden="true" />
-
-        <div class="input-box">
-          <button type="submit" class="btn-submit">
-            Redefinir Senha <i class="bx bx-reset"></i>
-          </button>
-        </div>
-
-        <div class="swith-form">
-          <span>Lembrou sua senha?
-            <a href="#" @click.prevent="trocarFormulario('login')">Voltar ao Login</a>
-          </span>
-        </div>
-
-      </form>
-
     </div>
 
     <div v-if="showPopup" class="login-popup-overlay" @click="showPopup = false">
@@ -267,12 +256,10 @@
           {{ popupMessage }}
         </p>
 
-        <!-- Botão quando for sucesso -->
         <button v-if="popupType === 'success'" type="button" class="login-popup-button" @click="irParaLogin">
           Ir para o Login
         </button>
 
-        <!-- Botão quando for erro -->
         <button v-else type="button" class="login-popup-button" @click="showPopup = false">
           fechar
         </button>
@@ -280,6 +267,16 @@
       </div>
 
     </div>
+
+    <div v-if="isLoading" class="global-loading-overlay" role="status" aria-live="polite" aria-label="Carregando">
+      <div class="global-loading-box">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="loading-text">
+          {{ loadingMessage || 'Processando...' }}
+        </div>
+      </div>
+    </div>
+
   </section>
 </template>
 
@@ -323,7 +320,12 @@ export default {
       showPopup: false,
       popupTitle: '',
       popupMessage: '',
-      popupType: 'info'
+      popupType: 'info',
+
+      // loading global para ações longas
+      isLoading: false,
+      loadingMessage: '',
+      loadingAction: '' // 'login' | 'criarUsuario' | 'solicitarResetSenha' | 'redefinirSenha'
     };
   },
 
@@ -406,8 +408,30 @@ export default {
   },
 
   methods: {
-    async fazerLogin() {
+    // --- helper para iniciar / parar loading ---
+    startLoading(action = '', message = '') {
+      this.loadingAction = action;
+      this.loadingMessage = message || '';
+      this.isLoading = true;
+    },
+    stopLoading() {
+      this.isLoading = false;
+      this.loadingMessage = '';
+      this.loadingAction = '';
+    },
+
+    async fazerLogin(event) {
+      if (this.isLoading) return;
+
+      // Validação nativa do HTML5 (ex: email com @) é acionada aqui pelo submit.
+      // Se a validação falhar, o navegador deve impedir a submissão e exibir o aviso.
+      if (event && !event.target.checkValidity()) {
+        return;
+      }
+
       this.erroLogin = '';
+      this.startLoading('login', 'Entrando…');
+
       try {
         // 1) Login principal
         const { data } = await axios.post(API_URL, this.login);
@@ -445,12 +469,12 @@ export default {
           }
         } catch (err) {
           console.warn('Não foi possível obter telefone/endereço do usuário:', err);
-          // garantir chaves existentes (evita undefined)
           if (!localStorage.getItem('usuarioTelefone')) localStorage.setItem('usuarioTelefone', '');
           if (!localStorage.getItem('usuarioEndereco')) localStorage.setItem('usuarioEndereco', '');
         }
 
         // 6) Redireciona
+        localStorage.setItem('showWelcomePopup', 'true');
         this.$router.push('/');
       } catch (error) {
         this.abrirPopup(
@@ -460,6 +484,8 @@ export default {
           'Usuário ou senha inválidos. Verifique e tente novamente.',
           'error'
         );
+      } finally {
+        this.stopLoading();
       }
     },
 
@@ -484,7 +510,13 @@ export default {
       this.cadastro.telefone = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
     },
 
-    criarUsuario() {
+    async criarUsuario(event) {
+      if (this.isLoading) return;
+      
+      if (event && !event.target.checkValidity()) {
+        return;
+      }
+
       if (this.cadastro.senha !== this.cadastro.confirmarSenha) {
         this.abrirPopup('Senhas diferentes', 'As senhas informadas não coincidem.', 'error');
         return;
@@ -515,42 +547,59 @@ export default {
         role: this.cadastro.permissao
       };
 
-      axios
-        .post(API_URL_CLI, payload)
-        .then(() => {
+      this.startLoading('criarUsuario', 'Criando conta…');
+
+      try {
+        const res = await axios.post(API_URL_CLI, payload);
+
+        this.abrirPopup(
+          'Conta criada',
+          'Sua conta foi criada com sucesso! Faça login para continuar.',
+          'success'
+        );
+        this.erroCadastro = '';
+        this.resetCadastro();
+      } catch (error) {
+        if (
+          error.response?.status === 400 &&
+          typeof error.response.data === 'string' &&
+          error.response.data.includes('Já existe um usuário')
+        ) {
           this.abrirPopup(
-            'Conta criada',
-            'Sua conta foi criada com sucesso! Faça login para continuar.',
-            'success'
+            'E-mail já cadastrado',
+            'Este e-mail já está cadastrado. Faça login ou use outro e-mail.',
+            'error'
           );
-          this.erroCadastro = '';
-          this.resetCadastro();
-        })
-        .catch(error => {
-          if (
-            error.response?.status === 400 &&
-            typeof error.response.data === 'string' &&
-            error.response.data.includes('Já existe um usuário')
-          ) {
-            this.abrirPopup(
-              'E-mail já cadastrado',
-              'Este e-mail já está cadastrado. Faça login ou use outro e-mail.',
-              'error'
-            );
-          } else {
-            this.abrirPopup(
-              'Erro ao criar conta',
-              error.response?.data?.message ||
-              error.response?.data ||
-              'Não foi possível criar o usuário. Tente novamente.',
-              'error'
-            );
-          }
-          this.sucessoCriacao = '';
-        });
+        } else {
+          this.abrirPopup(
+            'Erro ao criar conta',
+            error.response?.data?.message ||
+            error.response?.data ||
+            'Não foi possível criar o usuário. Tente novamente.',
+            'error'
+          );
+        }
+        this.sucessoCriacao = '';
+      } finally {
+        this.stopLoading();
+      }
     },
 
-    async solicitarResetSenha() {
+    async solicitarResetSenha(event) {
+      if (this.isLoading) return;
+      
+      if (event && !event.target.checkValidity()) {
+        return;
+      }
+
+      // Validação extra de e-mail (a nativa já deveria ter resolvido isso)
+      if (!this.reset.email || !/.+@.+\..+/.test(this.reset.email)) {
+        this.abrirPopup('E-mail inválido', 'Informe um e-mail válido para receber o código.', 'error');
+        return;
+      }
+
+      this.startLoading('solicitarResetSenha', 'Enviando código…');
+
       this.erroRecuperacao = '';
       try {
         await axios.post(API_URL_REQ, { email: this.reset.email });
@@ -570,10 +619,14 @@ export default {
           'Não foi possível enviar o pedido de redefinição. Tente novamente.',
           'error'
         );
+      } finally {
+        this.stopLoading();
       }
     },
 
     async redefinirSenha() {
+      if (this.isLoading) return;
+      
       // checa se as senhas coincidem
       if (this.reset.novaSenha !== this.reset.confirmarNovaSenha) {
         this.abrirPopup(
@@ -602,6 +655,8 @@ export default {
         return;
       }
 
+      this.startLoading('redefinirSenha', 'Redefinindo senha…');
+
       try {
         await axios.post(API_URL_RES, {
           token: this.reset.token,
@@ -625,10 +680,13 @@ export default {
           'error'
         );
         this.sucessoRecuperacao = '';
+      } finally {
+        this.stopLoading();
       }
     },
 
     trocarFormulario(modo) {
+      if (this.isLoading) return; // evita trocar durante ação
       this.modoCadastro = modo === 'cadastro';
       this.modoRecuperacao = modo === 'recuperacao';
       this.etapaRecuperacao = 1;
@@ -718,7 +776,6 @@ export default {
     pickFirstAndSecond(full) {
       if (!full) return '';
       const tokens = full.replace(/\s+/g, ' ').trim().split(' ');
-      if (!tokens.length) return '';
       const connectors = new Set(['da', 'de', 'do', 'das', 'dos', 'e']);
 
       const normalized = tokens.map((t, i) => {
