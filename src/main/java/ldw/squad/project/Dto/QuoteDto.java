@@ -18,5 +18,6 @@ public record QuoteDto(
         Double additionalCost,
         UUID clientId,
         String clientName,
-        String clientEmail
+        String clientEmail,
+        String clientPhone
 ) {}

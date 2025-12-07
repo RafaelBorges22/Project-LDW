@@ -20,7 +20,8 @@ public class QuoteMapper {
                 quote.getAdditionalCost(),
                 quote.getClient().getId(),
                 quote.getClient().getName(),
-                quote.getClient().getEmail()
+                quote.getClient().getEmail(),
+                quote.getClient().getPhone()
         );
     }
 
