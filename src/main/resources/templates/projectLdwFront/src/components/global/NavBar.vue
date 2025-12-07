@@ -20,47 +20,77 @@
       <span></span>
     </button>
 
-    <!-- painel direito (desktop = apenas ícones; mobile = painel deslizante com legendas) -->
+    <!-- painel direito -->
     <div class="navbar-right" :class="{ open: isMenuOpen }" ref="panel">
       <ul class="nav-links" role="menubar">
+
+        <!-- Início -->
         <li role="none">
           <router-link to="/" @click="closeMenu" role="menuitem">
             <i class="fi fi-sr-home" aria-hidden="true"></i>
             <span class="link-label">Início</span>
+            <span class="icon-tooltip">Página inicial</span>
           </router-link>
         </li>
 
+        <!-- rota geral para qualquer usuário logado -->
         <li v-if="isLoggedIn" role="none">
           <router-link to="/budget" @click="closeMenu" role="menuitem">
             <i class="fi fi-ss-checklist-task-budget" aria-hidden="true"></i>
             <span class="link-label">Orçamento</span>
+            <span class="icon-tooltip">Novo orçamento</span>
           </router-link>
         </li>
 
-        <li role="none">
+        <!-- rota apenas para usuário comum (cliente) -->
+        <li v-if="isClient" role="none">
+          <router-link to="/budget-table-cl" @click="closeMenu" role="menuitem">
+            <i class="fi fi-ss-folder-check" aria-hidden="true"></i>
+            <span class="link-label">Meus Orçamentos</span>
+            <span class="icon-tooltip">Meus orçamentos</span>
+          </router-link>
+        </li>
+
+        <!-- rota apenas para admin -->
+        <li v-if="isAdmin" role="none">
+          <router-link to="/budget-table" @click="closeMenu" role="menuitem">
+            <i class="fi fi-ss-folder-check" aria-hidden="true"></i>
+            <span class="link-label">Painel Admin</span>
+            <span class="icon-tooltip">Área administrativa</span>
+          </router-link>
+        </li>
+
+        <!-- mensagens (somente logado) -->
+        <li v-if="isLoggedIn" role="none">
           <router-link to="/chat" @click="closeMenu" role="menuitem">
             <i class="fi fi-sr-messages" aria-hidden="true"></i>
             <span class="link-label">Mensagens</span>
+            <span class="icon-tooltip">Chat</span>
           </router-link>
         </li>
 
-        <li v-if="!isloggedComputed" role="none">
+        <!-- login quando não está logado -->
+        <li v-if="!isLoggedIn" role="none">
           <router-link to="/login" @click="closeMenu" role="menuitem">
             <i class="fi fi-ss-user-add" aria-hidden="true"></i>
             <span class="link-label">Entrar</span>
+            <span class="icon-tooltip">Login / Cadastro</span>
           </router-link>
         </li>
 
+        <!-- conta quando logado -->
         <li v-if="isLoggedIn" role="none">
           <router-link to="/account" @click="closeMenu" role="menuitem">
             <i class="fi fi-ss-user" aria-hidden="true"></i>
             <span class="link-label">Conta</span>
+            <span class="icon-tooltip">Minha conta</span>
           </router-link>
         </li>
+
       </ul>
     </div>
 
-    <!-- backdrop (aparece só no mobile quando o menu está aberto) -->
+    <!-- backdrop mobile -->
     <div
       v-if="isMenuOpen"
       class="mobile-backdrop"
@@ -72,51 +102,87 @@
 </template>
 
 <script>
+function safeGetToken() {
+  const raw = localStorage.getItem("jwtToken");
+  if (!raw) return null;
+  const trimmed = String(raw).trim();
+  if (!trimmed || trimmed.toLowerCase() === "null" || trimmed.toLowerCase() === "undefined") return null;
+  return trimmed;
+}
+
+function decodeJwt(token) {
+  try {
+    const payload = token.split(".")[1];
+    const padded = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = decodeURIComponent(
+      Array.prototype.map.call(atob(padded), function(c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join("")
+    );
+    return JSON.parse(decoded);
+  } catch (e) {
+    try { return JSON.parse(atob(token.split(".")[1])); }
+    catch (err) { console.warn("Erro ao decodificar JWT:", err); return null; }
+  }
+}
+
+function extractRolesFromDecoded(decoded) {
+  if (!decoded) return [];
+  const roles = new Set();
+  const pushCandidate = (r) => {
+    if (!r && r !== 0) return;
+    if (typeof r === "object") {
+      if (Array.isArray(r)) r.forEach(pushCandidate);
+      else if (r.authority) pushCandidate(r.authority);
+      else if (r.role) pushCandidate(r.role);
+      return;
+    }
+    if (typeof r === "string") {
+      r.split(/[, ]+/).map(s => s.trim()).forEach(s => {
+        if (!s) return;
+        const normalized = s.replace(/^ROLE_/i, "").toLowerCase();
+        roles.add(normalized);
+      });
+    }
+  };
+  const candidates = [decoded.role, decoded.roles, decoded.authorities, decoded.authority, decoded.userRole];
+  candidates.forEach(pushCandidate);
+  return Array.from(roles);
+}
+
 export default {
   name: "Navbar",
   data() {
     return {
-      isLoggedIn: !!localStorage.getItem("jwtToken"),
+      isLoggedIn: false,
       isMenuOpen: false,
+      userRoles: [],
     };
   },
-
   computed: {
-    // algumas builds minificam/alteram localStorage; keep a computed alias if quiser
-    isloggedComputed() {
-      return this.isLoggedIn;
-    }
+    isAdmin() { return this.userRoles.includes("admin"); },
+    isClient() { return this.isLoggedIn && this.userRoles.includes("client"); }
   },
-
   created() {
-    this.$watch(
-      () => this.$route.fullPath,
-      () => {
-        this.updateAuthState();
-        this.closeMenu();
-      }
-    );
-
+    this.updateAuthState();
+    this.$watch(() => this.$route.fullPath, () => { 
+      this.updateAuthState(); 
+      this.closeMenu(); 
+    });
     window.addEventListener("storage", this.onStorage);
   },
-
   mounted() {
-    // fecha ao apertar Esc
     document.addEventListener("keydown", this.onKeyDown);
-    // fecha se clicar fora do painel (fallback se backdrop não capturar)
     document.addEventListener("click", this.onDocumentClick, true);
   },
-
   beforeUnmount() {
     window.removeEventListener("storage", this.onStorage);
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("click", this.onDocumentClick, true);
   },
-
   methods: {
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
-      // quando abrir, move foco para o painel para acessibilidade
       this.$nextTick(() => {
         if (this.isMenuOpen && this.$refs.panel) {
           this.$refs.panel.setAttribute("tabindex", "-1");
@@ -124,54 +190,28 @@ export default {
         }
       });
     },
-
     closeMenu() {
       this.isMenuOpen = false;
-      // devolve foco para o botão hamburger
-      this.$nextTick(() => {
-        if (this.$refs.hamburgerBtn) this.$refs.hamburgerBtn.focus();
-      });
+      this.$nextTick(() => { if (this.$refs.hamburgerBtn) this.$refs.hamburgerBtn.focus(); });
     },
-
     updateAuthState() {
-      const raw = localStorage.getItem("jwtToken");
-      const token =
-        raw && String(raw).trim() && raw.toLowerCase() !== "null" && raw.toLowerCase() !== "undefined"
-          ? raw
-          : null;
+      const token = safeGetToken();
       this.isLoggedIn = !!token;
-    },
-
-    onStorage(event) {
-      if (event.key === "jwtToken") {
-        this.updateAuthState();
+      if (!token) { 
+        this.userRoles = []; 
+        return; 
       }
+      const decoded = decodeJwt(token);
+      const roles = extractRolesFromDecoded(decoded);
+      this.userRoles = roles.length ? roles : decoded?.role ? [decoded.role.toLowerCase()] : [];
     },
-
-    onKeyDown(e) {
-      if (e.key === "Escape" && this.isMenuOpen) {
-        this.closeMenu();
-      }
-    },
-
+    onStorage(event) { if (event.key === "jwtToken") this.updateAuthState(); },
+    onKeyDown(e) { if (e.key === "Escape" && this.isMenuOpen) this.closeMenu(); },
     onDocumentClick(e) {
-      // Se menu fechado, ignora
       if (!this.isMenuOpen) return;
-
-      const panel = this.$refs.panel;
-      const hamburger = this.$refs.hamburgerBtn;
-      const backdrop = this.$refs.backdrop;
-
-      // Se existe backdrop e o alvo é dentro dele -> já fecha via @click no backdrop.
-      // Caso o clique seja fora do painel e fora do hambuger, fechamos como fallback.
-      const clickedInsidePanel = panel && panel.contains(e.target);
-      const clickedHamburger = hamburger && hamburger.contains(e.target);
-      const clickedBackdrop = backdrop && backdrop.contains(e.target);
-
-      if (!clickedInsidePanel && !clickedHamburger && !clickedBackdrop) {
-        this.closeMenu();
-      }
-    },
+      const panel = this.$refs.panel, hamburger = this.$refs.hamburgerBtn, backdrop = this.$refs.backdrop;
+      if (!(panel && panel.contains(e.target)) && !(hamburger && hamburger.contains(e.target)) && !(backdrop && backdrop.contains(e.target))) this.closeMenu();
+    }
   },
 };
 </script>
