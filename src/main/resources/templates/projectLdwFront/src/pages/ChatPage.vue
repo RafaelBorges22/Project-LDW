@@ -158,30 +158,35 @@ export default {
     getChatKey(a, b) {
       return [a, b].map((x) => x.toLowerCase()).sort().join("-");
     },
-	openChatWith(username) {
-	  this.selectedUser = username;
-	  const key = this.getChatKey(this.username, username);
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.messageList;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    },
+    openChatWith(username) {
+      this.selectedUser = username;
+      const key = this.getChatKey(this.username, username);
 
-	  if (!this.chatMap[key]) this.chatMap[key] = { messages: [] };
+      if (!this.chatMap[key]) this.chatMap[key] = { messages: [] };
 
-	  // Primeiro carrega histórico
-	  fetch(`http://localhost:8081/mensagemchat/historico/${this.username}/${username}`)
-	    .then((res) => res.json())
-	    .then((history) => {
-	      this.chatMap[key].messages = history.map((h) => ({
-	        sender: h.idUsuarioRemetente,
-	        recipient: h.idUsuarioDestinatario,
-	        content: h.mensagem,
-	      }));
-	      this.displayedMessages = [...this.chatMap[key].messages];
+      fetch(`http://localhost:8081/mensagemchat/historico/${this.username}/${username}`)
+        .then((res) => res.json())
+        .then((history) => {
+          this.chatMap[key].messages = history.map((h) => ({
+            sender: h.idUsuarioRemetente,
+            recipient: h.idUsuarioDestinatario,
+            content: h.mensagem,
+          }));
+          this.displayedMessages = [...this.chatMap[key].messages];
+          this.scrollToBottom();
 
-	      // Depois que histórico carregou, se inscreve no STOMP
-	      this.subscribeRoom(key);
-
-	      this.$nextTick(() => this.scrollToBottom());
-	    })
-	    .catch((err) => console.error(err));
-	},
+          this.subscribeRoom(key);
+        })
+        .catch((err) => console.error(err));
+    },
     subscribeRoom(roomId) {
       if (this.roomSubscriptions[roomId]) return;
       const sub = this.stompClient.subscribe(`/topic/room/${roomId}`, (msg) => {
@@ -196,19 +201,19 @@ export default {
           this.selectedUser === message.recipient
         ) {
           this.displayedMessages = [...this.chatMap[key].messages];
-          this.$nextTick(() => this.scrollToBottom());
+          this.scrollToBottom();
         }
       });
       this.roomSubscriptions[roomId] = sub;
     },
-	closeChat() {
-	  this.selectedUser = null;
-	  this.displayedMessages = [];
+    closeChat() {
+      this.selectedUser = null;
+      this.displayedMessages = [];
 
-	  if (!this.isAdmin) {
-	    this.$router.push("/");
-	  }
-	},
+      if (!this.isAdmin) {
+        this.$router.push("/");
+      }
+    },
 	sendMessage() {
 	  if (!this.messageText.trim()) return;
 
@@ -235,9 +240,12 @@ export default {
 	    }),
 	  }).catch((err) => console.error("Erro ao salvar mensagem:", err));
 
-	  // Limpa input
+	  // Atualiza chatMap e displayedMessages apenas se ainda não existir
+	  const key = this.getChatKey(this.username, this.selectedUser);
+	  if (!this.chatMap[key]) this.chatMap[key] = { messages: [] };
+
 	  this.messageText = "";
-	  this.$nextTick(() => this.scrollToBottom());
+	  this.scrollToBottom();
 	},
     loadContacts() {
       fetch("http://localhost:8081/clients")
@@ -267,8 +275,8 @@ export default {
   margin-bottom: 12px;
 }
 
-.message-list {
-  max-height: 400px;
+#message-list {
+  max-height: 550px;
   overflow-y: auto;
 }
 
