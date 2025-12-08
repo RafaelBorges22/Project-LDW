@@ -35,3 +35,6 @@ build/
 mysql-data/
 
 .bin
+
+# Arquivos de ambiente
+.env

@@ -4,6 +4,7 @@ import BudgetTable from '../components/budget/BudgetTable.vue';
 import BudgetTableCL from '../components/budget/BudgetTableCL.vue';
 import HomePage from '../pages/HomePage.vue';
 import Login from '../pages/LoginPage.vue';
+import ChatPage from '../pages/ChatPage.vue';
 import BudgetDetails from '../components/budget/BudgetDetails.vue';
 import BudgetDetailsCl from '../components/budget/BudgetDetailsCl.vue';
 import ForbiddenErrorPage from '../pages/err/403.vue';
@@ -56,6 +57,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Account',
     component: () => import('../pages/AccountPage.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+      path: '/chat',
+      name: 'ChatPage',
+      component: ChatPage,
+      meta: { requiresAuth: true }
   },
   {
     path: '/403',

@@ -1,79 +1,57 @@
 <template>
   <div id="app">
-    <!-- Header global -->
     <Navbar />
 
-    <!-- Conteúdo do chat -->
     <div class="chat-wrapper">
-      <!-- Debug -->
-      <div class="chat-debug">{{ debugMessage }}</div>
-
-      <!-- Lista de clientes (admin) -->
       <div v-if="isAdmin && !selectedUser" class="admin-list">
         <h2>Escolha um cliente</h2>
-        <div
-          v-for="user in contacts"
-          :key="user"
-          class="user-card"
-          @click="openChatWith(user)"
-        >
+        <div v-for="user in contacts" :key="user" class="user-card" @click="openChatWith(user)">
           {{ user }}
         </div>
       </div>
 
-      <!-- Área do chat -->
       <div v-if="selectedUser" id="chat-area">
-        <!-- Header do chat -->
         <div id="chat-header">
           <button @click="closeChat">✕</button>
           <h2 id="chat-with-name">{{ selectedUser }}</h2>
         </div>
 
-        <!-- Lista de mensagens -->
         <div id="message-list" ref="messageList">
           <div
             v-for="(message, index) in displayedMessages"
             :key="index"
-            :class="['message', message.sender === username ? 'sent' : 'received']"
-          >
+            :class="['message', message.sender === username ? 'sent' : 'received']">
             <div class="sender-name">
-              {{ message.sender === username ? "Você" : message.sender }}
+              {{ message.sender === username ? 'Você' : message.sender }}
             </div>
-            <div class="bubble">{{ message.content }}</div>
+            <div class="bubble">
+              {{ message.content }}
+              <div v-if="message.type === 'AUTO'" class="auto-tag">
+                Mensagem automática — as próximas respostas serão humanas.
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Input de mensagem -->
         <div id="message-input">
-          <input
-            ref="messageInput"
-            type="text"
-            placeholder="Digite uma mensagem..."
-            @keyup.enter="sendMessage"
-          />
+          <input ref="messageInput" v-model="messageText" type="text" placeholder="Digite uma mensagem..." @keyup.enter="sendMessage" />
           <button @click="sendMessage">Enviar</button>
         </div>
       </div>
     </div>
 
-    <!-- Footer global -->
     <Footer />
   </div>
 </template>
 
 <script>
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import Navbar from '../components/global/NavBar.vue';
-import Footer from '../components/global/Footer.vue';
+import Navbar from "../components/global/NavBar.vue";
+import Footer from "../components/global/Footer.vue";
 
 export default {
   name: "ChatPage",
-
-  components: {
-    Navbar,
-    Footer,
-  },
+  components: { Navbar, Footer },
 
   data() {
     return {
@@ -83,19 +61,18 @@ export default {
       displayedMessages: [],
       chatMap: {},
       roomSubscriptions: {},
-
       adminName: "Rafael Borges",
       adminEmail: "rafaelmascarenhasborges@gmail.com",
       isAdmin: false,
       contacts: [],
-
-      debugMessage: "Conectando ao chat..."
+      messageText: "",
+      welcomeMessage: "Olá! Obrigado por usar nosso site. Use esse chat para tirar dúvidas e marcar horários.",
     };
   },
 
   created() {
-    this.username = localStorage.getItem("usuarioNome");
-    const email = localStorage.getItem("usuarioEmail");
+    this.username = localStorage.getItem("usuarioNome") || "";
+    const email = localStorage.getItem("usuarioEmail") || "";
     this.isAdmin = email === this.adminEmail;
   },
 
@@ -103,135 +80,110 @@ export default {
     this.connect();
   },
 
+  beforeUnmount() {
+    this.cleanup();
+  },
+
   methods: {
+    cleanup() {
+      try {
+        Object.values(this.roomSubscriptions).forEach((s) => s?.unsubscribe && s.unsubscribe());
+        this.stompClient?.deactivate();
+      } catch {}
+    },
+
     connect() {
-      this.debugMessage = "Abrindo conexão WebSocket...";
-
-      // SockJS sem query param, username será enviado via publish
-      const socket = new SockJS("http://localhost:8081/ws");
-
       this.stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000, // reconexão a cada 5s
-        debug: (msg) => console.log("STOMP DEBUG:", msg),
+        webSocketFactory: () => new WebSocket("ws://localhost:8081/ws"),
+        reconnectDelay: 5000,
       });
 
       this.stompClient.onConnect = () => {
-        this.debugMessage = "Conectado ao chat!";
-        console.log("STOMP conectado!");
-
-        // Registrar usuário
         this.stompClient.publish({
           destination: "/app/chat.addUser",
           body: JSON.stringify({ sender: this.username }),
         });
 
-        // Admin → receber lista de usuários
         if (this.isAdmin) {
           this.subscribeOnlineUsers();
-          this.stompClient.publish({ destination: "/app/chat.getOnlineUsers", body: "{}" });
-          return;
+          this.loadContacts();
         }
 
-        // Usuário normal → abrir chat com admin
-        const roomId = this.getChatKey(this.username, this.adminName);
-        if (!this.roomSubscriptions[roomId]) this.subscribeRoom(roomId);
-
-        // Abrir chat e enviar mensagem de boas-vindas automática
-        setTimeout(() => {
-          this.openChatWith(this.adminName);
-          this.sendAutomatedWelcome();
-        }, 200);
-      };
-
-      this.stompClient.onStompError = (err) => {
-        console.error("STOMP ERROR:", err);
-        this.debugMessage = "Erro na conexão STOMP: " + JSON.stringify(err);
+        if (!this.isAdmin) {
+          const room = this.getChatKey(this.username, this.adminName);
+          this.subscribeRoom(room);
+          setTimeout(() => this.openChatWith(this.adminName), 200);
+        }
       };
 
       this.stompClient.activate();
     },
 
-    async loadContacts() {
-      try {
-        this.debugMessage = "Carregando lista de clientes...";
-        const res = await fetch("http://localhost:8081/clients");
-        const data = await res.json();
-        this.contacts = data.map(c => c.name).filter(n => n !== this.username);
-        this.debugMessage = "Lista de clientes carregada!";
-      } catch (err) {
-        console.error("Erro ao carregar clientes:", err);
-        this.debugMessage = "Erro ao carregar clientes: " + err.message;
-      }
-    },
-
     getChatKey(a, b) {
-      return [a, b].sort().join("-");
+      return [a, b].map((x) => x.toLowerCase()).sort().join("-");
     },
 
     subscribeRoom(roomId) {
-      if (!this.stompClient || !this.stompClient.connected) {
-        this.debugMessage = "STOMP ainda não conectado, não é possível assinar a sala.";
-        return;
-      }
-
       if (this.roomSubscriptions[roomId]) return;
 
-      this.stompClient.subscribe("/topic/room/" + roomId, (msg) => {
-        const message = JSON.parse(msg.body);
-        const chatKey = this.getChatKey(message.sender, message.recipient);
-
-        if (!this.chatMap[chatKey]) this.chatMap[chatKey] = [];
-        this.chatMap[chatKey].push(message);
-
-        if (this.selectedUser === message.sender || this.selectedUser === message.recipient) {
-          this.appendMessage(message);
-        }
+      const sub = this.stompClient.subscribe(`/topic/room/${roomId}`, (msg) => {
+        const m = JSON.parse(msg.body);
+        this.handleChatMessage(m);
       });
 
-      this.roomSubscriptions[roomId] = true;
-      this.debugMessage = "Assinando sala: " + roomId;
+      this.roomSubscriptions[roomId] = sub;
+    },
+
+    handleChatMessage(message) {
+      const key = this.getChatKey(message.sender, message.recipient);
+      if (!this.chatMap[key]) this.chatMap[key] = [];
+
+      this.chatMap[key].push(message);
+
+      const other = message.sender === this.username ? message.recipient : message.sender;
+
+      if (this.selectedUser === other) {
+        this.displayedMessages.push(message);
+        this.$nextTick(() => {
+          this.$refs.messageList.scrollTop = this.$refs.messageList.scrollHeight;
+        });
+      }
     },
 
     openChatWith(user) {
       this.selectedUser = user;
-      this.displayedMessages = [];
+      const key = this.getChatKey(this.username, user);
+      this.displayedMessages = this.chatMap[key] ? [...this.chatMap[key]] : [];
+      this.subscribeRoom(key);
 
-      const roomId = this.getChatKey(this.username, user);
-      this.subscribeRoom(roomId);
+	  if (!this.chatMap[key] || this.chatMap[key].length === 0) {
+	    if ((this.username === this.adminName && user) || 
+	        (user === this.adminName)) {
+	      this.sendAdminAutoMessage(user);
+	    }
+	  }
 
-      const chatKey = this.getChatKey(this.username, user);
-      if (this.chatMap[chatKey]) this.displayedMessages = [...this.chatMap[chatKey]];
 
       this.$nextTick(() => this.$refs.messageInput?.focus());
     },
 
     closeChat() {
+      if (this.isAdmin) {
+        this.selectedUser = null;
+        this.displayedMessages = [];
+        return;
+      }
       this.selectedUser = null;
-      this.displayedMessages = [];
-    },
-
-    appendMessage(msg) {
-      this.displayedMessages.push(msg);
-      this.$nextTick(() => {
-        this.$refs.messageList.scrollTop = this.$refs.messageList.scrollHeight;
-      });
+      this.$router.push("/");
     },
 
     sendMessage() {
-      if (!this.stompClient || !this.stompClient.connected) {
-        this.debugMessage = "STOMP não conectado, não é possível enviar mensagem.";
-        return;
-      }
-
-      const input = this.$refs.messageInput;
-      const content = input.value.trim();
-      if (!content) return;
+      if (!this.messageText.trim()) return;
 
       const msg = {
         sender: this.username,
         recipient: this.selectedUser,
-        content,
+        content: this.messageText,
         type: "CHAT",
       };
 
@@ -240,41 +192,53 @@ export default {
         body: JSON.stringify(msg),
       });
 
-      const chatKey = this.getChatKey(this.username, this.selectedUser);
-      if (!this.chatMap[chatKey]) this.chatMap[chatKey] = [];
-      this.chatMap[chatKey].push(msg);
-
-      this.appendMessage(msg);
-      input.value = "";
+      this.messageText = "";
     },
 
-    sendAutomatedWelcome() {
-      if (!this.selectedUser) return;
-
+    sendAdminAutoMessage(user) {
       const msg = {
         sender: this.adminName,
-        recipient: this.username,
-        content: "Boa tarde! Seja bem-vindo ao KazuTattoo. Se precisar de qualquer coisa, me manda uma mensagem, eu respondo assim que der! (essa mensagem foi automatizada)",
-        type: "CHAT",
+        recipient: user,
+        content: this.welcomeMessage,
+        type: "AUTO",
       };
 
-      const chatKey = this.getChatKey(this.username, this.adminName);
-      if (!this.chatMap[chatKey]) this.chatMap[chatKey] = [];
-      this.chatMap[chatKey].push(msg);
+      const key = this.getChatKey(this.adminName, user);
+      if (!this.chatMap[key]) this.chatMap[key] = [];
+      this.chatMap[key].push(msg);
 
-      this.appendMessage(msg);
+      if (this.selectedUser === user) {
+        this.displayedMessages.push(msg);
+      }
+
+      this.stompClient.publish({
+        destination: "/app/chat.privateMessage",
+        body: JSON.stringify(msg),
+      });
+    },
+
+    async loadContacts() {
+      try {
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch("http://localhost:8081/clients", { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        this.contacts = data.map((c) => c.name).filter((n) => n && n !== this.username);
+      } catch {}
     },
 
     subscribeOnlineUsers() {
-      if (!this.stompClient || !this.stompClient.connected) return;
+      if (this.roomSubscriptions["__users_topic"]) return;
 
-      this.stompClient.subscribe("/topic/users", (msg) => {
-        const users = JSON.parse(msg.body).filter(u => u !== this.username);
-        this.contacts = users;
-        this.debugMessage = "Lista de clientes atualizada!";
+      const sub = this.stompClient.subscribe("/topic/users", (msg) => {
+        try {
+          const users = JSON.parse(msg.body);
+          this.contacts = users.filter((u) => u !== this.username);
+        } catch {}
       });
 
-      this.loadContacts();
+      this.roomSubscriptions["__users_topic"] = sub;
     },
   },
 };
@@ -282,4 +246,9 @@ export default {
 
 <style scoped>
 @import "../assets/Scss/pages/chat.scss";
+.auto-tag {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
 </style>
