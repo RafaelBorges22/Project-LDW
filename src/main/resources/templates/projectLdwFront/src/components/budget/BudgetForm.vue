@@ -1,10 +1,20 @@
 <template>
   <div class="form-container">
     <form class="budget-form" @submit.prevent="handleSubmit" enctype="multipart/form-data">
+
+      <div class="form-header">
+        <h2 class="title">SOLICITAR ORÇAMENTO DE TATUAGEM</h2>
+        <p class="instruction">
+          Descreva sua ideia em detalhes e inclua uma imagem de referência. Após o envio, o tatuador avaliará o pedido e entrará em contato com você via <strong>Mensagens</strong> para definir o valor e a disponibilidade.
+        </p>
+      </div>
+      
+      <hr class="separator"/>
+
       <div class="form-row">
         <div class="form-group">
           <label for="description" class="form-label">DESCREVA SUA TATTOO <span class="required">*</span></label>
-          <input v-model="form.description" type="text" id="description" placeholder="Quero tatuar um Dragão cabreiro..." class="form-input" required />
+          <input v-model="form.description" type="text" id="description" placeholder="Quero um dragão imponente em preto e cinza, com estilo..." class="form-input" required />
         </div>
 
         <div class="form-group color-option">
@@ -21,38 +31,39 @@
           <label for="body-part" class="form-label">PARTE DO CORPO <span class="required">*</span></label>
           <select v-model="form.bodyPart" id="body-part" class="form-select" required>
             <option disabled value="">Selecione</option>
-            <option value="ARM">BRAÇO</option>
-            <option value="LEG">PERNA</option>
-            <option value="BACK">COSTAS</option>
-            <option value="CHEST">PEITO</option>
-            <option value="RIB">COSTELA</option>
-            <option value="NECK">PESCOÇO</option>
-            <option value="HAND">MÃO</option>
-            <option value="HEAD">CABEÇA</option>
-            <option value="FOOT">PÉ</option>
-            <option value="OTHER">OUTRO</option>
+            <option value="ARM">Braço</option>
+            <option value="LEG">Perna</option>
+            <option value="BACK">Costas</option>
+            <option value="CHEST">Peito</option>
+            <option value="RIB">Costela</option>
+            <option value="NECK">Pescoço</option>
+            <option value="HAND">Mão</option>
+            <option value="HEAD">Cabeça</option>
+            <option value="FOOT">Pé</option>
+            <option value="OTHER">Outro</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="size" class="form-label">TAMANHO <span class="required">*</span></label>
+          <label for="size" class="form-label">TAMANHO (ESTIMADO) <span class="required">*</span></label>
           <select v-model="form.size" id="size" class="form-select" required>
             <option disabled value="">Selecione</option>
-            <option value="SMALL">Pequeno</option>
-            <option value="MEDIUM">Médio</option>
-            <option value="LARGE">Grande</option>
+            <option value="SMALL">Pequeno (5 a 10 cm)</option>
+            <option value="MEDIUM">Médio (10 a 20 cm)</option>
+            <option value="LARGE">Grande (acima de 20 cm)</option>
           </select>
         </div>
       </div>
 
       <div class="form-group upload-section">
-        <label for="reference-image" class="form-label">IMAGEM DE REFERÊNCIA</label>
+        <label for="reference-image" class="form-label">IMAGEM DE REFERÊNCIA <span class="required">*</span></label>
+        <p class="upload-tip">Ajude o tatuador com uma imagem do estilo ou desenho desejado. (Obrigatório)</p>
         <div class="upload-box">
-          <input type="file" id="reference-image" class="file-input" @change="handleFileChange" />
+          <input type="file" id="reference-image" class="file-input" @change="handleFileChange" accept="image/*" />
           
           <div v-if="!imageUrl" class="upload-placeholder">
-            <img src="../../assets/base/LogoFooter.png" alt="Upload Icon" class="upload-icon" />
-            <span>BUSCAR IMAGEM</span>
+            <i class="fi fi-rr-cloud-upload upload-icon" aria-hidden="true"></i>
+            <span>CLIQUE PARA BUSCAR IMAGEM</span>
           </div>
           
           <div v-if="imageUrl" class="image-preview">
@@ -61,25 +72,48 @@
         </div>
       </div>
 
-      <button type="submit" class="submit-button">ENVIAR</button>
-
-      <p class="form-note">O pedido será enviado para o tatuador, que confirmará disponibilidade e valores.</p>
-  <div v-if="showSuccess" class="success-popup">
-    <div class="popup-content">
-      <img src="../../assets/base/LogoFooter.png" alt="Sucesso" class="popup-icon" />
-      <h3>Orçamento enviado! 🎉</h3>
-      <p>Obrigado por confiar no nosso trabalho.  
-      Nosso tatuador vai analisar sua ideia e te responder logo logo! 🖤✨</p>
-
-      <button @click="showSuccess = false" class="popup-button">
-        Fechar
-      </button>
-  </div>
-</div>
-
+      <button type="submit" class="submit-button" :disabled="isLoading" :aria-disabled="isLoading">ENVIAR ORÇAMENTO</button>
+      <p class="form-note">Todos os campos marcados com <span class="required">*</span> são obrigatórios.</p>
     </form>
   </div>
+  
+  <div v-if="showSuccess" class="success-modal-backdrop" @click.self="showSuccess = false">
+    <div class="success-modal-content">
+      <div class="modal-header">
+        <i class="fi fi-ss-check-circle modal-icon" aria-hidden="true"></i>
+        <h3 class="modal-title">ORÇAMENTO ENVIADO COM SUCESSO!</h3>
+      </div>
+      <div class="modal-body">
+        <p>Obrigado por confiar no nosso trabalho, <strong>{{ client.name }}</strong>!</p>
+        <p>Nossa equipe já recebeu sua ideia e a imagem de referência.</p>
+        <p>
+          O tatuador irá analisar e te responder o mais breve possível. Fique de olho na aba
+          <router-link to="/chat" class="link-chat">Mensagens</router-link> e
+          <router-link :to="budgetLink" class="link-chat">Meus Orçamentos</router-link> para o retorno!
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button @click="showSuccess = false" class="modal-button">
+          FECHAR E CONTINUAR
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    v-if="isLoading"
+    class="global-loading-overlay"
+    role="status"
+    aria-live="polite"
+    aria-label="Carregando"
+  >
+    <div class="global-loading-box">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="loading-text">{{ loadingMessage || 'Processando...' }}</div>
+    </div>
+  </div>
 </template>
+
 <script lang="js">
 import axios from "axios";
 
@@ -103,7 +137,11 @@ export default {
       },
       showSuccess: false,
       selectedFile: null,
-      imageUrl: null
+      imageUrl: null,
+
+      isLoading: false,
+      loadingMessage: '',
+      loadingAction: '' 
     };
   },
 
@@ -134,7 +172,68 @@ export default {
     }
   },
 
+  computed: {
+    budgetLink() {
+      try {
+        const raw = localStorage.getItem('jwtToken');
+        if (!raw) return { name: 'BudgetTableCL' };
+
+        const token = String(raw).trim();
+        if (!token || token.toLowerCase() === 'null' || token.toLowerCase() === 'undefined') {
+          return { name: 'BudgetTableCL' };
+        }
+
+        const parts = token.split('.');
+        if (parts.length < 2) return { name: 'BudgetTableCL' };
+
+        const payload = parts[1];
+
+        let decoded = null;
+        try {
+          const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+          decoded = JSON.parse(json);
+        } catch (e) {
+          console.warn('Falha ao decodificar JWT no budgetLink:', e);
+          return { name: 'BudgetTableCL' };
+        }
+
+        const roleValue = decoded?.role ?? decoded?.roles ?? decoded?.authorities ?? null;
+
+        let roleStr = '';
+        if (Array.isArray(roleValue)) {
+          if (roleValue.length > 0 && typeof roleValue[0] === 'object' && roleValue[0] !== null) {
+            roleStr = roleValue.map(r => r.authority || r.role || JSON.stringify(r)).join(',');
+          } else {
+            roleStr = roleValue.join(',');
+          }
+        } else {
+          roleStr = String(roleValue || '');
+        }
+
+        if (roleStr.toUpperCase().includes('ADMIN')) {
+          return { name: 'BudgetTable' };
+        } else {
+          return { name: 'BudgetTableCL' };
+        }
+      } catch (err) {
+        console.error('Erro ao obter budgetLink:', err);
+        return { name: 'BudgetTableCL' };
+      }
+    }
+  },
+
   methods: {
+    startLoading(action = '', message = '') {
+      this.loadingAction = action;
+      this.loadingMessage = message || '';
+      this.isLoading = true;
+    },
+    stopLoading() {
+      this.isLoading = false;
+      this.loadingMessage = '';
+      this.loadingAction = '';
+    },
+
     handleFileChange(event) {
       if (this.imageUrl) URL.revokeObjectURL(this.imageUrl);
 
@@ -154,9 +253,10 @@ export default {
         alert("Erro: clientId não encontrado. Faça login novamente.");
         return;
       }
-
+      
+      // Validação adicionada, pois o upload agora é obrigatório
       if (!this.selectedFile) {
-        alert("É necessário anexar uma imagem.");
+        alert("É necessário anexar uma imagem de referência.");
         return;
       }
 
@@ -172,6 +272,8 @@ export default {
       const formData = new FormData();
       formData.append("quote", new Blob([JSON.stringify(quoteData)], { type: "application/json" }));
       formData.append("image", this.selectedFile);
+
+      this.startLoading('sendQuote', 'Enviando orçamento…');
 
       try {
         const response = await axios.post(API_URL, formData, {
@@ -189,14 +291,15 @@ export default {
         this.showSuccess = true;
       } catch (err) {
         console.error("Erro ao enviar orçamento:", err);
+      } finally {
+
+        this.stopLoading();
       }
     }
   }
 };
 </script>
 
-
 <style scoped>
 @import '../../assets/Scss/pages/BudgetForm.scss';
-@import '../../assets/Scss/global/PopUp.scss';
 </style>
