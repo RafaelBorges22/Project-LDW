@@ -130,13 +130,12 @@ public class QuoteController {
             @RequestBody UpdateQuoteDto dto
     ) {
         Optional<QuoteModel> optionalQuote = quoteRepository.findById(id);
-        if (optionalQuote.isEmpty()) return ResponseEntity.notFound().build();
+        if (optionalQuote.isEmpty())
+            return ResponseEntity.notFound().build();
+
         QuoteModel quote = optionalQuote.get();
 
-        if (dto.getFinalValue() != null) {
-            quote.setFinalValue(dto.getFinalValue());
-        }
-
+        // Atualiza valores permitidos
         if (dto.getAdditionalCost() != null) {
             quote.setAdditionalCost(dto.getAdditionalCost());
         }
@@ -144,10 +143,15 @@ public class QuoteController {
         if (dto.getState() != null) {
             quote.setState(dto.getState());
         }
-        QuoteModel updatedQuote = quoteRepository.save(quote);
 
-        return ResponseEntity.ok(QuoteMapper.toDto(updatedQuote));
+        // ⚠ CHAMAMOS O SERVICE PARA RESOLVER OS CÁLCULOS
+        quoteService.updateQuoteValues(quote);
+
+        QuoteModel updated = quoteRepository.save(quote);
+        return ResponseEntity.ok(QuoteMapper.toDto(updated));
     }
+
+
 
     @Operation(summary = "Excluir orçamento (admin)")
     @DeleteMapping("/{id}/admin")

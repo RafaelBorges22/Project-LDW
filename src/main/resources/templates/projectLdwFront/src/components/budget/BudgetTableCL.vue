@@ -128,12 +128,9 @@
               </td>
 
               <td data-label="Valor Final" class="text-right col-final">
-                <template v-if="q.computedFinal == null">
-                  <span class="final-value-await">Aguardando revisão</span>
-                </template>
-                <template v-else>
-                  <span class="final-value highlight-final">{{ formatCurrency(q.computedFinal) }}</span>
-                </template>
+                <span class="final-value highlight-final">
+                  {{ q.finalValue != null ? formatCurrency(q.finalValue) : '—' }}
+                </span>
               </td>
 
               <td data-label="Ações" class="col-actions">
@@ -234,17 +231,34 @@ async function fetchQuotes(){
     const res=await axios.get(`${API_URL_BUD}/${id.value}/history`,{headers:{Authorization:`Bearer ${getTokenSafe()}`}});
 
     const data=Array.isArray(res.data)?res.data:(res.data?.content||(res.data?[res.data]:[]));
-    quotes.value=data.map(q=>{
-      const adjustment=q.additionalCost!=null?toNumber(q.additionalCost):null;
-      const backendFinal=q.finalValue!=null?toNumber(q.finalValue):null;
-      let initial=q.estimatedValue ?? q.initialValue ?? q.estimated ?? q.calculatedValue ?? q.basePrice ?? q.quotedValue ?? q.value ?? q.price ?? q.total ?? null;
-      if(initial==null && backendFinal!=null && adjustment!=null) initial=Number((backendFinal-adjustment).toFixed(2));
-      const pending=isPendingState(q.state||q.status);
-      let computedFinal=backendFinal!=null?Number(backendFinal):null;
-      if(computedFinal==null && initial!=null && adjustment!=null && !pending) computedFinal=Number((initial+adjustment).toFixed(2));
-      if(pending) computedFinal=null;
-      return {id:q.id||q._id||null,description:q.description||q.desc||q.title||"Sem descrição",state:q.state||q.status||null,initialValue:initial!=null?Number(initial):null,adjustment:adjustment!=null?Number(adjustment):null,computedFinal:computedFinal!=null?Number(computedFinal):null,raw:q};
-    });
+    quotes.value = data.map(q => {
+  const additional = q.additionalCost != null ? toNumber(q.additionalCost) : null;
+  const backendFinal = q.finalValue != null ? toNumber(q.finalValue) : null;
+
+  let estimated =
+    q.estimatedValue ??
+    q.initialValue ??
+    q.estimated ??
+    q.calculatedValue ??
+    q.basePrice ??
+    null;
+  let finalValue = backendFinal;
+
+  if (finalValue == null && estimated != null && additional != null) {
+    finalValue = Number((estimated + additional).toFixed(2));
+  }
+
+  return {
+    id: q.id || q._id || null,
+    description: q.description || "Sem descrição",
+    state: q.state,
+    initialValue: estimated != null ? Number(estimated) : null,
+    adjustment: additional != null ? Number(additional) : null,
+    finalValue: finalValue != null ? Number(finalValue) : null,
+    raw: q
+  };
+});
+
   }catch(err){console.error(err);error.value=err?.response?.data?.message||err?.message||"Erro ao carregar histórico.";quotes.value=[];}
   finally{loading.value=false;}
 }
@@ -265,11 +279,26 @@ function countBy(label){const t=String(label||"").toLowerCase();return quotes.va
 const hasData=computed(()=>quotes.value.length>0);
 
 // ---------------- Init ----------------
-onMounted(async()=>{
-  const email=getEmailFromToken();
-  if(!email){error.value="Token inválido.";return;}
-  try{id.value=await fetchClientId(email);await fetchQuotes();}catch{error.value="Erro ao obter ID do cliente.";}
+onMounted(async () => {
+  const email = getEmailFromToken();
+  if (!email) {
+    error.value = "Token inválido.";
+    return;
+  }
+
+  try {
+    id.value = await fetchClientId(email);
+
+    await fetchQuotes(); 
+    if (router.currentRoute.value.query.refresh) {
+      await fetchQuotes();
+    }
+
+  } catch {
+    error.value = "Erro ao obter ID do cliente.";
+  }
 });
+
 </script>
 
 <style scoped>
