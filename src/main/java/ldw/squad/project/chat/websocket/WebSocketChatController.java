@@ -1,11 +1,14 @@
 package ldw.squad.project.chat.websocket;
 
+import ldw.squad.project.chat.history.ChatMessageDocument;
+import ldw.squad.project.chat.history.ChatMessageRepository;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,12 +17,15 @@ public class WebSocketChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketUserService userService;
+    private final ChatMessageRepository chatRepository; // novo
 
-    public WebSocketChatController(SimpMessagingTemplate messagingTemplate, WebSocketUserService userService) {
+    public WebSocketChatController(SimpMessagingTemplate messagingTemplate,
+                                   WebSocketUserService userService,
+                                   ChatMessageRepository chatRepository) {
         this.messagingTemplate = messagingTemplate;
         this.userService = userService;
+        this.chatRepository = chatRepository; // novo
     }
-
 
     @MessageMapping("/chat.addUser")
     public void addUser(@Payload ChatSocketMessage chatMessage,
@@ -62,6 +68,18 @@ public class WebSocketChatController {
 
         System.out.println("✉️ [Sala: " + roomId + "] " + sender + " ➜ " + recipient + ": " + message.getContent());
 
+        // Enviar via STOMP
         messagingTemplate.convertAndSend("/topic/room/" + roomId, message);
+
+        // Salvar no MongoDB apenas mensagens do tipo CHAT ou AUTO (você pode ajustar)
+        if ("CHAT".equalsIgnoreCase(message.getType()) || "AUTO".equalsIgnoreCase(message.getType())) {
+            ChatMessageDocument doc = new ChatMessageDocument();
+            doc.setIdUsuarioRemetente(message.getSender());
+            doc.setIdUsuarioDestinatario(message.getRecipient());
+            doc.setMensagem(message.getContent());
+            doc.setDataHora(new Date());
+
+            chatRepository.save(doc);
+        }
     }
 }

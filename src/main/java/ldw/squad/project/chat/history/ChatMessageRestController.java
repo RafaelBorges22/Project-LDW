@@ -59,6 +59,13 @@ public class ChatMessageRestController {
         repository.save(mensagemChat);
         return ResponseEntity.ok("✅ Mensagem atualizada com sucesso!");
     }
+    
+    @GetMapping("/historico/{user1}/{user2}")
+    public ResponseEntity<?> getChatBetweenUsers(@PathVariable String user1, @PathVariable String user2) {
+        List<ChatMessageDocument> mensagens = repository.findChatBetweenUsers(user1, user2);
+        return ResponseEntity.ok(mensagens);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable String id) {

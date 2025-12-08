@@ -3,13 +3,12 @@
     <Navbar />
 
     <div class="chat-wrapper">
+      <!-- Lista de clientes (admin) -->
       <div v-if="isAdmin && !selectedUser" class="admin-list">
         <h2>Escolha um cliente</h2>
-
         <div class="admin-search-row">
           <input
             v-model="clientSearch"
-            @input="onClientSearch"
             type="search"
             placeholder="Pesquisar cliente por nome ou e-mail..."
             class="search-input"
@@ -17,14 +16,18 @@
           />
         </div>
 
-        <div v-for="user in filteredContacts" :key="user.email || user.name" class="user-card" @click="openChatWith(user.name)">
+        <div
+          v-for="user in filteredContacts"
+          :key="user.name + '__' + (user.email || '')"
+          class="user-card"
+          @click="openChatWith(user.name)"
+        >
           <div class="user-left">
-            <div class="avatar">{{ user.name ? user.name.charAt(0).toUpperCase() : '?' }}</div>
+            <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
           </div>
           <div class="user-body">
             <div class="user-name">{{ user.name }}</div>
-            <div class="user-email" v-if="user.email">{{ user.email }}</div>
-            <div class="user-email" v-else>sem e-mail</div>
+            <div class="user-email">{{ user.email || 'sem e-mail' }}</div>
           </div>
           <div class="user-right">
             <button class="open-btn" @click.stop="openChatWith(user.name)">Abrir</button>
@@ -36,34 +39,41 @@
         </div>
       </div>
 
-      <div v-if="selectedUser" id="chat-area">
+      <!-- Área de chat -->
+      <div id="chat-area" v-show="selectedUser">
         <div id="chat-header">
           <button @click="closeChat">✕</button>
           <div id="chat-title">
-            <h2 id="chat-with-name">{{ selectedContact?.name || selectedUser }}</h2>
+            <h2 class="contact-name">{{ selectedContact?.name || selectedUser }}</h2>
             <div class="chat-email" v-if="selectedContact?.email">{{ selectedContact.email }}</div>
           </div>
         </div>
 
         <div id="message-list" ref="messageList">
+          <!-- Barra de boas-vindas fixa -->
+          <div class="welcome-bar">{{ welcomeMessage }}</div>
+
+          <!-- Mensagens reais -->
           <div
             v-for="(message, index) in displayedMessages"
             :key="index"
-            :class="['message', message.sender === username ? 'sent' : 'received']">
+            :class="['message', message.sender === username ? 'sent' : 'received']"
+          >
             <div class="sender-name">
               {{ message.sender === username ? 'Você' : message.sender }}
             </div>
-            <div class="bubble">
-              {{ message.content }}
-              <div v-if="message.type === 'AUTO'" class="auto-tag">
-                Mensagem automática — as próximas respostas serão humanas.
-              </div>
-            </div>
+            <div class="bubble">{{ message.content }}</div>
           </div>
         </div>
 
         <div id="message-input">
-          <input ref="messageInput" v-model="messageText" type="text" placeholder="Digite uma mensagem..." @keyup.enter="sendMessage" />
+          <input
+            ref="messageInput"
+            v-model="messageText"
+            type="text"
+            placeholder="Digite uma mensagem..."
+            @keyup.enter="sendMessage"
+          />
           <button @click="sendMessage">Enviar</button>
         </div>
       </div>
@@ -81,62 +91,54 @@ import Footer from "../components/global/Footer.vue";
 export default {
   name: "ChatPage",
   components: { Navbar, Footer },
-
   data() {
     return {
       stompClient: null,
-      username: null,
+      username: localStorage.getItem("usuarioNome") || "",
       selectedUser: null,
       displayedMessages: [],
       chatMap: {},
       roomSubscriptions: {},
       adminName: "Rafael Borges",
       adminEmail: "rafaelmascarenhasborges@gmail.com",
-      isAdmin: false,
-      contacts: [], // agora guarda objetos { name, email }
+      isAdmin: localStorage.getItem("usuarioEmail") === "rafaelmascarenhasborges@gmail.com",
+      contacts: [],
       messageText: "",
-      welcomeMessage: "Olá! Obrigado por usar nosso site. Use esse chat para tirar dúvidas e marcar horários.",
-      clientSearch: "", // termo de busca para filtro
+      welcomeMessage:
+        "Olá! Bem-vindo(a) ao chat! Use este espaço para tirar dúvidas e marcar horários.",
+      clientSearch: "",
     };
   },
-
-  created() {
-    this.username = localStorage.getItem("usuarioNome") || "";
-    const email = localStorage.getItem("usuarioEmail") || "";
-    this.isAdmin = email === this.adminEmail;
-  },
-
   mounted() {
     this.connect();
+    if (!this.isAdmin) {
+      setTimeout(() => {
+        this.openChatWith(this.adminName);
+      }, 200);
+    }
   },
-
   beforeUnmount() {
     this.cleanup();
   },
-
   computed: {
     selectedContact() {
-      return this.contacts.find(c => c.name === this.selectedUser) || null;
+      return this.contacts.find((c) => c.name === this.selectedUser) || null;
     },
     filteredContacts() {
-      if (!this.clientSearch || !this.clientSearch.trim()) return this.contacts;
-      const q = this.clientSearch.trim().toLowerCase();
-      return this.contacts.filter(c => {
-        const name = (c.name || "").toLowerCase();
-        const email = (c.email || "").toLowerCase();
-        return name.includes(q) || email.includes(q);
-      });
-    }
+      if (!this.clientSearch.trim()) return this.contacts;
+      const q = this.clientSearch.toLowerCase().trim();
+      return this.contacts.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.email && c.email.toLowerCase().includes(q))
+      );
+    },
   },
-
   methods: {
     cleanup() {
-      try {
-        Object.values(this.roomSubscriptions).forEach((s) => s?.unsubscribe && s.unsubscribe());
-        this.stompClient?.deactivate();
-      } catch {}
+      Object.values(this.roomSubscriptions).forEach((s) => s?.unsubscribe?.());
+      this.stompClient?.deactivate();
     },
-
     connect() {
       this.stompClient = new Client({
         webSocketFactory: () => new WebSocket("ws://localhost:8081/ws"),
@@ -148,165 +150,129 @@ export default {
           destination: "/app/chat.addUser",
           body: JSON.stringify({ sender: this.username }),
         });
-
-        if (this.isAdmin) {
-          this.subscribeOnlineUsers();
-          this.loadContacts();
-        }
-
-        if (!this.isAdmin) {
-          const room = this.getChatKey(this.username, this.adminName);
-          this.subscribeRoom(room);
-          setTimeout(() => this.openChatWith(this.adminName), 200);
-        }
+        this.loadContacts();
       };
 
       this.stompClient.activate();
     },
-
     getChatKey(a, b) {
       return [a, b].map((x) => x.toLowerCase()).sort().join("-");
     },
+	openChatWith(username) {
+	  this.selectedUser = username;
+	  const key = this.getChatKey(this.username, username);
 
+	  if (!this.chatMap[key]) this.chatMap[key] = { messages: [] };
+
+	  // Primeiro carrega histórico
+	  fetch(`http://localhost:8081/mensagemchat/historico/${this.username}/${username}`)
+	    .then((res) => res.json())
+	    .then((history) => {
+	      this.chatMap[key].messages = history.map((h) => ({
+	        sender: h.idUsuarioRemetente,
+	        recipient: h.idUsuarioDestinatario,
+	        content: h.mensagem,
+	      }));
+	      this.displayedMessages = [...this.chatMap[key].messages];
+
+	      // Depois que histórico carregou, se inscreve no STOMP
+	      this.subscribeRoom(key);
+
+	      this.$nextTick(() => this.scrollToBottom());
+	    })
+	    .catch((err) => console.error(err));
+	},
     subscribeRoom(roomId) {
       if (this.roomSubscriptions[roomId]) return;
-
       const sub = this.stompClient.subscribe(`/topic/room/${roomId}`, (msg) => {
-        const m = JSON.parse(msg.body);
-        this.handleChatMessage(m);
-      });
+        const message = JSON.parse(msg.body);
+        const key = this.getChatKey(message.sender, message.recipient);
+        if (!this.chatMap[key]) this.chatMap[key] = { messages: [] };
 
+        this.chatMap[key].messages.push(message);
+
+        if (
+          this.selectedUser === message.sender ||
+          this.selectedUser === message.recipient
+        ) {
+          this.displayedMessages = [...this.chatMap[key].messages];
+          this.$nextTick(() => this.scrollToBottom());
+        }
+      });
       this.roomSubscriptions[roomId] = sub;
     },
+	closeChat() {
+	  this.selectedUser = null;
+	  this.displayedMessages = [];
 
-    handleChatMessage(message) {
-      const key = this.getChatKey(message.sender, message.recipient);
-      if (!this.chatMap[key]) this.chatMap[key] = [];
+	  if (!this.isAdmin) {
+	    this.$router.push("/");
+	  }
+	},
+	sendMessage() {
+	  if (!this.messageText.trim()) return;
 
-      this.chatMap[key].push(message);
+	  const msg = {
+	    sender: this.username,
+	    recipient: this.selectedUser,
+	    content: this.messageText,
+	  };
 
-      const other = message.sender === this.username ? message.recipient : message.sender;
+	  // Envia via WebSocket
+	  this.stompClient.publish({
+	    destination: "/app/chat.privateMessage",
+	    body: JSON.stringify(msg),
+	  });
 
-      if (this.selectedUser === other) {
-        this.displayedMessages.push(message);
-        this.$nextTick(() => {
-          this.$refs.messageList.scrollTop = this.$refs.messageList.scrollHeight;
+	  // Salva no banco
+	  fetch("http://localhost:8081/mensagemchat", {
+	    method: "POST",
+	    headers: { "Content-Type": "application/json" },
+	    body: JSON.stringify({
+	      idUsuarioRemetente: msg.sender,
+	      idUsuarioDestinatario: msg.recipient,
+	      mensagem: msg.content,
+	    }),
+	  }).catch((err) => console.error("Erro ao salvar mensagem:", err));
+
+	  // Limpa input
+	  this.messageText = "";
+	  this.$nextTick(() => this.scrollToBottom());
+	},
+    loadContacts() {
+      fetch("http://localhost:8081/clients")
+        .then((res) => res.json())
+        .then((data) => {
+          this.contacts = data
+            .map((c) => ({ name: c.name || "", email: c.email || "" }))
+            .filter(
+              (c) => c.name && c.name !== this.username && c.name !== this.adminName
+            );
         });
-      }
-    },
-
-    openChatWith(username) {
-      this.selectedUser = username;
-      const key = this.getChatKey(this.username, username);
-      this.displayedMessages = this.chatMap[key] ? [...this.chatMap[key]] : [];
-      this.subscribeRoom(key);
-
-      if (!this.chatMap[key] || this.chatMap[key].length === 0) {
-        if ((this.username === this.adminName && username) || (username === this.adminName)) {
-          this.sendAdminAutoMessage(username);
-        }
-      }
-
-      this.$nextTick(() => this.$refs.messageInput?.focus());
-    },
-
-    closeChat() {
-      if (this.isAdmin) {
-        this.selectedUser = null;
-        this.displayedMessages = [];
-        return;
-      }
-      this.selectedUser = null;
-      this.$router.push("/");
-    },
-
-    sendMessage() {
-      if (!this.messageText.trim()) return;
-
-      const msg = {
-        sender: this.username,
-        recipient: this.selectedUser,
-        content: this.messageText,
-        type: "CHAT",
-      };
-
-      this.stompClient.publish({
-        destination: "/app/chat.privateMessage",
-        body: JSON.stringify(msg),
-      });
-
-      this.messageText = "";
-    },
-
-    sendAdminAutoMessage(user) {
-      const msg = {
-        sender: this.adminName,
-        recipient: user,
-        content: this.welcomeMessage,
-        type: "AUTO",
-      };
-
-      const key = this.getChatKey(this.adminName, user);
-      if (!this.chatMap[key]) this.chatMap[key] = [];
-      this.chatMap[key].push(msg);
-
-      if (this.selectedUser === user) {
-        this.displayedMessages.push(msg);
-      }
-
-      this.stompClient.publish({
-        destination: "/app/chat.privateMessage",
-        body: JSON.stringify(msg),
-      });
-    },
-
-    async loadContacts() {
-      try {
-        const token = localStorage.getItem("token");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch("http://localhost:8081/clients", { headers });
-        if (!res.ok) return;
-        const data = await res.json();
-
-        const mapped = data.map((c) => {
-          if (typeof c === "string") return { name: c, email: "" };
-          return { name: c.name || c.username || "", email: c.email || "" };
-        });
-
-        this.contacts = mapped.filter((c) => c.name && c.name !== this.username && c.name !== this.adminName);
-      } catch (err) {}
-    },
-
-    subscribeOnlineUsers() {
-      if (this.roomSubscriptions["__users_topic"]) return;
-
-      const sub = this.stompClient.subscribe("/topic/users", (msg) => {
-        try {
-          const users = JSON.parse(msg.body);
-          const mapped = users.map((u) => {
-            if (typeof u === "string") return { name: u, email: "" };
-            return { name: u.name || u.username || "", email: u.email || "" };
-          });
-          this.contacts = mapped.filter((c) => c.name && c.name !== this.username && c.name !== this.adminName);
-        } catch {}
-      });
-
-      this.roomSubscriptions["__users_topic"] = sub;
-    },
-
-    // evento chamado no input do filtro — hoje apenas passthrough
-    onClientSearch() {
-      // deixei aqui caso queira debounce ou analytics futuramente
     },
   },
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 @import "../assets/Scss/pages/chat.scss";
-.auto-tag {
-  font-size: 10px;
-  opacity: 0.7;
-  margin-top: 4px;
+
+.welcome-bar {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.message-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.contact-name {
+  color: white;
 }
 </style>
