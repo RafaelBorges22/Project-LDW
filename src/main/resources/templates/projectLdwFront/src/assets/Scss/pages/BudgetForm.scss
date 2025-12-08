@@ -1,193 +1,458 @@
-// Container principal do formulário
+@import '../global/Global.scss';
+
+$accent: $brown-color;
+$accent-dark: $brown-color-white;
+$bg-page: $black-color;
+$card-bg: $black-color;
+$text: $text-color-white;
+$text-muted: rgba(255,255,255,0.66);
+$border-color-dark: rgba(255,255,255,0.1);
+$error: $error-color;
+$success: $success-color;
+$info: #4682b4;
+$warning: $brown-color-white;
+$highlight: lighten($brown-color, 15%);
+$radius-lg: 12px;
+$radius-sm: 8px;
+$gap: 16px;
+$transition-fast: $transition;
+
 .form-container {
-  background-color: #F8F5EE;
-  padding: 50px 0;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-
-  .budget-form {
-    width: 100%;
-    max-width: 700px;
-    padding: 40px;
-    background-color: #F8F5EE;
-    border: 1px solid #D8D4CC;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-
-    .form-row {
-      display: flex;
-      gap: 30px;
-      margin-bottom: 25px;
-
-      .form-group {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-
-        .form-label {
-          font-size: 1rem;
-          font-weight: bold;
-          color: #5C3A33;
-          margin-bottom: 8px;
-          text-transform: uppercase;
-
-          .required {
-            color: #a70000;
-            font-size: 1.2rem;
-          }
-        }
-
-        .form-input,
-        .form-select {
-          width: 100%;
-          padding: 12px;
-          border: 1px solid #D8D4CC;
-          border-radius: 6px;
-          background-color: #ffffff;
-          font-size: 1rem;
-          color: #333;
-          box-sizing: border-box;
-
-          &::placeholder {
-            color: #bbb;
-          }
-        }
-
-        .form-select {
-          appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235C3A33' width='24' height='24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-          background-repeat: no-repeat;
-          background-position: right 10px center;
-          background-size: 16px;
-        }
-      }
-    }
-
-    // Seção de upload de imagem
-    .upload-section {
-      flex: none;
-
-      .upload-box {
-        position: relative;
-        width: 100%;
-        height: 500px; /* Mantém a altura fixa */
-        border: 2px solid #5C3A33;
-        border-radius: 8px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        overflow: hidden; /* Adicionado para cortar a imagem se ela exceder o limite */
-        background-color: #f0f0f0; /* Adicionado um fundo para o quadrado de pré-visualização */
-
-        .upload-placeholder {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 10px;
-          color: #5C3A33;
-          font-weight: bold;
-        }
-        
-        // Estilos para a imagem de pré-visualização
-        .image-preview {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Redimensiona a imagem para caber no contêiner mantendo as proporções */
-          }
-        }
-        
-        .file-input {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-          cursor: pointer;
-          z-index: 10; /* Garante que o input de arquivo esteja acima da imagem */
-        }
-        
-        .upload-icon {
-          width: 50px;
-          height: 50px;
-        }
-      }
-    }
-
-    // Botão de envio
-    .submit-button {
-      display: block;
-      width: 100%;
-      max-width: 250px;
-      margin: 30px auto 10px auto;
-      padding: 18px 0;
-      background-color: #5C3A33;
-      color: #ffffff;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: background-color 0.3s ease;
-
-      &:hover {
-        background-color: #7B4B42;
-      }
-    }
-
-    .form-note {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #5C3A33;
-    }
-  }
+  padding: 20px;
+  max-width: 800px;
+  margin: 40px auto;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-// Estilo do checkbox customizado
+.budget-form {
+  background: linear-gradient(180deg, rgba($black-color, 0.98), darken($black-color, 2%));
+  color: $text;
+  padding: 40px;
+  border-radius: $radius-lg;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+}
+
+.form-header { margin-bottom: 30px; }
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: $highlight;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.instruction {
+  font-size: 1rem;
+  color: $text-muted;
+  line-height: 1.5;
+}
+
+.instruction strong { color: $highlight; }
+
+.separator {
+  border: none;
+  height: 1px;
+  background: $border-color-dark;
+  margin: 30px 0;
+}
+
+/* ----------------- Campos do Formulário ----------------- */
+
+.form-row {
+  display: flex;
+  gap: $gap;
+  margin-bottom: $gap;
+  flex-wrap: wrap; /* Para responsividade */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 45%; /* Garante que não quebre muito cedo */
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $text;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.required {
+  color: $error;
+  font-size: 1.1rem;
+}
+
+/* ----------------- Inputs / Selects ----------------- */
+
+.form-input, .form-select {
+  padding: 12px 14px;
+  width: 100%;
+  border-radius: $radius-sm;
+  border: 1px solid $border-color-dark;
+  background: rgba(255,255,255,0.05);
+  color: $text;
+  font-size: 1rem;
+  transition: border-color $transition-fast, background $transition-fast;
+  height: 48px;
+  box-sizing: border-box;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: $accent;
+  background: rgba(255,255,255,0.02);
+  box-shadow: 0 0 0 2px rgba($accent, 0.12);
+  outline: none;
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  background-image: url("data:image/svg+xml,%3Csvg fill='%23FFFFFF' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+  padding-right: 40px;
+  /* força o ícone mesmo quando o select está aberto/focado */
+  transition: border-color $transition-fast, background-position 0s;
+}
+
+/* garante que em foco a posição da imagem não mude */
+.form-select:focus {
+  background-position: right 14px center;
+}
+
+/* remover seta do IE/Edge */
+.form-select::-ms-expand { display: none; }
+
+/* opções mantendo contraste */
+.form-select option {
+  background-color: darken($card-bg, 5%);
+  color: $text;
+}
+
+/* ----------------- Checkbox (Colorida) - correções ----------------- */
+
+.color-option {
+  display: flex;
+  align-items: center; /* alinha label + checkbox ao centro */
+  gap: 12px;
+  flex-grow: 0;
+  min-width: 150px;
+  margin-top: 6px; /* leve ajuste para alinhar com inputs de texto */
+}
+
+.color-option .form-label {
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .checkbox-wrapper {
   position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #5C3A33;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* input invisível mas acessível */
+.form-checkbox {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* checkmark visual */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 34px;
+  width: 34px;
+  background-color: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  box-sizing: border-box;
+}
 
-  .form-checkbox {
-    opacity: 0;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
+.checkbox-wrapper .form-checkbox:focus + .checkmark {
+  box-shadow: 0 0 0 3px rgba($accent, 0.14);
+}
 
-    &:checked ~ .checkmark {
-      display: block;
-    }
-  }
+.checkbox-wrapper .form-checkbox:checked + .checkmark {
+  background-color: $accent;
+  border-color: lighten($accent, 5%);
+}
 
-  .checkmark {
-    display: none;
-    width: 20px;
-    height: 20px;
-    background-color: #5C3A33;
-    border-radius: 50%;
-  }
+.checkmark:after {
+  margin-bottom: 6px;
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 12px;
+  border: solid transparent;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity $transition-fast, transform $transition-fast;
+}
+
+.checkbox-wrapper .form-checkbox:checked + .checkmark:after {
+  border-color: $text;
+  opacity: 1;
 }
 
 
+.upload-section { margin-bottom: 25px; }
 
+.upload-tip {
+  font-size: 0.9rem;
+  color: $text-muted;
+  margin-top: -4px;
+  margin-bottom: 10px;
+}
+
+.upload-box {
+  border: 2px dashed rgba($accent, 0.4);
+  border-radius: $radius-sm;
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255,255,255,0.03);
+  transition: background 0.2s, border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.upload-box:hover { border-color: $accent; background: rgba(255,255,255,0.05); }
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: $text-muted;
+  font-weight: 700;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.upload-icon { font-size: 2.5rem; color: $accent; }
+
+.image-preview {
+  width: 100%;
+  max-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: $radius-sm;
+  z-index: 1;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* imagem responsiva: nunca será cortada, sempre inteira */
+.image-preview img {
+  display: block;
+  width: auto;         /* deixar largura automática */
+  height: auto;        /* deixar altura automática */
+  max-width: 100%;     /* não ultrapassa a largura do container */
+  max-height: 100%;    /* não ultrapassa a altura do container */
+  object-fit: contain; /* mostra inteira, mantendo proporção */
+}
+
+/* transição suave entre placeholder / preview */
+.upload-placeholder, .image-preview {
+  transition: opacity 0.15s ease;
+}
+
+/* ----------------- Botão de Envio ----------------- */
+
+.submit-button {
+  width: 100%;
+  padding: 15px 20px;
+  background-color: $accent;
+  color: $text-color-white;
+  border: none;
+  border-radius: $radius-sm;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all $transition-fast;
+  margin-top: 10px;
+}
+
+.submit-button:hover {
+  background-color: lighten($accent, 3%);
+}
+
+.form-note {
+  font-size: 0.85rem;
+  color: $text-muted;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ----------------- Modal de Sucesso ----------------- */
+
+.success-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.success-modal-content {
+  background: $card-bg;
+  padding: 30px;
+  border-radius: $radius-lg;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+
+.modal-header { margin-bottom: 20px; }
+
+.modal-icon {
+  font-size: 3rem;
+  color: $success;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  color: $success;
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.modal-body p { color: $text-muted; margin-bottom: 15px; line-height: 1.5; }
+
+.modal-body strong { color: $text; }
+
+.link-chat {
+  color: $text;
+  padding: 3px 6px;
+  border-radius: $radius-sm;
+  font-weight: 500;
+  background-color: $accent;
+  transition: background 0.2s;
+}
+
+.link-chat:hover { background: darken($accent, 5%); }
+
+.modal-button {
+  background: $accent;
+  color: $text;
+  padding: 12px 20px;
+  border: none;
+  border-radius: $radius-sm;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-button:hover { background: darken($accent, 5%); }
+
+/* ----------------- Responsivo ----------------- */
+
+@media (max-width: 768px) {
+  .budget-form { padding: 20px; margin: 15px; }
+  .form-row { flex-direction: column; gap: 0; }
+  .form-group { min-width: 100%; margin-bottom: $gap; }
+  .color-option { margin-top: 0; justify-content: flex-start; }
+  .image-preview { max-height: 320px; }
+}
+
+.global-loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.32);
+  z-index: 12000;
+  pointer-events: auto;
+}
+
+.global-loading-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  font-weight: 600;
+  color: $text-color-black;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.global-loading-box .spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,0,0,0.08);
+  border-top-color: rgba(0,0,0,0.45);
+  animation: _login-spin 0.9s linear infinite;
+}
+
+.global-loading-box .loading-text {
+  font-size: 0.95rem;
+  color: $text-color-black;
+  opacity: 0.95;
+}
+
+@keyframes _login-spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-submit[disabled],
+.btn-submit.disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+  pointer-events: none;
+  transform: none;
+}
