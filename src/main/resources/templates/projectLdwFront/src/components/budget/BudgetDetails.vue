@@ -24,9 +24,16 @@
       <div v-else>
         <!-- Grid principal: imagem + detalhes do orçamento -->
         <div class="details-container">
-          <!-- Imagem -->
+          <!-- Imagem (clicável para expandir) -->
           <div class="image-box" v-if="quote?.imageUrl">
-            <img :src="quote.imageUrl" alt="Imagem da solicitação" />
+            <img
+              :src="quote.imageUrl"
+              alt="Imagem da solicitação"
+              class="clickable-image"
+              @click="openImage(quote.imageUrl)"
+              tabindex="0"
+              @keyup.enter="openImage(quote.imageUrl)"
+            />
           </div>
 
           <!-- Informações do Orçamento -->
@@ -121,6 +128,21 @@
       <p>Orçamento não encontrado.</p>
     </div>
 
+    <!-- LIGHTBOX: exibida quando expandedImage tem valor -->
+    <div
+      v-if="expandedImage"
+      class="image-lightbox-backdrop"
+      @click.self="closeImage"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Visualização da imagem"
+    >
+      <div class="image-lightbox-content">
+        <button class="lightbox-close" @click="closeImage" aria-label="Fechar">✕</button>
+        <img :src="expandedImage" alt="Visualização ampliada" class="lightbox-image" />
+      </div>
+    </div>
+
     <!-- MINI TOAST COM TRANSITION -->
     <transition name="toast">
       <div
@@ -142,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import Navbar from '../global/NavBar.vue';
@@ -168,6 +190,26 @@ const toastVisible = ref(false);
 const toastMessage = ref('');
 const toastType = ref('success');
 let _toastTimer = null;
+
+// Lightbox (imagem expandida)
+const expandedImage = ref(null);
+
+function openImage(url) {
+  expandedImage.value = url;
+  // evita scroll atrás
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImage() {
+  expandedImage.value = null;
+  document.body.style.overflow = '';
+}
+
+function onKeyDown(e) {
+  if (e.key === 'Escape' && expandedImage.value) {
+    closeImage();
+  }
+}
 
 // Formatação
 function formatCurrency(value) {
@@ -251,46 +293,17 @@ async function fetchQuote() {
   } finally { loading.value = false; }
 }
 
-onMounted(() => fetchQuote());
+onMounted(() => {
+  fetchQuote();
+  window.addEventListener('keydown', onKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown);
+  // garante restaurar overflow caso componente desmontado com lightbox aberto
+  document.body.style.overflow = '';
+});
 </script>
 
 <style scoped>
-/* TOAST */
-.message-toast {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 14px 22px;
-  border-radius: 12px;
-  font-weight: 600;
-  min-width: 220px;
-  text-align: center;
-  z-index: 9999;
-  pointer-events: none;
-  color: #fff;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
-
-.message-toast.success { background-color: #28a745; }
-.message-toast.error { background-color: #dc3545; }
-
-.message-icon i { font-size: 1.2rem; }
-.message-text { flex: 1; }
-
-/* TRANSITION DO TOAST */
-.toast-enter-from, .toast-leave-to {
-  opacity: 0;
-  transform: translate(-50%, 80px);
-}
-.toast-enter-to, .toast-leave-from {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-.toast-enter-active, .toast-leave-active {
-  transition: all 0.5s ease;
-}
 </style>

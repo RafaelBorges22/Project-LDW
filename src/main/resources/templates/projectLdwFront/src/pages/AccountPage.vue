@@ -77,7 +77,7 @@
         </div>
 
         <div class="account-actions">
-          <button class="btn secondary" @click="isEditing ? cancelEdit() : goBack()">
+          <button id="back-btn" class="btn secondary" @click="isEditing ? cancelEdit() : goBack()">
             ← {{ isEditing ? 'Cancelar' : 'Voltar' }}
           </button>
 

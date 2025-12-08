@@ -77,28 +77,44 @@
     </form>
   </div>
   
-  <div v-if="showSuccess" class="success-modal-backdrop" @click.self="showSuccess = false">
-    <div class="success-modal-content">
-      <div class="modal-header">
-        <i class="fi fi-ss-check-circle modal-icon" aria-hidden="true"></i>
-        <h3 class="modal-title">ORÇAMENTO ENVIADO COM SUCESSO!</h3>
-      </div>
-      <div class="modal-body">
-        <p>Obrigado por confiar no nosso trabalho, <strong>{{ client.name }}</strong>!</p>
-        <p>Nossa equipe já recebeu sua ideia e a imagem de referência.</p>
-        <p>
-          O tatuador irá analisar e te responder o mais breve possível. Fique de olho na aba
-          <router-link to="/chat" class="link-chat">Mensagens</router-link> e
-          <router-link :to="budgetLink" class="link-chat">Meus Orçamentos</router-link> para o retorno!
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button @click="showSuccess = false" class="modal-button">
-          FECHAR E CONTINUAR
-        </button>
-      </div>
+<div v-if="showSuccess" class="success-modal-backdrop" @click.self="showSuccess = false">
+  <div class="success-modal-content">
+    
+    <div class="modal-icon-container">
+      <i class="fi fi-ss-check-circle modal-icon" aria-hidden="true"></i>
     </div>
+    
+    <div class="modal-header">
+      <h2 class="modal-title">ORÇAMENTO ENVIADO!</h2>
+      <p class="modal-subtitle">Sua ideia está em boas mãos.</p>
+    </div>
+    
+    <div class="modal-body">
+      <p class="greeting-text">Obrigado por confiar no nosso trabalho, <br /> <strong>{{ client.name }}</strong> !</p>
+      <p class="info-text">Nossa equipe já recebeu sua ideia e a imagem de referência.</p>
+      <p class="follow-up-text">
+        O tatuador irá analisar e te responder o mais breve possível. Fique de olho:
+      </p>
+      
+      <div class="action-links">
+        <router-link to="/chat" class="link-btn link-chat">
+          <i class="fi fi-sr-messages"></i> Mensagens
+        </router-link>
+        <router-link :to="budgetLink" class="link-btn link-budgets">
+          <i class="fi fi-ss-clipboard-list"></i> Meus Orçamentos
+        </router-link>
+      </div>
+
+    </div>
+    
+    <div class="modal-footer">
+      <button @click="showSuccess = false" class="modal-button modal-close-btn">
+        FECHAR E CONTINUAR NAVEGANDO
+      </button>
+    </div>
+    
   </div>
+</div>
 
   <div
     v-if="isLoading"

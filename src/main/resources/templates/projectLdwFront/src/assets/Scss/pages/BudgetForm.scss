@@ -336,7 +336,7 @@ $transition-fast: $transition;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85); // Fundo mais escuro
   display: flex;
   justify-content: center;
   align-items: center;
@@ -345,55 +345,110 @@ $transition-fast: $transition;
 
 .success-modal-content {
   background: $card-bg;
-  padding: 30px;
-  border-radius: $radius-lg;
-  max-width: 500px;
+  padding: 40px; // Aumento no padding para 'respirar'
+  border-radius: $radius-lg * 1.5; // Borda mais suave
+  max-width: 450px; // Levemente mais estreito
   width: 90%;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); // Sombra mais profunda e suave
   text-align: center;
+  border-top: 5px solid $success; // Linha de destaque no topo
 }
 
-.modal-header { margin-bottom: 20px; }
+.modal-icon-container {
+  // Contêiner para o ícone
+  margin-bottom: 20px;
+  .modal-icon {
+    font-size: 3.5rem; // Ícone um pouco maior
+    color: $success;
+    // Sem margem inferior pois o container gerencia
+  }
+}
 
-.modal-icon {
-  font-size: 3rem;
-  color: $success;
-  margin-bottom: 10px;
+.modal-header { 
+  margin-bottom: 30px; 
 }
 
 .modal-title {
   color: $success;
-  font-weight: 800;
-  font-size: 1.3rem;
+  font-weight: 700;
+  font-size: 1.6rem; // Tamanho refinado
+  margin-bottom: 5px;
 }
 
-.modal-body p { color: $text-muted; margin-bottom: 15px; line-height: 1.5; }
+.modal-subtitle {
+  color: $text-muted;
+  font-size: 1rem;
+}
 
-.modal-body strong { color: $text; }
+.modal-body {
+  margin-bottom: 30px;
+}
 
-.link-chat {
-  color: $text;
-  padding: 3px 6px;
+.modal-body p { 
+  color: $text-muted; 
+  margin-bottom: 15px; 
+  line-height: 1.6; 
+}
+
+.greeting-text {
+  font-size: 1.1rem;
+  color: $text; // Destaque na primeira linha
+}
+
+.modal-body strong { 
+  color: $accent-dark;
+  font-weight: 700;
+}
+
+// Links de Ação como Botões
+.action-links {
+  display: flex;
+  justify-content: center;
+  gap: 15px; // Espaçamento entre os links
+  margin-top: 25px;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: $text; // Texto escuro no fundo claro/colorido
+  background-color: $accent;
+  padding: 8px 15px;
   border-radius: $radius-sm;
   font-weight: 500;
-  background-color: $accent;
-  transition: background 0.2s;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.15s ease-in-out;
+  
+  i {
+    padding-top: 2px;
+    font-size: 1rem;
+  }
 }
 
-.link-chat:hover { background: darken($accent, 5%); }
+.link-btn:hover { 
+  transform: translateY(-2px);
+}
 
-.modal-button {
-  background: $accent;
-  color: $text;
-  padding: 12px 20px;
-  border: none;
+// Botão de Fechar Principal
+.modal-close-btn {
+  background: transparent; 
+  color: $text; 
+  padding: 12px 25px;
+  border: 1px solid $border-color-dark;
   border-radius: $radius-sm;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  width: 100%; 
+  transition: background 0.2s, transform 0.1s;
+  text-transform: uppercase;
+  font-size: 0.95rem;
 }
 
-.modal-button:hover { background: darken($accent, 5%); }
+.modal-close-btn:hover { 
+  background: darken($text-muted, 85%); 
+}
 
 /* ----------------- Responsivo ----------------- */
 
@@ -437,6 +492,7 @@ $transition-fast: $transition;
   border: 3px solid rgba(0,0,0,0.08);
   border-top-color: rgba(0,0,0,0.45);
   animation: _login-spin 0.9s linear infinite;
+  margin-top: 12px;
 }
 
 .global-loading-box .loading-text {

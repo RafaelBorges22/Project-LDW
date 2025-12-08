@@ -147,11 +147,13 @@
     background: rgba($text-color-white, 0.03);
     padding: 20px;
     border-radius: 12px;
+    display: flex;
+    flex-direction: column;
 
     li {
-      margin-bottom: 10px;
       padding-left: 20px;
       position: relative;
+      justify-content: left;
       font-size: 0.95rem;
       color: lighten($gray-color, 10%);
 
@@ -168,10 +170,6 @@
 
       strong {
         color: $text-color-white;
-      }
-
-      &:last-child {
-        margin-bottom: 0;
       }
     }
   }
@@ -285,7 +283,7 @@
       background-color: $brown-color;
       color: $text-color-white;
       padding: 18px 48px 16px 48px;
-      border: 1px solid rgba($text-color-white, 0.1);
+      border: 1px solid rgba($brown-color-white, 0.1);
       border-radius: 12px;
       font-size: 1.1rem;
       font-weight: 700;
@@ -540,6 +538,7 @@
     margin-bottom: 6px; 
     font-weight: 700;
   }
+
   .aftercare-text {
     font-size: 0.98rem;
     line-height: 1.45;

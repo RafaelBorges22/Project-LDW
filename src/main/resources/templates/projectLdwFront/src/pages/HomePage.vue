@@ -19,10 +19,9 @@
         </p>
 
         <ul class="welcome-popup-features">
-          <li><strong>Agendar sua tatuagem</strong> em poucos cliques, escolhendo data e horário.</li>
           <li><strong>Fazer um orçamento</strong> sem burocracia, direto pelo site.</li>
           <li><strong>Acompanhar o status</strong> do seu pedido em tempo real.</li>
-          <li><strong>Falar com o tatuador</strong> no <em>chat</em> integrado, sem sair do site.</li>
+          <li><strong>Falar com o tatuador</strong> no chat integrado, sem sair do site.</li>
         </ul>
 
         <div class="welcome-popup-buttons">

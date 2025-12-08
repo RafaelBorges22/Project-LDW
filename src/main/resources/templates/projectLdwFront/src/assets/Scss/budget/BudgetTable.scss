@@ -94,18 +94,22 @@ $transition-fast: $transition;
 }
 
 .search-input, .state-filter {
+  flex: 1;
+  min-width: 180px;
   padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+  background: rgba(255,255,255,0.02);
   color: $text;
-  font-size: 0.95rem;
-  transition: border-color $transition-fast, box-shadow $transition-fast;
-
 }
+
 .search-input:focus, .state-filter:focus {
+  box-shadow: 0 8px 22px rgba($accent,0.06);
+  transform: translateY(-1px);
   border-color: $accent;
-  box-shadow: 0 0 0 2px rgba($accent, 0.3);
 }
 
 /* placeholders */

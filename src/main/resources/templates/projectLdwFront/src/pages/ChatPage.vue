@@ -5,15 +5,44 @@
     <div class="chat-wrapper">
       <div v-if="isAdmin && !selectedUser" class="admin-list">
         <h2>Escolha um cliente</h2>
-        <div v-for="user in contacts" :key="user" class="user-card" @click="openChatWith(user)">
-          {{ user }}
+
+        <div class="admin-search-row">
+          <input
+            v-model="clientSearch"
+            @input="onClientSearch"
+            type="search"
+            placeholder="Pesquisar cliente por nome ou e-mail..."
+            class="search-input"
+            aria-label="Pesquisar cliente"
+          />
+        </div>
+
+        <div v-for="user in filteredContacts" :key="user.email || user.name" class="user-card" @click="openChatWith(user.name)">
+          <div class="user-left">
+            <div class="avatar">{{ user.name ? user.name.charAt(0).toUpperCase() : '?' }}</div>
+          </div>
+          <div class="user-body">
+            <div class="user-name">{{ user.name }}</div>
+            <div class="user-email" v-if="user.email">{{ user.email }}</div>
+            <div class="user-email" v-else>sem e-mail</div>
+          </div>
+          <div class="user-right">
+            <button class="open-btn" @click.stop="openChatWith(user.name)">Abrir</button>
+          </div>
+        </div>
+
+        <div v-if="!filteredContacts.length" class="no-results">
+          Nenhum cliente encontrado.
         </div>
       </div>
 
       <div v-if="selectedUser" id="chat-area">
         <div id="chat-header">
           <button @click="closeChat">✕</button>
-          <h2 id="chat-with-name">{{ selectedUser }}</h2>
+          <div id="chat-title">
+            <h2 id="chat-with-name">{{ selectedContact?.name || selectedUser }}</h2>
+            <div class="chat-email" v-if="selectedContact?.email">{{ selectedContact.email }}</div>
+          </div>
         </div>
 
         <div id="message-list" ref="messageList">
@@ -64,9 +93,10 @@ export default {
       adminName: "Rafael Borges",
       adminEmail: "rafaelmascarenhasborges@gmail.com",
       isAdmin: false,
-      contacts: [],
+      contacts: [], // agora guarda objetos { name, email }
       messageText: "",
       welcomeMessage: "Olá! Obrigado por usar nosso site. Use esse chat para tirar dúvidas e marcar horários.",
+      clientSearch: "", // termo de busca para filtro
     };
   },
 
@@ -82,6 +112,21 @@ export default {
 
   beforeUnmount() {
     this.cleanup();
+  },
+
+  computed: {
+    selectedContact() {
+      return this.contacts.find(c => c.name === this.selectedUser) || null;
+    },
+    filteredContacts() {
+      if (!this.clientSearch || !this.clientSearch.trim()) return this.contacts;
+      const q = this.clientSearch.trim().toLowerCase();
+      return this.contacts.filter(c => {
+        const name = (c.name || "").toLowerCase();
+        const email = (c.email || "").toLowerCase();
+        return name.includes(q) || email.includes(q);
+      });
+    }
   },
 
   methods: {
@@ -150,19 +195,17 @@ export default {
       }
     },
 
-    openChatWith(user) {
-      this.selectedUser = user;
-      const key = this.getChatKey(this.username, user);
+    openChatWith(username) {
+      this.selectedUser = username;
+      const key = this.getChatKey(this.username, username);
       this.displayedMessages = this.chatMap[key] ? [...this.chatMap[key]] : [];
       this.subscribeRoom(key);
 
-	  if (!this.chatMap[key] || this.chatMap[key].length === 0) {
-	    if ((this.username === this.adminName && user) || 
-	        (user === this.adminName)) {
-	      this.sendAdminAutoMessage(user);
-	    }
-	  }
-
+      if (!this.chatMap[key] || this.chatMap[key].length === 0) {
+        if ((this.username === this.adminName && username) || (username === this.adminName)) {
+          this.sendAdminAutoMessage(username);
+        }
+      }
 
       this.$nextTick(() => this.$refs.messageInput?.focus());
     },
@@ -224,8 +267,14 @@ export default {
         const res = await fetch("http://localhost:8081/clients", { headers });
         if (!res.ok) return;
         const data = await res.json();
-        this.contacts = data.map((c) => c.name).filter((n) => n && n !== this.username);
-      } catch {}
+
+        const mapped = data.map((c) => {
+          if (typeof c === "string") return { name: c, email: "" };
+          return { name: c.name || c.username || "", email: c.email || "" };
+        });
+
+        this.contacts = mapped.filter((c) => c.name && c.name !== this.username && c.name !== this.adminName);
+      } catch (err) {}
     },
 
     subscribeOnlineUsers() {
@@ -234,11 +283,20 @@ export default {
       const sub = this.stompClient.subscribe("/topic/users", (msg) => {
         try {
           const users = JSON.parse(msg.body);
-          this.contacts = users.filter((u) => u !== this.username);
+          const mapped = users.map((u) => {
+            if (typeof u === "string") return { name: u, email: "" };
+            return { name: u.name || u.username || "", email: u.email || "" };
+          });
+          this.contacts = mapped.filter((c) => c.name && c.name !== this.username && c.name !== this.adminName);
         } catch {}
       });
 
       this.roomSubscriptions["__users_topic"] = sub;
+    },
+
+    // evento chamado no input do filtro — hoje apenas passthrough
+    onClientSearch() {
+      // deixei aqui caso queira debounce ou analytics futuramente
     },
   },
 };
