@@ -4,18 +4,18 @@ public class ChatSocketMessage {
 	private String sender;
     private String recipient;
     private String content;
-    private MessageType type;
+    private String type;
 
     public enum MessageType {
         CHAT, JOIN, LEAVE
     }
 
-    public MessageType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(MessageType type) {
-        this.type = type;
+    public void setType(String string) {
+        this.type = string;
     }
 
     public String getContent() {

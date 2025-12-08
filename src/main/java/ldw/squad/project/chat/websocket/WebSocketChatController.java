@@ -15,8 +15,6 @@ public class WebSocketChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketUserService userService;
 
-    private final String ADMIN_NAME = "rafael borges";
-
     public WebSocketChatController(SimpMessagingTemplate messagingTemplate, WebSocketUserService userService) {
         this.messagingTemplate = messagingTemplate;
         this.userService = userService;
@@ -50,33 +48,6 @@ public class WebSocketChatController {
                 "/queue/users",
                 userService.getAllUsers()
         );
-
-        String usernameLower = username.toLowerCase();
-        String adminLower = ADMIN_NAME.toLowerCase();
-
-        if (!usernameLower.equals(adminLower)) {
-
-            ChatSocketMessage autoMsg = new ChatSocketMessage();
-            autoMsg.setSender(ADMIN_NAME);
-            autoMsg.setRecipient(username);
-            autoMsg.setType("CHAT");
-            autoMsg.setContent(
-                    "Boa tarde! Seja bem-vindo ao KazuTattoo. " +
-                    "Se precisar de qualquer coisa, me manda uma mensagem, " +
-                    "eu respondo assim que der! (mensagem automatizada)"
-            );
-
-            String roomId = Stream.of(usernameLower, adminLower)
-                    .map(String::trim)
-                    .sorted()
-                    .collect(Collectors.joining("-"));
-
-            String destination = "/topic/room/" + roomId;
-
-            System.out.println("🤖 Enviando mensagem automática para sala: " + destination);
-
-            messagingTemplate.convertAndSend(destination, autoMsg);
-        }
     }
 
     @MessageMapping("/chat.privateMessage")
