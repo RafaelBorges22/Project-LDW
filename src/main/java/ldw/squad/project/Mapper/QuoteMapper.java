@@ -18,6 +18,7 @@ public class QuoteMapper {
                 quote.getFinalValue(),
                 quote.isColored(),
                 quote.getAdditionalCost(),
+                quote.getEstimatedValue(),
                 quote.getClient().getId(),
                 quote.getClient().getName(),
                 quote.getClient().getEmail(),
@@ -38,6 +39,7 @@ public class QuoteMapper {
     public static void updateEntity(QuoteModel entity, UpdateQuoteDto dto) {
         if (dto.getFinalValue() != null) entity.setFinalValue(dto.getFinalValue());
         if (dto.getAdditionalCost() != null) entity.setAdditionalCost(dto.getAdditionalCost());
+        if (dto.getEstimatedValue() != null) entity.setEstimatedValue(dto.getEstimatedValue());
         if (dto.getState() != null) entity.setState(dto.getState());
     }
 

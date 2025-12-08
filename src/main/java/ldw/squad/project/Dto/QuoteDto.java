@@ -16,6 +16,7 @@ public record QuoteDto(
         Double finalValue,
         boolean colored,
         Double additionalCost,
+        Double estimatedValue,
         UUID clientId,
         String clientName,
         String clientEmail,

@@ -8,6 +8,7 @@ import lombok.Setter;
 public class UpdateQuoteDto {
     private Double finalValue;
     private Double additionalCost;
+    private Double estimatedValue;
     private State state;
 }
 
