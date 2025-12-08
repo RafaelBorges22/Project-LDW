@@ -183,7 +183,6 @@ const qSearch = ref("");
 const stateFilter = ref("");
 const clientFilter = ref("");
 
-// ---------------- Fetch ----------------
 async function fetchQuotes() {
   loading.value = true;
   error.value = null;
@@ -192,35 +191,54 @@ async function fetchQuotes() {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const data = await res.json();
-    const normalized = Array.isArray(data) ? data : data?.content || (data ? [data] : []);
 
-    quotes.value = normalized.map(q => {
-      const adjustment = Number(q.additionalCost) || 0;
-      const backendFinal = Number(q.finalValue) || null;
-      let initial = q.estimatedValue ?? q.initialValue ?? q.value ?? null;
-      if (initial == null && backendFinal != null) initial = backendFinal - adjustment;
+    const normalized = Array.isArray(data)
+      ? data
+      : data?.content || (data ? [data] : []);
 
-      const pending = String(q.state||"").toUpperCase() === "WAITING";
-      let computedFinal = backendFinal != null ? backendFinal : null;
-      if (computedFinal == null && initial != null && adjustment != null && !pending) computedFinal = initial + adjustment;
-      if (pending) computedFinal = null;
+quotes.value = normalized.map(q => {
 
-      return {
-        id: q.id || q._id || null,
-        description: q.description || q.title || "Sem descrição",
-        state: q.state || q.status || null,
-        initialValue: initial,
-        adjustment: adjustment,
-        computedFinal: computedFinal,
-        raw: q,
-        client: {
-          id: q.clientId || null,
-          // É crucial que o endpoint de orçamentos retorne clientName e clientEmail
-          name: q.clientName || null,
-          email: q.clientEmail || null
-        }
-      };
-    });
+  // -----------------------------
+  // 1. VALOR ESTIMADO (fixo do backend)
+  // -----------------------------
+  const initialValue =
+    q.estimatedValue !== undefined ? Number(q.estimatedValue) : null;
+
+  // -----------------------------
+  // 2. AJUSTE DO TATUADOR (backend)
+  // -----------------------------
+  const adjustment =
+    q.additionalCost !== undefined && q.additionalCost !== null && q.additionalCost !== ""
+      ? Number(q.additionalCost)
+      : null;
+
+  // -----------------------------
+  // 3. VALOR FINAL (exatamente o que vem do backend)
+  // -----------------------------
+  const finalValue =
+    q.finalValue !== undefined && q.finalValue !== null
+      ? Number(q.finalValue)
+      : null;
+
+  return {
+    id: q.id || q._id || null,
+    description: q.description || q.title || "Sem descrição",
+    state: q.state || q.status || null,
+
+    // valores alinhados com o backend
+    initialValue: initialValue,
+    adjustment: adjustment,
+    computedFinal: finalValue,
+
+    raw: q,
+
+    client: {
+      id: q.clientId || null,
+      name: q.clientName || null,
+      email: q.clientEmail || null
+    }
+  };
+});
   } catch (err) {
     console.error(err);
     error.value = err?.message || "Erro desconhecido";
@@ -230,44 +248,92 @@ async function fetchQuotes() {
   }
 }
 
+
 // ---------------- UI Helpers ----------------
 function formatCurrency(value) {
   if (value == null) return '—';
-  return Number(value).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
-function formatSignedCurrency(value){
-  if(value==null||isNaN(Number(value))) return '—';
-  const n=Number(value);
-  if(n===0) return formatCurrency(0);
-  return (n>0?"+":"-")+formatCurrency(Math.abs(n));
-}
-function goToQuoteDetails(id){ if(id) router.push(`/quotes/${id}`); }
-function translateSize(s){if(!s)return "—"; const n=String(s).toUpperCase(); return n==="SMALL"?"Pequeno":n==="MEDIUM"?"Médio":n==="LARGE"?"Grande":s;}
-function translateBodyPart(s){if(!s)return "—"; const n=String(s).toUpperCase(); switch(n){case "ARM":return "Braço";case "BACK":return "Costas";case "LEG":return "Perna";case "CHEST":return "Peito";case "RIB":return "Costela";case "NECK":return "Pescoço";case "HAND":return "Mão";case "HEAD":return "Cabeça";case "FOOT":return "Pé";case "OTHER":return "Outra";default:return s;}}
-function translateState(s){if(!s)return "—"; const n=String(s).toUpperCase(); if(n==="WAITING")return "Pendente"; if(n==="AWNSERED")return "Respondido"; if(n==="PAID")return "Pago"; return s;}
-function statusClass(s){const t=String(translateState(s)).toLowerCase(); if(t.includes("pendente"))return "status-pending"; if(t.includes("pago"))return "status-paid"; return "";}
 
-// ---------------- Filtros ----------------
+function formatSignedCurrency(value) {
+  if (value == null || isNaN(Number(value))) return '—';
+  const n = Number(value);
+  if (n === 0) return "+0,00";
+  return (n > 0 ? "+" : "-") + formatCurrency(Math.abs(n));
+}
+
+function goToQuoteDetails(id) {
+  if (id) router.push(`/quotes/${id}`);
+}
+
+function translateSize(s) {
+  if (!s) return "—";
+  const n = String(s).toUpperCase();
+  return n === "SMALL"
+    ? "Pequeno"
+    : n === "MEDIUM"
+      ? "Médio"
+      : n === "LARGE"
+        ? "Grande"
+        : s;
+}
+
+function translateBodyPart(s) {
+  if (!s) return "—";
+  const n = String(s).toUpperCase();
+  switch (n) {
+    case "ARM": return "Braço";
+    case "BACK": return "Costas";
+    case "LEG": return "Perna";
+    case "CHEST": return "Peito";
+    case "RIB": return "Costela";
+    case "NECK": return "Pescoço";
+    case "HAND": return "Mão";
+    case "HEAD": return "Cabeça";
+    case "FOOT": return "Pé";
+    case "OTHER": return "Outra";
+    default: return s;
+  }
+}
+
+function translateState(s) {
+  if (!s) return "—";
+  const n = String(s).toUpperCase();
+  if (n === "WAITING") return "Pendente";
+  if (n === "AWNSERED") return "Respondido";
+  if (n === "PAID") return "Pago";
+  return s;
+}
+
+function statusClass(s) {
+  const t = String(translateState(s)).toLowerCase();
+  if (t.includes("pendente")) return "status-pending";
+  if (t.includes("pago")) return "status-paid";
+  return "";
+}
+
+
+// ---------------- FILTROS ----------------
 const filteredQuotes = computed(() => {
   let list = quotes.value.slice();
-  
-  // 1. Filtro por Descrição
-  if(qSearch.value) {
-    list = list.filter(q => (q.description||"").toLowerCase().includes(qSearch.value.toLowerCase()));
+
+  if (qSearch.value) {
+    list = list.filter(q =>
+      (q.description || "").toLowerCase().includes(qSearch.value.toLowerCase())
+    );
   }
 
-  // 2. Filtro por Estado
-  if(stateFilter.value) {
-    list = list.filter(q => String(q.state||"").toUpperCase() === stateFilter.value.toUpperCase());
+  if (stateFilter.value) {
+    list = list.filter(
+      q => String(q.state || "").toUpperCase() === stateFilter.value.toUpperCase()
+    );
   }
 
-  // 3. Filtro por Cliente (Nome ou E-mail)
-  if(clientFilter.value) {
+  if (clientFilter.value) {
+    const val = clientFilter.value.toLowerCase();
     list = list.filter(q => {
-      const val = clientFilter.value.toLowerCase();
-      // Garante que 'name' e 'email' sejam strings vazias se forem null, prevenindo erros de .includes()
-      const name = q.client?.name?.toLowerCase() || '';
-      const email = q.client?.email?.toLowerCase() || '';
+      const name = q.client?.name?.toLowerCase() || "";
+      const email = q.client?.email?.toLowerCase() || "";
       return name.includes(val) || email.includes(val);
     });
   }
@@ -275,11 +341,17 @@ const filteredQuotes = computed(() => {
   return list;
 });
 
-function onSearch(){}
-function onFilterChange(){}
-function onClientSearch(){}
-function countBy(label){return quotes.value.filter(q=>translateState(q.state).toLowerCase().includes(label.toLowerCase())).length;}
-const hasData = computed(()=>quotes.value.length>0);
+function onSearch() {}
+function onFilterChange() {}
+function onClientSearch() {}
+
+function countBy(label) {
+  return quotes.value.filter(q =>
+    translateState(q.state).toLowerCase().includes(label.toLowerCase())
+  ).length;
+}
+
+const hasData = computed(() => quotes.value.length > 0);
 
 // ---------------- Init ----------------
 onMounted(fetchQuotes);

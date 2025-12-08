@@ -206,12 +206,18 @@ async function saveEdit() {
       additionalCost: Number(edited.value.additionalCost),
       state: edited.value.state,
     };
-    await axios.put(`${import.meta.env.VITE_API_URL_BUD}/${quote.value.id}`, payload, { headers: { "Content-Type": "application/json" } });
+
+    await axios.put(`${import.meta.env.VITE_API_URL_BUD}/${quote.value.id}`, payload, {
+      headers: { "Content-Type": "application/json" }
+    });
 
     showToast('success', 'Orçamento atualizado com sucesso!');
 
     isEditing.value = false;
-    fetchQuote();
+    setTimeout(() => {
+      router.push("/budget-table");
+    }, 600);
+
   } catch(err) {
     console.error(err);
     showToast('error', 'Erro ao atualizar orçamento.');
