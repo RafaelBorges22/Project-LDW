@@ -139,46 +139,131 @@
   align-items: center;
 }
 
-/* botões */
+/* ============================
+   BOTÕES – ESTILO PROFISSIONAL
+   (substitui regras anteriores de .btn / variantes)
+   ============================ */
+
+/* Base dos botões */
 .btn {
-  padding: 10px 14px;
+  padding: 11px 16px 9px 16px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
   border: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
+  font-size: 16px;
+  min-height: 44px;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.16s ease,
+    border-color 0.16s ease;
 }
 
-/* estilos variantes */
-.btn.secondary {
-  background: transparent;
-  color: $text-color-white;
-  border: 1px solid rgba(255,255,255,0.08);
+/* Ícones */
+.btn i {
+  font-size: 16px;
 }
 
+/* VARIANTE OUTLINE (branco sutil) */
 .btn.outline {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.03);
   color: $text-color-white;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
+.btn.outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 18px rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.btn.outline:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* VARIANTE SECUNDÁRIA (usada para "Voltar" etc) */
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: $text-color-white;
+}
+
+.btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 22px rgba(255, 255, 255, 0.10);
+  transform: translateY(-1px);
+}
+
+.btn.secondary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* VARIANTE DANGER — (EXCLUIR) - usando apenas $error-color */
 .btn.danger {
-  padding: 11px 14px 9px 14px;
+  /* mantém a variante padrão (marrom) para outros usos */
   background: linear-gradient(180deg, $brown-color, $brown-color-white);
-  color: $text-color-white;
   border: 1px solid $brown-color;
+  color: $text-color-white;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
 }
 
-/* ========= ALTERAÇÃO: uniformizar botões dentro de .right-actions =========
-   Manter cores diferentes (outline / danger), mas garantir mesma fonte,
-   mesmo padding e mesmo tamanho de ícone para ambos.
-*/
+/* botão de excluir quando usado acima do "Voltar" (classe específica) */
+.btn.danger.delete-above-back {
+  /* tom de erro mais escuro usando darken() aplicado diretamente */
+  background: linear-gradient(180deg, darken($error-color, 8%), darken($error-color, 12%));
+  border: 1px solid darken($error-color, 12%);
+  color: $text-color-white;
+  padding-left: 14px;
+  padding-right: 14px;
+  font-size: 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(darken($error-color, 12%), 0.18);
+  transition: transform 0.14s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* hover mais contido, escurecendo levemente */
+.btn.danger.delete-above-back:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(darken($error-color, 12%), 0.28);
+  background: linear-gradient(180deg, darken($error-color, 12%), darken($error-color, 16%));
+}
+
+/* active: remove elevação */
+.btn.danger.delete-above-back:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* foco visível para acessibilidade */
+.btn.danger.delete-above-back:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(darken($error-color, 12%), 0.14), 0 8px 22px rgba(darken($error-color, 12%), 0.18);
+}
+
+/* mantém comportamento padrão do .btn.danger original para hover/active (marrom) */
+.btn.danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 26px rgba($brown-color, 0.32);
+  background: linear-gradient(180deg, lighten($brown-color, 4%), lighten($brown-color-white, 4%));
+}
+
+.btn.danger:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
 .right-actions .btn {
-  font-size: 16px;       /* mesmo tamanho de fonte */
-  padding: 11px 16px 9px 16px;    /* mesmo padding (substitui padding diferente do .btn.danger) */
+  font-size: 16px; 
+  padding: 11px 16px 9px 16px;   
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -186,10 +271,9 @@
 }
 
 .right-actions .btn i {
-  font-size: 16px;       /* mesmo tamanho do ícone */
+  font-size: 16px;    
 }
 
-/* toast simples para "copiado" */
 .copy-toast {
   position: fixed;
   left: 50%;
