@@ -34,7 +34,8 @@ build/
 
 mysql-data/
 
-.bin
+bin/
+${project.build.directory}/
 
 # Arquivos de ambiente
 .env
